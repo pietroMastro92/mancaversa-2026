@@ -6,16 +6,16 @@
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Pietrobnb 2026">
-  <meta name="description" content="Pietrobnb · Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde (22–24 agosto 2026).">
-  <title>Pietrobnb · Mancaversa & Gallipoli 2026</title>
+  <meta name="apple-mobile-web-app-title" content="PietroBnB 2026">
+  <meta name="description" content="PietroBnB · Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde (22–24 agosto 2026).">
+  <title>PietroBnB · Mancaversa & Gallipoli 2026</title>
 
   <!-- Open Graph / WhatsApp Preview -->
-  <meta property="og:title" content="Pietrobnb · Salento 2026">
+  <meta property="og:title" content="PietroBnB · Salento 2026">
   <meta property="og:description" content="Tre giorni di mare nel Salento organizzati da Pietro. Programma orario, alloggio a Via Egnazia 44, mappe e bacheca live.">
   <meta property="og:type" content="website">
 
-  <!-- Favicon con Logo Giocoso Pietrobnb -->
+  <!-- Favicon con Logo Giocoso PietroBnB -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😎</text></svg>">
 
   <!-- Fonts: Plus Jakarta Sans -->
@@ -1212,7 +1212,7 @@
       100% { transform: scale(1); }
     }
 
-    /* Floating Board Quick FAB (Bottom Right on Desktop / Mobile) */
+    /* Floating Board Quick FAB */
     .floating-fab-corner {
       position: fixed;
       bottom: calc(75px + env(safe-area-inset-bottom));
@@ -1665,8 +1665,8 @@
   <header class="site-header">
     <div class="container header-content">
       
-      <!-- Custom Funny Pietrobnb Logo -->
-      <div class="brand-logo" onclick="triggerPietroEasterEgg()" title="Pietrobnb - Clicca per una sorpresa!">
+      <!-- Custom Funny PietroBnB Logo -->
+      <div class="brand-logo" onclick="triggerPietroEasterEgg()" title="PietroBnB - Clicca per una sorpresa!">
         <svg class="pietro-mascot-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Corpo Bélo di Airbnb Modificato -->
           <path d="M50 8C38 8 28 17 22 28C14 42 22 72 45 92C48 94.5 52 94.5 55 92C78 72 86 42 78 28C72 17 62 8 50 8ZM50 20C57 20 63 25.5 66 33C71 44 65 67 50 82C35 67 29 44 34 33C37 25.5 43 20 50 20Z" fill="#FF385C"/>
@@ -1682,7 +1682,7 @@
           <path d="M42 56Q50 63 58 56" stroke="#18181B" stroke-width="3" stroke-linecap="round"/>
           <path d="M47 59Q50 66 53 59Z" fill="#FF5A78"/>
         </svg>
-        <span>Pietro<b>bnb</b></span>
+        <span>Pietro<b>BnB</b></span>
       </div>
 
       <!-- Airbnb Search Pill Button -->
@@ -2397,7 +2397,7 @@
         <a href="#checklist">Checklist</a>
         <a href="#mappe">Mappe</a>
       </div>
-      <p>Pietrobnb · Mancaversa & Gallipoli 2026 · Salento</p>
+      <p>PietroBnB · Mancaversa & Gallipoli 2026 · Salento</p>
     </div>
   </footer>
 
@@ -2409,7 +2409,7 @@
     // 1. Easter Egg Giocoso di Pietro
     // --------------------------------------------------------------------------
     const PIETRO_QUOTES = [
-      "🌴 Benvenuti su Pietrobnb! Pietro è il vostro Superhost del weekend 😎🍹",
+      "🌴 Benvenuti su PietroBnB! Pietro è il vostro Superhost del weekend 😎🍹",
       "🏖️ Regola n°1 di Pietro: Tuffo a bomba a Baia Verde e zero pensieri! 🌊",
       "🍕 Host Pietro approva: Stasera rustico leccese caldo e pizza per tutti!",
       "⚡ Pietro dice: Se c'è Tramontana, lo Ionio è una piscina piatta! 😎",
@@ -2544,7 +2544,7 @@
         author: 'Superhost Pietro',
         avatar: '😎',
         bg: '#FFF0F2',
-        text: '🌴 Benvenuti su Pietrobnb! Scrivete qui sotto idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
+        text: '🌴 Benvenuti su PietroBnB! Scrivete qui sotto idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
         time: '22 ago',
         timestamp: Date.now() - 10000
       }
@@ -2581,7 +2581,6 @@
       updateUnreadBadges();
       localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
 
-      // Auto scroll to bottom
       const container = document.getElementById('drawerMessagesContainer');
       if (container) {
         setTimeout(() => {
@@ -2662,7 +2661,6 @@
         container.scrollTop = container.scrollHeight;
       }
 
-      // If new incoming message and drawer is closed, increment unread badge!
       if (isNewIncoming && !isDrawerOpen) {
         unreadCount++;
         updateUnreadBadges();
@@ -2704,7 +2702,6 @@
             if (data && data.message) {
               const parsedMsg = JSON.parse(data.message);
               if (parsedMsg && parsedMsg.id && parsedMsg.text) {
-                // If message sent by another user, mark as new incoming
                 const isFromOther = parsedMsg.author !== currentUser.name;
                 addMessageToBoard(parsedMsg, isFromOther);
               }
@@ -2848,8 +2845,8 @@
 
     function shareTrip() {
       const shareData = {
-        title: 'Pietrobnb · Mancaversa 2026',
-        text: 'Pietrobnb: programma, alloggio, mappe e bacheca del viaggio per il weekend nel Salento (22–24 agosto 2026)!',
+        title: 'PietroBnB · Mancaversa 2026',
+        text: 'PietroBnB: programma, alloggio, mappe e bacheca del viaggio per il weekend nel Salento (22–24 agosto 2026)!',
         url: window.location.href
       };
 
