@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, interactive-widget=resizes-content">
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1217,8 +1217,8 @@
       transform: translateX(-50%) translateY(100%);
       width: 100%;
       max-width: 540px;
-      height: 84vh;
-      max-height: 720px;
+      height: 88dvh;
+      max-height: 88vh;
       background: #FFFFFF;
       border-top-left-radius: var(--radius-lg);
       border-top-right-radius: var(--radius-lg);
@@ -1226,7 +1226,7 @@
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.2s ease;
       padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -1247,7 +1247,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px 12px;
+      padding: 8px 16px 10px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -1258,7 +1258,7 @@
     }
 
     .drawer-title {
-      font-size: 16.5px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--charcoal);
     }
@@ -1267,7 +1267,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--green-dark);
       background: var(--green-bg);
@@ -1290,14 +1290,14 @@
     }
 
     .btn-close-drawer {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: var(--radius-pill);
       background: var(--surface-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--charcoal);
       font-weight: 700;
     }
@@ -1309,34 +1309,34 @@
     .identity-banner {
       background: var(--surface-subtle);
       border-bottom: 1px solid var(--border-subtle);
-      padding: 8px 16px;
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
     .identity-user {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       min-width: 0;
     }
 
     .user-avatar-badge {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: var(--radius-pill);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 14px;
       flex-shrink: 0;
       box-shadow: var(--shadow-xs);
     }
 
     .user-name-text {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--charcoal);
       white-space: nowrap;
@@ -1345,10 +1345,10 @@
     }
 
     .btn-edit-name {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--rausch);
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: var(--radius-pill);
       background: var(--rausch-light);
       white-space: nowrap;
@@ -1359,22 +1359,35 @@
       transform: scale(0.95);
     }
 
+    /* Messages Stream Container */
     .drawer-messages-list {
       flex: 1;
       overflow-y: auto;
-      padding: 14px 16px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
     }
 
     .board-msg-item {
       background: var(--surface-subtle);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 10px 12px;
+      padding: 9px 12px;
       animation: fadeInMsg 0.25s ease-out;
+      transition: background 0.4s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .board-msg-item.highlight-flash {
+      animation: flashHighlight 1.5s ease-out;
+    }
+
+    @keyframes flashHighlight {
+      0% { background: #FEF08A; border-color: #FACC15; }
+      100% { background: var(--surface-subtle); border-color: var(--border-subtle); }
     }
 
     @keyframes fadeInMsg {
@@ -1387,28 +1400,67 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .msg-author-info {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .msg-avatar {
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .msg-author {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 800;
       color: var(--charcoal);
     }
 
-    .msg-time {
+    .msg-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
       font-size: 10.5px;
       color: var(--gray-muted);
+    }
+
+    .msg-edited-tag {
+      font-size: 9.5px;
+      font-style: italic;
+      color: var(--gray-muted);
+    }
+
+    /* WhatsApp Style Quoted Box inside Message */
+    .msg-reply-box {
+      background: rgba(0, 0, 0, 0.04);
+      border-left: 3px solid var(--rausch);
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 4px 0 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .msg-reply-box:active {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .msg-reply-author {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--rausch);
+      margin-bottom: 1px;
+    }
+
+    .msg-reply-snippet {
+      font-size: 11.5px;
+      color: var(--gray-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .msg-body {
@@ -1418,6 +1470,37 @@
       word-break: break-word;
     }
 
+    /* Actions Bar (Rispondi, Modifica, Elimina) */
+    .msg-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-msg-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-muted);
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .btn-msg-action:active {
+      transform: scale(0.95);
+      color: var(--charcoal);
+    }
+
+    .btn-msg-action.delete-act {
+      color: #DC2626;
+      margin-left: auto;
+    }
+
     .empty-board-notice {
       text-align: center;
       padding: 30px 10px;
@@ -1425,25 +1508,79 @@
       font-size: 13px;
     }
 
+    /* Reply / Edit Floating Banner above Input */
+    .board-context-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: #F3F4F6;
+      border-top: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--rausch);
+      padding: 6px 14px;
+      font-size: 12px;
+    }
+
+    .board-context-banner.active {
+      display: flex;
+    }
+
+    .context-banner-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .context-banner-label {
+      font-weight: 700;
+      color: var(--rausch);
+      font-size: 11px;
+    }
+
+    .context-banner-snippet {
+      color: var(--gray-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 11.5px;
+    }
+
+    .btn-cancel-context {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-pill);
+      background: #E5E7EB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Message Input Form at bottom of Drawer */
     .drawer-form {
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-top: 1px solid var(--border-subtle);
       background: #FFFFFF;
       display: flex;
       gap: 8px;
+      align-items: center;
     }
 
+    /* FONT-SIZE 16px to prevent iOS Safari autozoom! */
     .drawer-input {
       flex: 1;
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-pill);
-      padding: 9px 14px;
-      font-size: 13.5px;
+      padding: 10px 14px;
+      font-size: 16px;
       font-family: inherit;
       color: var(--charcoal);
       background: #FFFFFF;
       outline: none;
       transition: var(--transition);
+      line-height: 1.3;
     }
 
     .drawer-input:focus {
@@ -1454,14 +1591,15 @@
       background: var(--rausch);
       color: #FFFFFF;
       font-weight: 700;
-      font-size: 13px;
-      padding: 9px 16px;
+      font-size: 13.5px;
+      padding: 10px 16px;
       border-radius: var(--radius-pill);
       display: flex;
       align-items: center;
       gap: 5px;
       flex-shrink: 0;
       transition: var(--transition);
+      min-height: 42px;
     }
 
     .drawer-send-btn:active {
@@ -1515,8 +1653,8 @@
 
     .name-modal input {
       width: 100%;
-      padding: 10px 12px;
-      font-size: 14px;
+      padding: 11px 12px;
+      font-size: 16px; /* 16px to prevent iOS autozoom */
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-xs);
       margin-bottom: 14px;
@@ -2242,8 +2380,17 @@
       </div>
     </div>
 
-    <!-- Form for New Message -->
-    <form class="drawer-form" onsubmit="handleSendDrawerMessage(event)">
+    <!-- Context Banner: Replying or Editing -->
+    <div class="board-context-banner" id="boardContextBanner">
+      <div class="context-banner-text">
+        <div class="context-banner-label" id="contextBannerLabel">Rispondendo a Marco</div>
+        <div class="context-banner-snippet" id="contextBannerSnippet">Testo del messaggio...</div>
+      </div>
+      <button type="button" class="btn-cancel-context" onclick="cancelCurrentContext()" title="Annulla">✕</button>
+    </div>
+
+    <!-- Form for New / Edited Message (16px font-size prevents iOS autozoom) -->
+    <form class="drawer-form" id="drawerForm" onsubmit="handleSendDrawerMessage(event)">
       <input 
         type="text" 
         id="drawerInputText" 
@@ -2252,8 +2399,8 @@
         autocomplete="off" 
         required
       >
-      <button type="submit" class="drawer-send-btn">
-        <span>Invia</span>
+      <button type="submit" class="drawer-send-btn" id="drawerSubmitBtn">
+        <span id="drawerSubmitLabel">Invia</span>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -2354,7 +2501,7 @@
     let currentUser = null;
 
     function initUserIdentity() {
-      const saved = localStorage.getItem('mancaversa_user_identity_v2');
+      const saved = localStorage.getItem('mancaversa_user_identity_v3');
       if (saved) {
         try {
           currentUser = JSON.parse(saved);
@@ -2363,17 +2510,17 @@
         }
       }
 
-      if (!currentUser || !currentUser.name) {
+      if (!currentUser || !currentUser.name || !currentUser.id) {
         const randomAnimal = ANONYMOUS_ANIMALS[Math.floor(Math.random() * ANONYMOUS_ANIMALS.length)];
         currentUser = {
-          id: 'user_' + Math.random().toString(36).substring(2, 9),
+          id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
           name: randomAnimal.name,
           avatar: randomAnimal.avatar,
           bg: randomAnimal.bg,
           color: randomAnimal.color,
           isCustom: false
         };
-        localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+        localStorage.setItem('mancaversa_user_identity_v3', JSON.stringify(currentUser));
       }
 
       updateIdentityUI();
@@ -2416,7 +2563,7 @@
         return;
       }
 
-      localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+      localStorage.setItem('mancaversa_user_identity_v3', JSON.stringify(currentUser));
       updateIdentityUI();
       closeNameModal();
       showToast(`Nome salvato: ${currentUser.name}`);
@@ -2430,14 +2577,14 @@
       currentUser.color = randomAnimal.color;
       currentUser.isCustom = false;
 
-      localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+      localStorage.setItem('mancaversa_user_identity_v3', JSON.stringify(currentUser));
       updateIdentityUI();
       closeNameModal();
       showToast(`Assegnato: ${currentUser.name}`);
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Drawer & Circular FAB Badge Counter)
+    // 3. Real-Time Group Board (Reply WhatsApp-style, Edit, Delete & Mobile Keyboard Sync)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
@@ -2445,20 +2592,27 @@
     let isDrawerOpen = false;
     let unreadCount = 0;
 
+    // State for Reply & Edit
+    let activeReplyingMsg = null;
+    let activeEditingMsgId = null;
+
     const singleWelcomeNote = [
       {
         id: 'init_welcome_pietro',
+        userId: 'host_pietro_01',
         author: 'Superhost Pietro',
         avatar: '😎',
         bg: '#FFF0F2',
         text: '🌴 Benvenuti su PietroBnB! Scrivete qui sotto idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
         time: '22 ago',
-        timestamp: Date.now() - 10000
+        timestamp: Date.now() - 10000,
+        isEdited: false,
+        replyTo: null
       }
     ];
 
     function initRealtimeBoard() {
-      const cached = localStorage.getItem('mancaversa_board_cache_v4');
+      const cached = localStorage.getItem('mancaversa_board_cache_v5');
       if (cached) {
         try {
           boardMessages = JSON.parse(cached);
@@ -2472,6 +2626,41 @@
       renderDrawerMessages();
       fetchPastMessages();
       connectToLiveStream();
+      setupMobileViewportHandling();
+    }
+
+    // Setup visual viewport & keyboard handling for iOS/Android
+    function setupMobileViewportHandling() {
+      const drawerInput = document.getElementById('drawerInputText');
+      const drawer = document.getElementById('boardDrawer');
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+          if (isDrawerOpen) {
+            const vvHeight = window.visualViewport.height;
+            const screenHeight = window.innerHeight;
+            if (vvHeight < screenHeight * 0.85) {
+              // Keyboard is open!
+              drawer.style.height = `${vvHeight - 10}px`;
+              drawer.style.maxHeight = `${vvHeight - 10}px`;
+              setTimeout(scrollMessagesToBottom, 150);
+            } else {
+              // Keyboard closed
+              drawer.style.height = '88dvh';
+              drawer.style.maxHeight = '88vh';
+            }
+          }
+        });
+      }
+
+      if (drawerInput) {
+        drawerInput.addEventListener('focus', () => {
+          setTimeout(() => {
+            scrollMessagesToBottom();
+            drawerInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 300);
+        });
+      }
     }
 
     function openBoardDrawer() {
@@ -2483,17 +2672,11 @@
         drawer.classList.add('active');
       }
 
-      // Reset badge
       unreadCount = 0;
       updateUnreadBadges();
       localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
 
-      const container = document.getElementById('drawerMessagesContainer');
-      if (container) {
-        setTimeout(() => {
-          container.scrollTop = container.scrollHeight;
-        }, 100);
-      }
+      setTimeout(scrollMessagesToBottom, 100);
     }
 
     function closeBoardDrawer() {
@@ -2504,8 +2687,16 @@
         overlay.classList.remove('active');
         drawer.classList.remove('active');
       }
+      cancelCurrentContext();
       unreadCount = 0;
       updateUnreadBadges();
+    }
+
+    function scrollMessagesToBottom() {
+      const container = document.getElementById('drawerMessagesContainer');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
 
     function updateUnreadBadges() {
@@ -2535,9 +2726,51 @@
 
       container.innerHTML = '';
       boardMessages.forEach(msg => {
+        const isOwner = currentUser && (msg.userId === currentUser.id || (msg.author === currentUser.name && currentUser.isCustom));
+        const isWelcomeNote = msg.id === 'init_welcome_pietro';
+
         const item = document.createElement('div');
         item.className = 'board-msg-item';
-        item.setAttribute('data-id', msg.id);
+        item.id = `msg_node_${msg.id}`;
+
+        // Reply quote HTML (WhatsApp style)
+        let replyQuoteHtml = '';
+        if (msg.replyTo && msg.replyTo.text) {
+          replyQuoteHtml = `
+            <div class="msg-reply-box" onclick="scrollToMessage('${escapeHTML(msg.replyTo.id)}')">
+              <div class="msg-reply-author">↩️ ${escapeHTML(msg.replyTo.author || 'Anonimo')}</div>
+              <div class="msg-reply-snippet">${escapeHTML(msg.replyTo.text)}</div>
+            </div>
+          `;
+        }
+
+        // Actions row (Rispondi, Modifica, Elimina)
+        let actionsHtml = '';
+        if (!isWelcomeNote) {
+          actionsHtml = `
+            <div class="msg-actions-row">
+              <button type="button" class="btn-msg-action" onclick="startReplyToMessage('${escapeHTML(msg.id)}')">
+                ↩️ Rispondi
+              </button>
+              ${isOwner ? `
+                <button type="button" class="btn-msg-action" onclick="startEditMessage('${escapeHTML(msg.id)}')">
+                  ✏️ Modifica
+                </button>
+                <button type="button" class="btn-msg-action delete-act" onclick="confirmDeleteMessage('${escapeHTML(msg.id)}')">
+                  🗑️ Elimina
+                </button>
+              ` : ''}
+            </div>
+          `;
+        } else {
+          actionsHtml = `
+            <div class="msg-actions-row">
+              <button type="button" class="btn-msg-action" onclick="startReplyToMessage('${escapeHTML(msg.id)}')">
+                ↩️ Rispondi
+              </button>
+            </div>
+          `;
+        }
 
         item.innerHTML = `
           <div class="msg-header">
@@ -2545,32 +2778,226 @@
               <span class="msg-avatar">${escapeHTML(msg.avatar || '🐬')}</span>
               <span class="msg-author">${escapeHTML(msg.author || 'Anonimo')}</span>
             </div>
-            <span class="msg-time">${escapeHTML(msg.time || 'Adesso')}</span>
+            <div class="msg-meta-right">
+              ${msg.isEdited ? '<span class="msg-edited-tag">(modificato)</span>' : ''}
+              <span class="msg-time">${escapeHTML(msg.time || 'Adesso')}</span>
+            </div>
           </div>
+          ${replyQuoteHtml}
           <div class="msg-body">${escapeHTML(msg.text || '')}</div>
+          ${actionsHtml}
         `;
         container.appendChild(item);
       });
     }
 
+    function scrollToMessage(msgId) {
+      if (!msgId) return;
+      const target = document.getElementById(`msg_node_${msgId}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.remove('highlight-flash');
+        void target.offsetWidth; // trigger reflow
+        target.classList.add('highlight-flash');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Context Management: Reply and Edit Handlers
+    // --------------------------------------------------------------------------
+    function startReplyToMessage(msgId) {
+      const msg = boardMessages.find(m => m.id === msgId);
+      if (!msg) return;
+
+      activeReplyingMsg = msg;
+      activeEditingMsgId = null;
+
+      const banner = document.getElementById('boardContextBanner');
+      const label = document.getElementById('contextBannerLabel');
+      const snippet = document.getElementById('contextBannerSnippet');
+      const submitLabel = document.getElementById('drawerSubmitLabel');
+      const input = document.getElementById('drawerInputText');
+
+      if (banner && label && snippet && input) {
+        label.textContent = `↩️ Rispondendo a ${msg.author}`;
+        snippet.textContent = `"${msg.text}"`;
+        banner.classList.add('active');
+        if (submitLabel) submitLabel.textContent = 'Invia';
+        input.focus();
+      }
+    }
+
+    function startEditMessage(msgId) {
+      const msg = boardMessages.find(m => m.id === msgId);
+      if (!msg) return;
+
+      activeEditingMsgId = msg.id;
+      activeReplyingMsg = null;
+
+      const banner = document.getElementById('boardContextBanner');
+      const label = document.getElementById('contextBannerLabel');
+      const snippet = document.getElementById('contextBannerSnippet');
+      const submitLabel = document.getElementById('drawerSubmitLabel');
+      const input = document.getElementById('drawerInputText');
+
+      if (banner && label && snippet && input) {
+        label.textContent = '✏️ Modifica messaggio';
+        snippet.textContent = `"${msg.text}"`;
+        banner.classList.add('active');
+        if (submitLabel) submitLabel.textContent = 'Salva';
+        input.value = msg.text;
+        input.focus();
+        input.select();
+      }
+    }
+
+    function cancelCurrentContext() {
+      activeReplyingMsg = null;
+      activeEditingMsgId = null;
+
+      const banner = document.getElementById('boardContextBanner');
+      const submitLabel = document.getElementById('drawerSubmitLabel');
+      const input = document.getElementById('drawerInputText');
+
+      if (banner) banner.classList.remove('active');
+      if (submitLabel) submitLabel.textContent = 'Invia';
+    }
+
+    function confirmDeleteMessage(msgId) {
+      const msg = boardMessages.find(m => m.id === msgId);
+      if (!msg) return;
+
+      if (confirm(`Vuoi eliminare questo messaggio?\n"${msg.text.substring(0, 40)}..."`)) {
+        // Remove locally
+        boardMessages = boardMessages.filter(m => m.id !== msgId);
+        localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+        renderDrawerMessages();
+
+        // Broadcast delete action via SSE
+        const deletePayload = {
+          action: 'delete',
+          id: msgId,
+          userId: currentUser.id
+        };
+
+        fetch(NTFY_URL, {
+          method: 'POST',
+          headers: { 'Title': 'Mancaversa Board Action' },
+          body: JSON.stringify(deletePayload)
+        }).catch(err => console.warn('Delete broadcast error', err));
+
+        showToast('Messaggio eliminato');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Send / Edit Message Submit Handler
+    // --------------------------------------------------------------------------
+    function handleSendDrawerMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('drawerInputText');
+      if (!input) return;
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      if (activeEditingMsgId) {
+        // EDIT MODE
+        const msgIdx = boardMessages.findIndex(m => m.id === activeEditingMsgId);
+        if (msgIdx !== -1) {
+          boardMessages[msgIdx].text = text;
+          boardMessages[msgIdx].isEdited = true;
+          localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+          renderDrawerMessages();
+
+          const editPayload = {
+            action: 'edit',
+            id: activeEditingMsgId,
+            text: text,
+            isEdited: true
+          };
+
+          fetch(NTFY_URL, {
+            method: 'POST',
+            headers: { 'Title': 'Mancaversa Board Action' },
+            body: JSON.stringify(editPayload)
+          }).catch(err => console.warn('Edit sync error', err));
+
+          showToast('Messaggio modificato');
+        }
+        input.value = '';
+        cancelCurrentContext();
+        return;
+      }
+
+      // NEW MESSAGE MODE (with optional reply)
+      const newMsg = {
+        id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        userId: currentUser.id,
+        author: currentUser.name,
+        avatar: currentUser.avatar,
+        bg: currentUser.bg,
+        text: text,
+        time: timeStr,
+        timestamp: Date.now(),
+        isEdited: false,
+        replyTo: activeReplyingMsg ? {
+          id: activeReplyingMsg.id,
+          author: activeReplyingMsg.author,
+          text: activeReplyingMsg.text
+        } : null
+      };
+
+      addMessageToBoard(newMsg, false);
+      input.value = '';
+      cancelCurrentContext();
+
+      fetch(NTFY_URL, {
+        method: 'POST',
+        headers: { 'Title': 'Mancaversa Board' },
+        body: JSON.stringify(newMsg)
+      }).catch(err => console.warn('Sync post error', err));
+    }
+
     function addMessageToBoard(msg, isNewIncoming = false) {
+      // Check if already present
       if (boardMessages.some(m => m.id === msg.id)) return;
 
       boardMessages.push(msg);
-      if (boardMessages.length > 60) boardMessages = boardMessages.slice(-60);
+      if (boardMessages.length > 70) boardMessages = boardMessages.slice(-70);
 
-      localStorage.setItem('mancaversa_board_cache_v4', JSON.stringify(boardMessages));
+      localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
       renderDrawerMessages();
 
-      const container = document.getElementById('drawerMessagesContainer');
-      if (container && isDrawerOpen) {
-        container.scrollTop = container.scrollHeight;
+      if (isDrawerOpen) {
+        scrollMessagesToBottom();
       }
 
       if (isNewIncoming && !isDrawerOpen) {
         unreadCount++;
         updateUnreadBadges();
         showToast(`💬 ${msg.author}: "${msg.text.substring(0, 22)}..."`);
+      }
+    }
+
+    function handleIncomingAction(payload) {
+      if (!payload || !payload.action || !payload.id) return;
+
+      if (payload.action === 'delete') {
+        boardMessages = boardMessages.filter(m => m.id !== payload.id);
+        localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+        renderDrawerMessages();
+      } else if (payload.action === 'edit') {
+        const msg = boardMessages.find(m => m.id === payload.id);
+        if (msg) {
+          msg.text = payload.text;
+          msg.isEdited = true;
+          localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+          renderDrawerMessages();
+        }
       }
     }
 
@@ -2585,7 +3012,9 @@
               const data = JSON.parse(line);
               if (data && data.message) {
                 const parsedMsg = JSON.parse(data.message);
-                if (parsedMsg && parsedMsg.id && parsedMsg.text) {
+                if (parsedMsg && parsedMsg.action) {
+                  handleIncomingAction(parsedMsg);
+                } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
                   addMessageToBoard(parsedMsg, false);
                 }
               }
@@ -2607,45 +3036,16 @@
             const data = JSON.parse(e.data);
             if (data && data.message) {
               const parsedMsg = JSON.parse(data.message);
-              if (parsedMsg && parsedMsg.id && parsedMsg.text) {
-                const isFromOther = parsedMsg.author !== currentUser.name;
+              if (parsedMsg && parsedMsg.action) {
+                handleIncomingAction(parsedMsg);
+              } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
+                const isFromOther = !currentUser || (parsedMsg.userId !== currentUser.id && parsedMsg.author !== currentUser.name);
                 addMessageToBoard(parsedMsg, isFromOther);
               }
             }
           } catch (err) {}
         };
       } catch (e) {}
-    }
-
-    function handleSendDrawerMessage(e) {
-      e.preventDefault();
-      const input = document.getElementById('drawerInputText');
-      if (!input) return;
-
-      const text = input.value.trim();
-      if (!text) return;
-
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-      const newMsg = {
-        id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-        author: currentUser.name,
-        avatar: currentUser.avatar,
-        bg: currentUser.bg,
-        text: text,
-        time: timeStr,
-        timestamp: Date.now()
-      };
-
-      addMessageToBoard(newMsg, false);
-      input.value = '';
-
-      fetch(NTFY_URL, {
-        method: 'POST',
-        headers: { 'Title': 'Mancaversa Board' },
-        body: JSON.stringify(newMsg)
-      }).catch(err => console.warn('Sync post error', err));
     }
 
     function escapeHTML(str) {
