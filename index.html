@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1203,6 +1203,7 @@
       z-index: 999;
       opacity: 0;
       transition: opacity 0.25s ease;
+      touch-action: none;
     }
 
     .board-drawer-overlay.active {
@@ -1217,8 +1218,8 @@
       transform: translateX(-50%) translateY(100%);
       width: 100%;
       max-width: 540px;
-      height: 88dvh;
-      max-height: 88vh;
+      height: 85dvh;
+      max-height: 85vh;
       background: #FFFFFF;
       border-top-left-radius: var(--radius-lg);
       border-top-right-radius: var(--radius-lg);
@@ -1226,8 +1227,9 @@
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.2s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       padding-bottom: env(safe-area-inset-bottom);
+      overflow: hidden;
     }
 
     .board-drawer.active {
@@ -1249,6 +1251,7 @@
       justify-content: space-between;
       padding: 8px 16px 10px;
       border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
     }
 
     .drawer-title-group {
@@ -1314,6 +1317,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .identity-user {
@@ -1518,6 +1522,7 @@
       border-left: 3px solid var(--rausch);
       padding: 6px 14px;
       font-size: 12px;
+      flex-shrink: 0;
     }
 
     .board-context-banner.active {
@@ -1566,6 +1571,7 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-shrink: 0;
     }
 
     /* FONT-SIZE 16px to prevent iOS Safari autozoom! */
@@ -1574,13 +1580,14 @@
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-pill);
       padding: 10px 14px;
-      font-size: 16px;
+      font-size: 16px !important;
       font-family: inherit;
       color: var(--charcoal);
       background: #FFFFFF;
       outline: none;
       transition: var(--transition);
       line-height: 1.3;
+      -webkit-appearance: none;
     }
 
     .drawer-input:focus {
@@ -1654,12 +1661,13 @@
     .name-modal input {
       width: 100%;
       padding: 11px 12px;
-      font-size: 16px; /* 16px to prevent iOS autozoom */
+      font-size: 16px !important; /* 16px to prevent iOS autozoom */
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-xs);
       margin-bottom: 14px;
       font-family: inherit;
       outline: none;
+      -webkit-appearance: none;
     }
 
     .name-modal input:focus {
@@ -1763,7 +1771,7 @@
       <!-- Airbnb Search Pill Button -->
       <div class="search-pill" onclick="scrollToId('programma')" role="button" tabindex="0">
         <span class="search-pill-text">22–24 Ago</span>
-        <span class="search-pill-sub">4 Persone</span>
+        <span class="search-pill-sub">Salento</span>
         <div class="search-pill-btn">
           <svg viewBox="0 0 32 32">
             <path d="M16 1C7.716 1 1 7.716 1 16c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15 0-8.284-6.716-15-15-15zm0 2c7.18 0 13 5.82 13 13 0 7.18-5.82 13-13 13-7.18 0-13-5.82-13-13 0-7.18 5.82-13 13-13zm0 4a1.5 1.5 0 0 0-1.5 1.5v6.5a1.5 1.5 0 0 0 .44 1.06l4 4a1.5 1.5 0 0 0 2.12-2.12L17.5 14.38V8.5A1.5 1.5 0 0 0 16 7z"></path>
@@ -1816,7 +1824,7 @@
     <section class="hero-section" id="overview">
       <div class="listing-meta-top">
         <span class="badge-superhost" onclick="triggerPietroEasterEgg()">🌴 Superhost Pietro</span>
-        <div class="listing-rating">★ 5.0 (4 amici)</div>
+        <div class="listing-rating">★ 5.0 · Weekend Top</div>
         <span style="color: var(--border-strong);">·</span>
         <span class="listing-location">Mancaversa & Gallipoli</span>
       </div>
@@ -1855,10 +1863,10 @@
       <!-- Specs 2x2 Grid -->
       <div class="specs-grid">
         <div class="spec-box">
-          <div class="spec-icon">👥</div>
+          <div class="spec-icon">🌊</div>
           <div class="spec-info">
-            <strong>4 Persone</strong>
-            <span>Gruppo amici</span>
+            <strong>Salento</strong>
+            <span>Costa Ionica</span>
           </div>
         </div>
         <div class="spec-box">
@@ -2389,7 +2397,7 @@
       <button type="button" class="btn-cancel-context" onclick="cancelCurrentContext()" title="Annulla">✕</button>
     </div>
 
-    <!-- Form for New / Edited Message (16px font-size prevents iOS autozoom) -->
+    <!-- Form for New / Edited Message -->
     <form class="drawer-form" id="drawerForm" onsubmit="handleSendDrawerMessage(event)">
       <input 
         type="text" 
@@ -2467,7 +2475,7 @@
       "🏖️ Regola n°1 di Pietro: Tuffo a bomba a Baia Verde e zero pensieri! 🌊",
       "🍕 Host Pietro approva: Stasera rustico leccese caldo e pizza per tutti!",
       "⚡ Pietro dice: Se c'è Tramontana, lo Ionio è una piscina piatta! 😎",
-      "🎉 Rating di Pietro: ★★★★★ 5 stelle certificate per questo gruppo!"
+      "🎉 Rating di Pietro: ★★★★★ 5 stelle certificate per questa vacanza!"
     ];
 
     let lastQuoteIdx = -1;
@@ -2584,13 +2592,14 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Reply WhatsApp-style, Edit, Delete & Mobile Keyboard Sync)
+    // 3. Real-Time Group Board (Reply WhatsApp-style, Edit, Delete & Anti-Shift Mobile Keyboard)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
     let boardMessages = [];
     let isDrawerOpen = false;
     let unreadCount = 0;
+    let savedScrollPosition = 0;
 
     // State for Reply & Edit
     let activeReplyingMsg = null;
@@ -2629,36 +2638,57 @@
       setupMobileViewportHandling();
     }
 
-    // Setup visual viewport & keyboard handling for iOS/Android
+    // Rock-solid iOS & Android Keyboard & Viewport Shift Handler
     function setupMobileViewportHandling() {
       const drawerInput = document.getElementById('drawerInputText');
       const drawer = document.getElementById('boardDrawer');
 
+      // Visual Viewport resize (Virtual Keyboard)
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', () => {
-          if (isDrawerOpen) {
-            const vvHeight = window.visualViewport.height;
+          if (isDrawerOpen && drawer) {
+            const vv = window.visualViewport;
             const screenHeight = window.innerHeight;
-            if (vvHeight < screenHeight * 0.85) {
-              // Keyboard is open!
-              drawer.style.height = `${vvHeight - 10}px`;
-              drawer.style.maxHeight = `${vvHeight - 10}px`;
-              setTimeout(scrollMessagesToBottom, 150);
+            if (vv.height < screenHeight * 0.85) {
+              // Keyboard active
+              drawer.style.height = `${vv.height}px`;
+              drawer.style.maxHeight = `${vv.height}px`;
+              window.scrollTo(0, 0);
+              document.body.scrollTop = 0;
+              document.documentElement.scrollTop = 0;
+              setTimeout(scrollMessagesToBottom, 80);
             } else {
-              // Keyboard closed
-              drawer.style.height = '88dvh';
-              drawer.style.maxHeight = '88vh';
+              // Keyboard hidden
+              drawer.style.height = '85dvh';
+              drawer.style.maxHeight = '85vh';
             }
+          }
+        });
+
+        window.visualViewport.addEventListener('scroll', () => {
+          if (isDrawerOpen) {
+            window.scrollTo(0, 0);
           }
         });
       }
 
       if (drawerInput) {
+        // Prevent page jumping upwards on tap
         drawerInput.addEventListener('focus', () => {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
           setTimeout(() => {
+            window.scrollTo(0, 0);
             scrollMessagesToBottom();
-            drawerInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 300);
+          }, 80);
+        });
+
+        drawerInput.addEventListener('blur', () => {
+          if (isDrawerOpen && drawer) {
+            drawer.style.height = '85dvh';
+            drawer.style.maxHeight = '85vh';
+          }
         });
       }
     }
@@ -2667,6 +2697,14 @@
       isDrawerOpen = true;
       const overlay = document.getElementById('boardDrawerOverlay');
       const drawer = document.getElementById('boardDrawer');
+
+      // Lock body scroll to prevent iOS viewport jumping
+      savedScrollPosition = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${savedScrollPosition}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+
       if (overlay && drawer) {
         overlay.classList.add('active');
         drawer.classList.add('active');
@@ -2683,9 +2721,19 @@
       isDrawerOpen = false;
       const overlay = document.getElementById('boardDrawerOverlay');
       const drawer = document.getElementById('boardDrawer');
+
+      // Unlock body scroll and restore position
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, savedScrollPosition);
+
       if (overlay && drawer) {
         overlay.classList.remove('active');
         drawer.classList.remove('active');
+        drawer.style.height = '85dvh';
+        drawer.style.maxHeight = '85vh';
       }
       cancelCurrentContext();
       unreadCount = 0;
@@ -2963,7 +3011,6 @@
     }
 
     function addMessageToBoard(msg, isNewIncoming = false) {
-      // Check if already present
       if (boardMessages.some(m => m.id === msg.id)) return;
 
       boardMessages.push(msg);
