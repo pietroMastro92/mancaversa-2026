@@ -62,8 +62,8 @@
       --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05);
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
       --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
-      --shadow-floating: 0 10px 28px rgba(0, 0, 0, 0.16);
-      --shadow-drawer: 0 -8px 30px rgba(0, 0, 0, 0.18);
+      --shadow-floating: 0 8px 24px rgba(255, 56, 92, 0.35);
+      --shadow-drawer: 0 -8px 32px rgba(0, 0, 0, 0.18);
       
       --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
@@ -86,7 +86,7 @@
       color: var(--charcoal);
       background-color: #FFFFFF;
       line-height: 1.5;
-      padding-bottom: calc(90px + env(safe-area-inset-bottom));
+      padding-bottom: calc(40px + env(safe-area-inset-bottom));
       overflow-x: hidden;
       touch-action: manipulation;
     }
@@ -1115,78 +1115,56 @@
     }
 
     /* ==========================================================================
-       FLOATING ACTION BAR & UNREAD BADGES
+       CIRCULAR FLOATING ACTION BUTTON (52x52px) IN BASSO A DESTRA
        ========================================================================== */
-    .floating-bar-mobile {
+    .floating-fab-circular {
       position: fixed;
-      bottom: calc(10px + env(safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 99;
-      background: rgba(30, 30, 30, 0.94);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      right: 18px;
+      width: 52px;
+      height: 52px;
       border-radius: var(--radius-pill);
-      padding: 5px 8px;
-      box-shadow: var(--shadow-floating);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      width: calc(100% - 24px);
-      max-width: 380px;
-    }
-
-    .floating-bar-flex {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-    }
-
-    .float-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
+      background: var(--rausch);
       color: #FFFFFF;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 5px 8px;
-      border-radius: var(--radius-pill);
-      transition: var(--transition);
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-floating);
+      z-index: 98;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s ease;
+      touch-action: manipulation;
     }
 
-    .float-item:active {
-      transform: scale(0.92);
-      color: #FF5A78;
+    .floating-fab-circular:active {
+      transform: scale(0.9);
+      background: var(--rausch-dark);
     }
 
-    .float-item svg {
-      width: 18px;
-      height: 18px;
+    .floating-fab-circular svg {
+      width: 24px;
+      height: 24px;
       fill: currentColor;
     }
 
-    .float-item.rausch-tint {
-      color: #FF5A78;
-    }
-
-    /* Red Notification Badge */
+    /* Red Notification Badge with White Outline */
     .unread-badge {
       position: absolute;
-      top: 1px;
-      right: 4px;
+      top: -3px;
+      right: -3px;
       background: #FF385C;
       color: #FFFFFF;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
-      min-width: 17px;
-      height: 17px;
+      min-width: 20px;
+      height: 20px;
       border-radius: var(--radius-pill);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 4px;
-      border: 2px solid #1E1E1E;
-      box-shadow: 0 2px 5px rgba(255, 56, 92, 0.5);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       animation: badgePulse 1.8s infinite;
     }
 
@@ -1202,7 +1180,7 @@
       align-items: center;
       justify-content: center;
       padding: 0 3px;
-      margin-left: 2px;
+      margin-left: 3px;
       animation: badgePulse 1.8s infinite;
     }
 
@@ -1210,45 +1188,6 @@
       0% { transform: scale(1); }
       50% { transform: scale(1.15); }
       100% { transform: scale(1); }
-    }
-
-    /* Floating Board Quick FAB */
-    .floating-fab-corner {
-      position: fixed;
-      bottom: calc(75px + env(safe-area-inset-bottom));
-      right: 16px;
-      z-index: 98;
-      background: #FFFFFF;
-      color: var(--charcoal);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-pill);
-      padding: 8px 14px 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      box-shadow: var(--shadow-floating);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .floating-fab-corner:active {
-      transform: scale(0.94);
-      background: var(--surface-subtle);
-    }
-
-    .floating-fab-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-pill);
-      background: var(--rausch);
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      position: relative;
     }
 
     /* ==========================================================================
@@ -1295,7 +1234,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Drag handle */
     .drawer-handle-bar {
       width: 38px;
       height: 4px;
@@ -1305,7 +1243,6 @@
       cursor: pointer;
     }
 
-    /* Drawer Header */
     .drawer-header {
       display: flex;
       align-items: center;
@@ -1369,7 +1306,6 @@
       background: #E5E7EB;
     }
 
-    /* Identity Banner inside Drawer */
     .identity-banner {
       background: var(--surface-subtle);
       border-bottom: 1px solid var(--border-subtle);
@@ -1423,7 +1359,6 @@
       transform: scale(0.95);
     }
 
-    /* Messages Stream Container */
     .drawer-messages-list {
       flex: 1;
       overflow-y: auto;
@@ -1490,7 +1425,6 @@
       font-size: 13px;
     }
 
-    /* Message Input Form at bottom of Drawer */
     .drawer-form {
       padding: 10px 14px;
       border-top: 1px solid var(--border-subtle);
@@ -1605,16 +1539,16 @@
        ========================================================================== */
     .toast-pill {
       position: fixed;
-      bottom: calc(75px + env(safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%) translateY(40px);
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 16px;
+      transform: translateY(60px);
       background: #111111;
       color: #FFFFFF;
-      padding: 9px 18px;
+      padding: 9px 16px;
       border-radius: var(--radius-pill);
       font-size: 12.5px;
       font-weight: 700;
-      box-shadow: var(--shadow-floating);
+      box-shadow: var(--shadow-drawer);
       z-index: 999;
       display: flex;
       align-items: center;
@@ -1622,11 +1556,14 @@
       opacity: 0;
       pointer-events: none;
       transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+      max-width: calc(100% - 90px);
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .toast-pill.visible {
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
       opacity: 1;
     }
 
@@ -2256,15 +2193,14 @@
   </main>
 
   <!-- ==========================================================================
-       FLOATING CORNER FAB (SEMPRE VISIBILE IN BASSO A DESTRA)
+       PULSANTE CIRCOLARE FLOTTANTE BACHECA (52x52px IN BASSO A DESTRA)
        ========================================================================== -->
-  <div class="floating-fab-corner" onclick="openBoardDrawer()" id="fabCornerButton">
-    <div class="floating-fab-icon">
-      💬
-      <span class="unread-badge" id="cornerFabBadge" style="display: none;">0</span>
-    </div>
-    <span>Bacheca</span>
-  </div>
+  <button class="floating-fab-circular" onclick="openBoardDrawer()" id="fabCircularBtn" aria-label="Apri bacheca live">
+    <svg viewBox="0 0 24 24">
+      <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+    </svg>
+    <span class="unread-badge" id="fabUnreadBadge" style="display: none;">0</span>
+  </button>
 
   <!-- ==========================================================================
        BACHECA SLIDE-UP BOTTOM SHEET (DRAWER FLOTTANTE)
@@ -2345,35 +2281,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ==========================================================================
-       FLOATING BOTTOM BAR
-       ========================================================================== -->
-  <aside class="floating-bar-mobile" aria-label="Navigazione rapida mobile">
-    <div class="floating-bar-flex">
-      <a href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE" target="_blank" class="float-item rausch-tint">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        <span>Casa</span>
-      </a>
-      <a href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa" target="_blank" class="float-item">
-        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        <span>Spiaggia</span>
-      </a>
-      <button class="float-item" onclick="scrollToId('programma')">
-        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-        <span>Orari</span>
-      </button>
-      <button class="float-item" onclick="openBoardDrawer()">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-        <span>Bacheca</span>
-        <span class="unread-badge" id="bottomBarBadge" style="display: none;">0</span>
-      </button>
-      <button class="float-item" onclick="shareTrip()">
-        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
-        <span>Invia</span>
-      </button>
-    </div>
-  </aside>
 
   <!-- ==========================================================================
        TOAST NOTIFICATION
@@ -2530,7 +2437,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Drawer & Unread Badge Counter)
+    // 3. Real-Time Group Board (Drawer & Circular FAB Badge Counter)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
@@ -2576,7 +2483,7 @@
         drawer.classList.add('active');
       }
 
-      // Clear unread count
+      // Reset badge
       unreadCount = 0;
       updateUnreadBadges();
       localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
@@ -2602,16 +2509,15 @@
     }
 
     function updateUnreadBadges() {
-      const cornerBadge = document.getElementById('cornerFabBadge');
-      const bottomBarBadge = document.getElementById('bottomBarBadge');
+      const fabBadge = document.getElementById('fabUnreadBadge');
       const catPillBadge = document.getElementById('catPillBadge');
 
-      const badges = [cornerBadge, bottomBarBadge, catPillBadge];
+      const badges = [fabBadge, catPillBadge];
       badges.forEach(b => {
         if (!b) return;
         if (unreadCount > 0) {
           b.textContent = unreadCount > 9 ? '9+' : unreadCount;
-          b.style.display = 'inline-flex';
+          b.style.display = 'flex';
         } else {
           b.style.display = 'none';
         }
@@ -2664,7 +2570,7 @@
       if (isNewIncoming && !isDrawerOpen) {
         unreadCount++;
         updateUnreadBadges();
-        showToast(`💬 Nuovo messaggio da ${msg.author}: "${msg.text.substring(0, 24)}..."`);
+        showToast(`💬 ${msg.author}: "${msg.text.substring(0, 22)}..."`);
       }
     }
 
