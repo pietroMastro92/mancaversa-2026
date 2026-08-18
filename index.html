@@ -1211,11 +1211,13 @@
       opacity: 1;
     }
 
+    /* Centered with left: 0; right: 0; margin: auto without transforms when open */
     .board-drawer {
       position: fixed;
+      left: 0;
+      right: 0;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%) translateY(100%);
+      margin: 0 auto;
       width: 100%;
       max-width: 540px;
       height: 85dvh;
@@ -1227,13 +1229,14 @@
       z-index: 1000;
       display: flex;
       flex-direction: column;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
       padding-bottom: env(safe-area-inset-bottom);
       overflow: hidden;
     }
 
     .board-drawer.active {
-      transform: translateX(-50%) translateY(0);
+      transform: translateY(0);
     }
 
     .drawer-handle-bar {
@@ -1372,6 +1375,7 @@
       flex-direction: column;
       gap: 10px;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
       scroll-behavior: smooth;
     }
 
@@ -2592,7 +2596,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Reply WhatsApp-style, Edit, Delete & Anti-Shift Mobile Keyboard)
+    // 3. Real-Time Group Board (VisualViewport Keyboard Pinning & Zero-Jump Engine)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
@@ -2638,57 +2642,66 @@
       setupMobileViewportHandling();
     }
 
-    // Rock-solid iOS & Android Keyboard & Viewport Shift Handler
+    // Dynamic keyboard pinning engine
+    function updateDrawerForKeyboard() {
+      if (!isDrawerOpen) return;
+      const drawer = document.getElementById('boardDrawer');
+      if (!drawer) return;
+
+      if (window.visualViewport) {
+        const vv = window.visualViewport;
+        const isKeyboardOpen = vv.height < window.innerHeight - 80;
+
+        if (isKeyboardOpen) {
+          drawer.style.height = `${vv.height}px`;
+          drawer.style.maxHeight = `${vv.height}px`;
+          drawer.style.top = `${vv.offsetTop}px`;
+          drawer.style.bottom = 'auto';
+          drawer.style.borderTopLeftRadius = '0px';
+          drawer.style.borderTopRightRadius = '0px';
+          drawer.style.transform = 'translateY(0)';
+        } else {
+          drawer.style.height = '85dvh';
+          drawer.style.maxHeight = '85vh';
+          drawer.style.top = 'auto';
+          drawer.style.bottom = '0';
+          drawer.style.borderTopLeftRadius = '24px';
+          drawer.style.borderTopRightRadius = '24px';
+          drawer.style.transform = 'translateY(0)';
+        }
+      }
+    }
+
     function setupMobileViewportHandling() {
       const drawerInput = document.getElementById('drawerInputText');
-      const drawer = document.getElementById('boardDrawer');
 
-      // Visual Viewport resize (Virtual Keyboard)
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', () => {
-          if (isDrawerOpen && drawer) {
-            const vv = window.visualViewport;
-            const screenHeight = window.innerHeight;
-            if (vv.height < screenHeight * 0.85) {
-              // Keyboard active
-              drawer.style.height = `${vv.height}px`;
-              drawer.style.maxHeight = `${vv.height}px`;
-              window.scrollTo(0, 0);
-              document.body.scrollTop = 0;
-              document.documentElement.scrollTop = 0;
-              setTimeout(scrollMessagesToBottom, 80);
-            } else {
-              // Keyboard hidden
-              drawer.style.height = '85dvh';
-              drawer.style.maxHeight = '85vh';
-            }
+          updateDrawerForKeyboard();
+          if (isDrawerOpen) {
+            setTimeout(scrollMessagesToBottom, 60);
           }
         });
 
         window.visualViewport.addEventListener('scroll', () => {
-          if (isDrawerOpen) {
-            window.scrollTo(0, 0);
-          }
+          updateDrawerForKeyboard();
         });
       }
 
       if (drawerInput) {
-        // Prevent page jumping upwards on tap
         drawerInput.addEventListener('focus', () => {
-          window.scrollTo(0, 0);
-          document.body.scrollTop = 0;
-          document.documentElement.scrollTop = 0;
           setTimeout(() => {
-            window.scrollTo(0, 0);
+            updateDrawerForKeyboard();
             scrollMessagesToBottom();
-          }, 80);
+          }, 60);
+          setTimeout(() => {
+            updateDrawerForKeyboard();
+            scrollMessagesToBottom();
+          }, 260);
         });
 
         drawerInput.addEventListener('blur', () => {
-          if (isDrawerOpen && drawer) {
-            drawer.style.height = '85dvh';
-            drawer.style.maxHeight = '85vh';
-          }
+          setTimeout(updateDrawerForKeyboard, 100);
         });
       }
     }
@@ -2698,8 +2711,7 @@
       const overlay = document.getElementById('boardDrawerOverlay');
       const drawer = document.getElementById('boardDrawer');
 
-      // Lock body scroll to prevent iOS viewport jumping
-      savedScrollPosition = window.scrollY;
+      savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${savedScrollPosition}px`;
       document.body.style.width = '100%';
@@ -2708,6 +2720,13 @@
       if (overlay && drawer) {
         overlay.classList.add('active');
         drawer.classList.add('active');
+        drawer.style.height = '85dvh';
+        drawer.style.maxHeight = '85vh';
+        drawer.style.top = 'auto';
+        drawer.style.bottom = '0';
+        drawer.style.borderTopLeftRadius = '24px';
+        drawer.style.borderTopRightRadius = '24px';
+        drawer.style.transform = 'translateY(0)';
       }
 
       unreadCount = 0;
@@ -2722,7 +2741,6 @@
       const overlay = document.getElementById('boardDrawerOverlay');
       const drawer = document.getElementById('boardDrawer');
 
-      // Unlock body scroll and restore position
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
@@ -2732,8 +2750,7 @@
       if (overlay && drawer) {
         overlay.classList.remove('active');
         drawer.classList.remove('active');
-        drawer.style.height = '85dvh';
-        drawer.style.maxHeight = '85vh';
+        drawer.style.transform = 'translateY(100%)';
       }
       cancelCurrentContext();
       unreadCount = 0;
@@ -2845,7 +2862,7 @@
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         target.classList.remove('highlight-flash');
-        void target.offsetWidth; // trigger reflow
+        void target.offsetWidth;
         target.classList.add('highlight-flash');
       }
     }
@@ -2916,12 +2933,10 @@
       if (!msg) return;
 
       if (confirm(`Vuoi eliminare questo messaggio?\n"${msg.text.substring(0, 40)}..."`)) {
-        // Remove locally
         boardMessages = boardMessages.filter(m => m.id !== msgId);
         localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
         renderDrawerMessages();
 
-        // Broadcast delete action via SSE
         const deletePayload = {
           action: 'delete',
           id: msgId,
@@ -2953,7 +2968,6 @@
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       if (activeEditingMsgId) {
-        // EDIT MODE
         const msgIdx = boardMessages.findIndex(m => m.id === activeEditingMsgId);
         if (msgIdx !== -1) {
           boardMessages[msgIdx].text = text;
@@ -2981,7 +2995,6 @@
         return;
       }
 
-      // NEW MESSAGE MODE (with optional reply)
       const newMsg = {
         id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
         userId: currentUser.id,
