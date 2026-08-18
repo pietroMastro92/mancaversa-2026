@@ -6,17 +6,17 @@
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Mancaversa 2026">
-  <meta name="description" content="Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde · 22–24 agosto 2026.">
-  <title>Mancaversa & Gallipoli · 22–24 Agosto 2026</title>
+  <meta name="apple-mobile-web-app-title" content="Pietrobnb 2026">
+  <meta name="description" content="Pietrobnb · Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde (22–24 agosto 2026).">
+  <title>Pietrobnb · Mancaversa & Gallipoli 2026</title>
 
   <!-- Open Graph / WhatsApp Preview -->
-  <meta property="og:title" content="Mancaversa & Gallipoli · 22–24 Agosto 2026">
-  <meta property="og:description" content="Tre giorni di mare nel Salento. Programma orario, alloggio a Via Egnazia 44, mappe e bacheca in tempo reale.">
+  <meta property="og:title" content="Pietrobnb · Salento 2026">
+  <meta property="og:description" content="Tre giorni di mare nel Salento organizzati da Pietro. Programma orario, alloggio a Via Egnazia 44, mappe e bacheca live.">
   <meta property="og:type" content="website">
 
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏖️</text></svg>">
+  <!-- Favicon con Logo Giocoso Pietrobnb -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😎</text></svg>">
 
   <!-- Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,7 +120,7 @@
     }
 
     /* ==========================================================================
-       STICKY TOP HEADER
+       STICKY TOP HEADER CON LOGO GIOCCOSO PIETROBNB
        ========================================================================== */
     .site-header {
       position: sticky;
@@ -148,25 +148,42 @@
       }
     }
 
+    /* Brand Mascot Logo */
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 16px;
+      gap: 7px;
+      font-size: 16.5px;
       font-weight: 800;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.4px;
       color: var(--rausch);
       flex-shrink: 0;
+      cursor: pointer;
+      user-select: none;
     }
 
-    .brand-logo svg {
-      width: 26px;
-      height: 26px;
-      fill: var(--rausch);
+    .brand-logo:active {
+      transform: scale(0.95);
+    }
+
+    /* Logo Animato con Occhiali da Sole e Sorriso */
+    .pietro-mascot-icon {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .brand-logo:hover .pietro-mascot-icon,
+    .brand-logo:active .pietro-mascot-icon {
+      transform: rotate(-10deg) scale(1.15);
     }
 
     .brand-logo span {
       color: var(--charcoal);
+    }
+
+    .brand-logo b {
+      color: var(--rausch);
     }
 
     .search-pill {
@@ -347,6 +364,11 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .badge-superhost:active {
+      transform: scale(0.95);
     }
 
     .listing-rating {
@@ -934,114 +956,7 @@
     }
 
     /* ==========================================================================
-       CHECKLIST INTERATTIVA CON LOCALSTORAGE
-       ========================================================================== */
-    .checklist-wrapper {
-      background: #FFFFFF;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px 14px;
-      box-shadow: var(--shadow-xs);
-      margin-bottom: 14px;
-    }
-
-    .checklist-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .checklist-counter {
-      font-size: 11.5px;
-      font-weight: 800;
-      color: var(--rausch);
-      background: var(--rausch-light);
-      padding: 3px 9px;
-      border-radius: var(--radius-pill);
-    }
-
-    .checklist-list {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .check-item {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 11px;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xs);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--charcoal);
-      cursor: pointer;
-      min-height: 44px;
-      transition: var(--transition);
-      user-select: none;
-    }
-
-    .check-item:active {
-      transform: scale(0.98);
-    }
-
-    .check-item.done {
-      background: #F0FDF4;
-      border-color: #DCFCE7;
-      color: var(--gray-muted);
-      text-decoration: line-through;
-    }
-
-    .check-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
-      border: 2px solid #BBBBBB;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      background: #FFFFFF;
-      font-size: 11px;
-      font-weight: 800;
-      transition: var(--transition);
-    }
-
-    .check-item.done .check-box {
-      background: var(--green-dark);
-      border-color: var(--green-dark);
-      color: #FFFFFF;
-    }
-
-    .wind-card {
-      background: linear-gradient(135deg, #F0F9FF 0%, #ECFDF5 100%);
-      border: 1px solid #BAE6FD;
-      border-radius: var(--radius-md);
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-
-    .wind-head {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: var(--blue-dark);
-      margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .wind-card p {
-      font-size: 12.5px;
-      color: #1E293B;
-      line-height: 1.4;
-    }
-
-    /* ==========================================================================
-       BACHECA DEL GRUPPO (REAL-TIME SYNC & GOOGLE DOCS ANIMAL IDENTITY)
+       BACHECA & COMMENTI LIVE (CON ANIMALI ANONIMI STILE GOOGLE DOCS)
        ========================================================================== */
     .bacheca-card {
       background: #FFFFFF;
@@ -1059,7 +974,6 @@
       }
     }
 
-    /* User Identity Banner */
     .identity-banner {
       background: var(--surface-subtle);
       border: 1px solid var(--border-subtle);
@@ -1121,7 +1035,6 @@
       transform: scale(0.95);
     }
 
-    /* Message Input Form */
     .board-form {
       display: flex;
       gap: 8px;
@@ -1165,7 +1078,6 @@
       transform: scale(0.96);
     }
 
-    /* Real-time Message Stream */
     .board-messages-list {
       display: flex;
       flex-direction: column;
@@ -1321,6 +1233,113 @@
       display: flex;
       gap: 8px;
       justify-content: flex-end;
+    }
+
+    /* ==========================================================================
+       CHECKLIST INTERATTIVA CON LOCALSTORAGE
+       ========================================================================== */
+    .checklist-wrapper {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 14px;
+      box-shadow: var(--shadow-xs);
+      margin-bottom: 14px;
+    }
+
+    .checklist-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .checklist-counter {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--rausch);
+      background: var(--rausch-light);
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+    }
+
+    .checklist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 11px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--charcoal);
+      cursor: pointer;
+      min-height: 44px;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .check-item:active {
+      transform: scale(0.98);
+    }
+
+    .check-item.done {
+      background: #F0FDF4;
+      border-color: #DCFCE7;
+      color: var(--gray-muted);
+      text-decoration: line-through;
+    }
+
+    .check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 2px solid #BBBBBB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #FFFFFF;
+      font-size: 11px;
+      font-weight: 800;
+      transition: var(--transition);
+    }
+
+    .check-item.done .check-box {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: #FFFFFF;
+    }
+
+    .wind-card {
+      background: linear-gradient(135deg, #F0F9FF 0%, #ECFDF5 100%);
+      border: 1px solid #BAE6FD;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .wind-head {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .wind-card p {
+      font-size: 12.5px;
+      color: #1E293B;
+      line-height: 1.4;
     }
 
     /* ==========================================================================
@@ -1488,18 +1507,34 @@
 <body>
 
   <!-- ==========================================================================
-       STICKY TOP HEADER
+       STICKY TOP HEADER CON LOGO PIETROBNB
        ========================================================================== -->
   <header class="site-header">
     <div class="container header-content">
       
-      <!-- Brand -->
-      <a href="#" class="brand-logo" title="Mancaversa 2026">
-        <svg viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.315c0 4.298-3.084 7.806-7.3 7.806-2.482 0-4.636-1.218-6.2-3.131C14.402 30.782 12.247 32 9.765 32 5.549 32 2.465 28.492 2.465 24.194c0-.986.207-1.898.718-3.125l.248-.564c1.031-2.316 5.176-11.006 7.126-14.836l.533-1.025C12.378 2.063 13.882 1 16 1zm0 3c-1.096 0-2.029.624-3.045 2.505l-.578 1.111C10.457 11.455 6.34 20.09 5.316 22.385l-.21.48c-.407.97-.571 1.637-.571 2.329 0 3.031 2.148 5.485 5.23 5.485 2.115 0 3.999-1.238 5.09-3.327l.345-.705.8.752c1.077 1.988 2.94 3.28 5.09 3.28 3.082 0 5.23-2.454 5.23-5.485 0-.74-.187-1.433-.647-2.493l-.133-.316c-.998-2.32-5.127-10.978-7.05-14.774l-.578-1.111C18.067 4.542 17.11 4 16 4zm0 13c2.209 0 4 1.791 4 4s-1.791 4-4 4-4-1.791-4-4 1.791-4 4-4zm0 2.5c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5z"></path>
+      <!-- Custom Funny Pietrobnb Logo -->
+      <div class="brand-logo" onclick="triggerPietroEasterEgg()" title="Pietrobnb - Clicca per una sorpresa!">
+        <svg class="pietro-mascot-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Corpo Bélo di Airbnb Modificato -->
+          <path d="M50 8C38 8 28 17 22 28C14 42 22 72 45 92C48 94.5 52 94.5 55 92C78 72 86 42 78 28C72 17 62 8 50 8ZM50 20C57 20 63 25.5 66 33C71 44 65 67 50 82C35 67 29 44 34 33C37 25.5 43 20 50 20Z" fill="#FF385C"/>
+          
+          <!-- Occhiali da Sole Estivi Neri 😎 -->
+          <!-- Lente Sinistra -->
+          <path d="M30 38C30 35 34 34 47 34C48 34 49 37 49 42C49 47 43 49 35 49C31 49 30 43 30 38Z" fill="#18181B"/>
+          <!-- Lente Destra -->
+          <path d="M51 34C64 34 68 35 68 38C68 43 67 49 63 49C55 49 51 47 51 42C51 37 51 34 51 34Z" fill="#18181B"/>
+          <!-- Ponte Occhiali -->
+          <path d="M46 37H54" stroke="#18181B" stroke-width="3" stroke-linecap="round"/>
+          <!-- Riflessi Lenti Bianche -->
+          <path d="M34 37L39 44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          <path d="M55 37L60 44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          
+          <!-- Sorrisetto Furbo con Linguetta 😜 -->
+          <path d="M42 56Q50 63 58 56" stroke="#18181B" stroke-width="3" stroke-linecap="round"/>
+          <path d="M47 59Q50 66 53 59Z" fill="#FF5A78"/>
         </svg>
-        <span>Mancaversa</span>
-      </a>
+        <span>Pietro<b>bnb</b></span>
+      </div>
 
       <!-- Airbnb Search Pill Button -->
       <div class="search-pill" onclick="scrollToId('programma')" role="button" tabindex="0">
@@ -1554,7 +1589,7 @@
          ========================================================================== -->
     <section class="hero-section" id="overview">
       <div class="listing-meta-top">
-        <span class="badge-superhost">Salento Summer</span>
+        <span class="badge-superhost" onclick="triggerPietroEasterEgg()">🌴 Superhost Pietro</span>
         <div class="listing-rating">★ 5.0 (4 amici)</div>
         <span style="color: var(--border-strong);">·</span>
         <span class="listing-location">Mancaversa & Gallipoli</span>
@@ -2004,7 +2039,7 @@
 
       <div class="bacheca-card">
         
-        <!-- User Identity Banner (Google Docs Animal Style) -->
+        <!-- User Identity Banner -->
         <div class="identity-banner">
           <div class="identity-user">
             <div class="user-avatar-badge" id="currentAvatarBadge">🐬</div>
@@ -2198,16 +2233,37 @@
         <a href="#checklist">Checklist</a>
         <a href="#mappe">Mappe</a>
       </div>
-      <p>Mancaversa · 22–24 Agosto 2026 · Salento</p>
+      <p>Pietrobnb · Mancaversa & Gallipoli 2026 · Salento</p>
     </div>
   </footer>
 
   <!-- ==========================================================================
-       INTERACTIVE CLIENT SCRIPTS (SYNC REAL-TIME & GOOGLE DOCS ANIMALS)
+       INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
   <script>
     // --------------------------------------------------------------------------
-    // 1. Google Docs Anonymous Animals Identity System
+    // 1. Easter Egg Giocoso di Pietro
+    // --------------------------------------------------------------------------
+    const PIETRO_QUOTES = [
+      "🌴 Benvenuti su Pietrobnb! Pietro è il vostro Superhost del weekend 😎🍹",
+      "🏖️ Regola n°1 di Pietro: Tuffo a bomba a Baia Verde e zero pensieri! 🌊",
+      "🍕 Host Pietro approva: Stasera rustico leccese caldo e pizza per tutti!",
+      "⚡ Pietro dice: Se c'è Tramontana, lo Ionio è una piscina piatta! 😎",
+      "🎉 Rating di Pietro: ★★★★★ 5 stelle certificate per questo gruppo!"
+    ];
+
+    let lastQuoteIdx = -1;
+    function triggerPietroEasterEgg() {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * PIETRO_QUOTES.length);
+      } while (idx === lastQuoteIdx && PIETRO_QUOTES.length > 1);
+      lastQuoteIdx = idx;
+      showToast(PIETRO_QUOTES[idx]);
+    }
+
+    // --------------------------------------------------------------------------
+    // 2. Google Docs Anonymous Animals Identity System
     // --------------------------------------------------------------------------
     const ANONYMOUS_ANIMALS = [
       { name: 'Delfino Anonimo', avatar: '🐬', bg: '#E0F2FE', color: '#0284C7' },
@@ -2310,34 +2366,32 @@
     }
 
     // --------------------------------------------------------------------------
-    // 2. Real-Time Group Board (Live Sync via NTFY.sh SSE & Local Storage)
+    // 3. Real-Time Group Board (Live Sync via NTFY.sh SSE & Local Storage)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
     let boardMessages = [];
 
-    // Pre-populated default notes if board is completely new
     const initialWelcomeNotes = [
       {
         id: 'init_1',
-        author: 'Delfino Anonimo',
-        avatar: '🐬',
-        bg: '#E0F2FE',
-        text: 'Benvenuti nella bacheca del viaggio! Qui possiamo organizzarci per chi porta cosa e le cene.',
+        author: 'Superhost Pietro',
+        avatar: '😎',
+        bg: '#FFF0F2',
+        text: 'Benvenuti su Pietrobnb! Ragazzi scrivete qui promemoria e idee per il weekend!',
         time: '22 ago'
       },
       {
         id: 'init_2',
-        author: 'Fenicottero Anonimo',
-        avatar: '🦩',
-        bg: '#FCE7F3',
+        author: 'Delfino Anonimo',
+        avatar: '🐬',
+        bg: '#E0F2FE',
         text: '🏖️ Io porto una cassa Bluetooth per la musica in spiaggia a Baia Verde!',
         time: '22 ago'
       }
     ];
 
     function initRealtimeBoard() {
-      // 1. Load cached local messages first
       const cached = localStorage.getItem('mancaversa_board_cache');
       if (cached) {
         try {
@@ -2350,11 +2404,7 @@
         boardMessages = [...initialWelcomeNotes];
       }
       renderBoardMessages();
-
-      // 2. Fetch past server messages
       fetchPastMessages();
-
-      // 3. Connect to SSE Live Stream
       connectToLiveStream();
     }
 
@@ -2388,7 +2438,7 @@
     }
 
     function addMessageToBoard(msg, prepend = false) {
-      if (boardMessages.some(m => m.id === msg.id)) return; // prevent duplicate
+      if (boardMessages.some(m => m.id === msg.id)) return;
 
       if (prepend) {
         boardMessages.unshift(msg);
@@ -2396,7 +2446,6 @@
         boardMessages.push(msg);
       }
 
-      // Keep max 50 recent messages
       if (boardMessages.length > 50) boardMessages = boardMessages.slice(0, 50);
 
       localStorage.setItem('mancaversa_board_cache', JSON.stringify(boardMessages));
@@ -2443,10 +2492,6 @@
             }
           } catch (err) {}
         };
-
-        eventSource.onerror = () => {
-          // Reconnect automatically handled by browser EventSource
-        };
       } catch (e) {}
     }
 
@@ -2470,11 +2515,9 @@
         time: timeStr
       };
 
-      // 1. Optimistic local update
       addMessageToBoard(newMsg, true);
       input.value = '';
 
-      // 2. Publish to live stream for everyone
       fetch(NTFY_URL, {
         method: 'POST',
         headers: { 'Title': 'Mancaversa Board' },
@@ -2492,7 +2535,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Checklist Items & LocalStorage
+    // 4. Checklist Items & LocalStorage
     // --------------------------------------------------------------------------
     const checklistItems = [
       { id: 'c1', text: '🏖️ Ombrellone e teli mare' },
@@ -2540,7 +2583,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // 4. Utility: Toast & Clipboard & Share
+    // 5. Toast & Clipboard & Share
     // --------------------------------------------------------------------------
     let toastTimer = null;
     function showToast(msg) {
@@ -2554,7 +2597,7 @@
       if (toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
         box.classList.remove('visible');
-      }, 2400);
+      }, 2600);
     }
 
     function copyText(text, successMsg) {
@@ -2585,8 +2628,8 @@
 
     function shareTrip() {
       const shareData = {
-        title: 'Mancaversa 2026 · Salento Trip',
-        text: 'Programma, alloggio, mappe e bacheca del viaggio per Mancaversa & Gallipoli (22–24 agosto 2026)!',
+        title: 'Pietrobnb · Mancaversa 2026',
+        text: 'Pietrobnb: programma, alloggio, mappe e bacheca del viaggio per il weekend nel Salento (22–24 agosto 2026)!',
         url: window.location.href
       };
 
@@ -2628,7 +2671,6 @@
       }
     }, { passive: true });
 
-    // Initialize all modules on load
     document.addEventListener('DOMContentLoaded', () => {
       initUserIdentity();
       initRealtimeBoard();
