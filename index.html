@@ -1,0 +1,2172 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FF385C">
+  <meta name="description" content="Guida e programma per il weekend a Marina di Mancaversa e Baia Verde (Gallipoli) · 22–24 agosto 2026. 4 persone, spiagge libere, alloggio e cene tipiche.">
+  <title>Mancaversa & Gallipoli · 22–24 Agosto 2026</title>
+
+  <!-- Open Graph / Meta per condivisione WhatsApp e Social -->
+  <meta property="og:title" content="Mancaversa · 22–24 Agosto 2026">
+  <meta property="og:description" content="Tre giorni di mare nel Salento senza complicazioni. Programma, alloggio a Via Egnazia 44, mappe e cene.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏖️</text></svg>">
+
+  <!-- Typography: Google Fonts Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       AIRBNB DESIGN SYSTEM - TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      
+      /* Colors */
+      --rausch: #FF385C;
+      --rausch-dark: #E00B41;
+      --rausch-light: #FFF0F2;
+      --charcoal: #222222;
+      --gray-dark: #484848;
+      --gray-muted: #717171;
+      --gray-light: #B0B0B0;
+      --surface-subtle: #F7F7F7;
+      --surface-card: #FFFFFF;
+      --border-subtle: #EBEBEB;
+      --border-strong: #DDDDDD;
+      
+      /* Badges & Accents */
+      --green-dark: #008A05;
+      --green-bg: #E6F7F4;
+      --blue-dark: #0369A1;
+      --blue-bg: #E0F2FE;
+      --amber-dark: #B45309;
+      --amber-bg: #FEF3C7;
+      
+      /* Shadows & Radii */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.12);
+      --shadow-floating: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+      
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --radius-pill: 9999px;
+      
+      --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-main);
+      color: var(--charcoal);
+      background-color: #FFFFFF;
+      line-height: 1.5;
+      padding-bottom: 90px; /* Spazio per floating bar mobile */
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      outline: none;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==========================================================================
+       STICKY HEADER & AIRBNB PILL NAVIGATION
+       ========================================================================== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: var(--transition);
+    }
+
+    .header-content {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* Brand Logo */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--rausch);
+      flex-shrink: 0;
+    }
+
+    .brand-logo svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--rausch);
+    }
+
+    .brand-logo span {
+      color: var(--charcoal);
+    }
+
+    /* Search Pill (Airbnb Style) */
+    .search-pill-container {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      padding: 6px 8px 6px 16px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .search-pill-container:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #CCCCCC;
+    }
+
+    .pill-segment {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--charcoal);
+      white-space: nowrap;
+      padding: 0 8px;
+    }
+
+    .pill-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border-strong);
+    }
+
+    .pill-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-pill);
+      background: var(--rausch);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+
+    .pill-icon-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    /* Header Actions */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 15px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      background: #FFFFFF;
+      color: var(--charcoal);
+      transition: var(--transition);
+    }
+
+    .btn-header:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .btn-header-primary {
+      background: var(--rausch);
+      color: #FFFFFF;
+      border-color: var(--rausch);
+    }
+
+    .btn-header-primary:hover {
+      background: var(--rausch-dark);
+      border-color: var(--rausch-dark);
+      color: #FFFFFF;
+    }
+
+    /* ==========================================================================
+       SUB-NAVIGATION (CATEGORY PILLS BAR)
+       ========================================================================== */
+    .category-bar-wrapper {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 76px;
+      z-index: 90;
+    }
+
+    .category-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .category-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: var(--radius-pill);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--gray-muted);
+      background: var(--surface-subtle);
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .cat-pill:hover {
+      color: var(--charcoal);
+      background: #EFEFEF;
+    }
+
+    .cat-pill.active {
+      background: var(--charcoal);
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       HERO & SHOWCASE (AIRBNB LISTING STYLE)
+       ========================================================================== */
+    .hero-section {
+      padding: 28px 0 16px;
+    }
+
+    .listing-meta-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-bottom: 10px;
+    }
+
+    .badge-superhost {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--rausch-light);
+      color: var(--rausch);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .listing-rating {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--charcoal);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .listing-location {
+      font-size: 14px;
+      color: var(--gray-muted);
+      font-weight: 500;
+    }
+
+    .listing-title {
+      font-size: clamp(28px, 4.5vw, 42px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -1.2px;
+      color: var(--charcoal);
+      margin-bottom: 18px;
+    }
+
+    /* Bento Photo Grid */
+    .bento-gallery {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-rows: 170px 170px;
+      gap: 12px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .gallery-item {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.35s ease;
+    }
+
+    .gallery-item:hover {
+      opacity: 0.95;
+    }
+
+    .gallery-item-main {
+      grid-row: 1 / 3;
+      grid-column: 1 / 2;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%),
+                  url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    }
+
+    .gallery-item-2 {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%),
+                  url('https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+    }
+
+    .gallery-item-3 {
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%),
+                  url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+    }
+
+    .gallery-item-4 {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%),
+                  url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+    }
+
+    .gallery-item-5 {
+      grid-column: 3 / 4;
+      grid-row: 2 / 3;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%),
+                  url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+    }
+
+    .gallery-badge {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 700;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gallery-badge-large {
+      font-size: 16px;
+      bottom: 20px;
+      left: 20px;
+    }
+
+    /* Key Specs Highlights Ribbon */
+    .specs-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--surface-subtle);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 36px;
+    }
+
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .spec-icon {
+      font-size: 22px;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-pill);
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-xs);
+      flex-shrink: 0;
+    }
+
+    .spec-text strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+
+    .spec-text span {
+      display: block;
+      font-size: 12.5px;
+      color: var(--gray-muted);
+    }
+
+    /* ==========================================================================
+       SECTION STYLING & CARDS
+       ========================================================================== */
+    .section-block {
+      padding: 24px 0;
+      scroll-margin-top: 140px;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+    }
+
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--rausch);
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: var(--charcoal);
+    }
+
+    .section-subtitle {
+      font-size: 15px;
+      color: var(--gray-muted);
+      margin-top: 4px;
+    }
+
+    /* Airbnb Card Style */
+    .airbnb-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .airbnb-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #E2E2E2;
+    }
+
+    .card-header-bar {
+      padding: 22px 26px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      background: #FFFFFF;
+    }
+
+    .card-date-badge {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--gray-muted);
+      margin-bottom: 4px;
+    }
+
+    .card-header-title {
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--charcoal);
+    }
+
+    .card-header-sub {
+      font-size: 14px;
+      color: var(--gray-muted);
+      margin-top: 3px;
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tag-green { background: var(--green-bg); color: var(--green-dark); }
+    .tag-blue { background: var(--blue-bg); color: var(--blue-dark); }
+    .tag-amber { background: var(--amber-bg); color: var(--amber-dark); }
+    .tag-rausch { background: var(--rausch-light); color: var(--rausch); }
+
+    /* Timeline Structure */
+    .timeline-container {
+      padding: 8px 26px 20px;
+    }
+
+    .timeline-step {
+      display: grid;
+      grid-template-columns: 95px 1fr;
+      gap: 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+    }
+
+    .timeline-step:last-child {
+      border-bottom: none;
+    }
+
+    .step-time-col {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--charcoal);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .step-time-badge {
+      background: var(--surface-subtle);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      font-feature-settings: "tnum";
+    }
+
+    .step-content strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--charcoal);
+      margin-bottom: 4px;
+    }
+
+    .step-content p {
+      font-size: 14.5px;
+      color: var(--gray-muted);
+      line-height: 1.45;
+    }
+
+    .step-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* Action Buttons (Airbnb Button Kit) */
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .btn-action-primary {
+      background: var(--rausch);
+      color: #FFFFFF;
+    }
+
+    .btn-action-primary:hover {
+      background: var(--rausch-dark);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    .btn-action-outline {
+      background: #FFFFFF;
+      color: var(--charcoal);
+      border: 1px solid var(--border-strong);
+    }
+
+    .btn-action-outline:hover {
+      background: var(--surface-subtle);
+      border-color: #999999;
+      transform: translateY(-1px);
+    }
+
+    .btn-action-subtle {
+      background: var(--surface-subtle);
+      color: var(--charcoal);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-action-subtle:hover {
+      background: #EBEBEB;
+    }
+
+    /* Tip / Notice Callout Box */
+    .tip-box {
+      margin: 14px 0 6px;
+      background: #FFFDF9;
+      border: 1px solid #F0E6D2;
+      border-left: 4px solid #E5A024;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13.5px;
+      color: #6B511F;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .tip-box svg {
+      width: 18px;
+      height: 18px;
+      fill: #E5A024;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ==========================================================================
+       ALLOGGIO / LA BASE SECTION (AIRBNB LISTING DETAILS)
+       ========================================================================== */
+    .listing-details-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+    }
+
+    .listing-main-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .host-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .host-header h3 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .host-header p {
+      font-size: 14px;
+      color: var(--gray-muted);
+      margin-top: 2px;
+    }
+
+    .host-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-pill);
+      background: var(--rausch-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--charcoal);
+    }
+
+    .amenity-icon {
+      font-size: 18px;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .house-rules-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .rule-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .rule-badge {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .rule-text strong {
+      display: block;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+
+    .rule-text span {
+      display: block;
+      font-size: 13px;
+      color: var(--gray-muted);
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       CENE & DINING SECTION
+       ========================================================================== */
+    .dining-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .dining-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .dining-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #E2E2E2;
+    }
+
+    .dining-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--rausch);
+      margin-bottom: 6px;
+    }
+
+    .dining-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: var(--charcoal);
+      margin-bottom: 4px;
+    }
+
+    .dining-addr {
+      font-size: 13.5px;
+      color: var(--gray-muted);
+      margin-bottom: 12px;
+    }
+
+    .dining-desc {
+      font-size: 14.5px;
+      color: var(--gray-dark);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .dining-specialty {
+      background: var(--surface-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--charcoal);
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       CHECKLIST & LOCAL TIPS SECTION
+       ========================================================================== */
+    .tips-checklist-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+    }
+
+    .checklist-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .checklist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .checklist-progress-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--rausch);
+      background: var(--rausch-light);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+    }
+
+    .checklist-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--charcoal);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .check-label:hover {
+      background: #EFEFEF;
+    }
+
+    .check-label.completed {
+      background: #F1FDF6;
+      border-color: #D1F2DF;
+      color: var(--gray-muted);
+      text-decoration: line-through;
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid #CCCCCC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: var(--transition);
+      background: #FFFFFF;
+    }
+
+    .check-label.completed .custom-checkbox {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: #FFFFFF;
+    }
+
+    /* Salento Wind & Local Guide */
+    .salento-guide-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .wind-rule-box {
+      background: linear-gradient(135deg, #E0F2FE 0%, #F0FDF4 100%);
+      border: 1px solid #BAE6FD;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .wind-rule-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .wind-rule-box p {
+      font-size: 13.5px;
+      color: #1E293B;
+      line-height: 1.45;
+    }
+
+    /* ==========================================================================
+       MAPS QUICK ACCESS GRID
+       ========================================================================== */
+    .maps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .map-quick-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: left;
+      transition: var(--transition);
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .map-quick-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .map-card-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .map-card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--charcoal);
+      margin-bottom: 2px;
+    }
+
+    .map-card-desc {
+      font-size: 13px;
+      color: var(--gray-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ==========================================================================
+       FLOATING ACTION BAR FOR MOBILE
+       ========================================================================== */
+    .mobile-floating-bar {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99;
+      background: rgba(34, 34, 34, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-pill);
+      padding: 6px 12px;
+      box-shadow: var(--shadow-floating);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: calc(100% - 32px);
+      max-width: 400px;
+    }
+
+    .floating-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 8px;
+    }
+
+    .floating-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: var(--radius-pill);
+      transition: var(--transition);
+    }
+
+    .floating-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .floating-btn.highlight {
+      color: #FF5A78;
+    }
+
+    /* ==========================================================================
+       TOAST NOTIFICATION COMPONENT
+       ========================================================================== */
+    .toast-pill {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--charcoal);
+      color: #FFFFFF;
+      padding: 12px 24px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: var(--shadow-lg);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+
+    .toast-pill.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    .site-footer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      padding: 45px 0 60px;
+      margin-top: 50px;
+      font-size: 14px;
+      color: var(--gray-muted);
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .footer-links a:hover {
+      color: var(--charcoal);
+      text-decoration: underline;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .bento-gallery {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 200px 140px 140px;
+      }
+      .gallery-item-main {
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
+      }
+      .gallery-item-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
+      .gallery-item-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+      .gallery-item-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
+      .gallery-item-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+      
+      .specs-ribbon {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .listing-details-grid,
+      .dining-grid,
+      .tips-checklist-grid,
+      .maps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .site-header {
+        position: relative; /* per favorire visuale su schermi piccoli */
+      }
+
+      .header-content {
+        height: 64px;
+      }
+
+      .brand-logo span {
+        display: none;
+      }
+
+      .pill-segment:not(:first-child) {
+        display: none;
+      }
+
+      .category-bar-wrapper {
+        top: 0;
+      }
+
+      .bento-gallery {
+        grid-template-columns: 1fr;
+        grid-template-rows: 240px 120px 120px;
+      }
+      .gallery-item-main { grid-column: 1; grid-row: 1; }
+      .gallery-item-2 { grid-column: 1; grid-row: 2; }
+      .gallery-item-3 { grid-column: 1; grid-row: 3; }
+      .gallery-item-4, .gallery-item-5 { display: none; }
+
+      .card-header-bar {
+        padding: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .timeline-container {
+        padding: 4px 18px 16px;
+      }
+
+      .timeline-step {
+        grid-template-columns: 78px 1fr;
+        gap: 12px;
+      }
+
+      .mobile-floating-bar {
+        display: block;
+      }
+
+      .specs-ribbon {
+        grid-template-columns: 1fr;
+      }
+
+      .amenities-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .maps-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Print optimizations */
+    @media print {
+      .site-header, .category-bar-wrapper, .mobile-floating-bar, .header-actions {
+        display: none !important;
+      }
+      .airbnb-card, .listing-main-card, .dining-card {
+        box-shadow: none !important;
+        border: 1px solid #CCC !important;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       STICKY TOP HEADER
+       ========================================================================== -->
+  <header class="site-header">
+    <div class="container header-content">
+      
+      <!-- Brand / Logo -->
+      <a href="#" class="brand-logo" title="Mancaversa 2026">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.315c0 4.298-3.084 7.806-7.3 7.806-2.482 0-4.636-1.218-6.2-3.131C14.402 30.782 12.247 32 9.765 32 5.549 32 2.465 28.492 2.465 24.194c0-.986.207-1.898.718-3.125l.248-.564c1.031-2.316 5.176-11.006 7.126-14.836l.533-1.025C12.378 2.063 13.882 1 16 1zm0 3c-1.096 0-2.029.624-3.045 2.505l-.578 1.111C10.457 11.455 6.34 20.09 5.316 22.385l-.21.48c-.407.97-.571 1.637-.571 2.329 0 3.031 2.148 5.485 5.23 5.485 2.115 0 3.999-1.238 5.09-3.327l.345-.705.8.752c1.077 1.988 2.94 3.28 5.09 3.28 3.082 0 5.23-2.454 5.23-5.485 0-.74-.187-1.433-.647-2.493l-.133-.316c-.998-2.32-5.127-10.978-7.05-14.774l-.578-1.111C18.067 4.542 17.11 4 16 4zm0 13c2.209 0 4 1.791 4 4s-1.791 4-4 4-4-1.791-4-4 1.791-4 4-4zm0 2.5c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5z"></path>
+        </svg>
+        <span>Mancaversa <b>2026</b></span>
+      </a>
+
+      <!-- Airbnb Style Floating Pill Search Summary -->
+      <div class="search-pill-container" onclick="scrollToSection('programma')" role="button" tabindex="0">
+        <span class="pill-segment">22–24 Agosto</span>
+        <div class="pill-divider"></div>
+        <span class="pill-segment">4 Ospiti</span>
+        <div class="pill-divider"></div>
+        <span class="pill-segment" style="color: var(--gray-muted);">Salento · Mare</span>
+        <div class="pill-icon-btn">
+          <svg viewBox="0 0 32 32">
+            <path d="M16 1C7.716 1 1 7.716 1 16c0 8.284 6.716 15 15 15 8.284 0 15-6.716 15-15 0-8.284-6.716-15-15-15zm0 2c7.18 0 13 5.82 13 13 0 7.18-5.82 13-13 13-7.18 0-13-5.82-13-13 0-7.18 5.82-13 13-13zm0 4a1.5 1.5 0 0 0-1.5 1.5v6.5a1.5 1.5 0 0 0 .44 1.06l4 4a1.5 1.5 0 0 0 2.12-2.12L17.5 14.38V8.5A1.5 1.5 0 0 0 16 7z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <button class="btn-header" onclick="shareTrip()" title="Condividi itinerario">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          Condividi
+        </button>
+        <a href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE" target="_blank" class="btn-header btn-header-primary">
+          📍 Mappa Casa
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       SUB-NAVIGATION CATEGORY PILLS
+       ========================================================================== -->
+  <div class="category-bar-wrapper">
+    <div class="container">
+      <nav class="category-bar" id="categoryNav">
+        <a href="#overview" class="cat-pill active">✨ Panoramica</a>
+        <a href="#g22" class="cat-pill">🏖️ Sab 22 · Baia Verde</a>
+        <a href="#g23" class="cat-pill">🌊 Dom 23 · Mancaversa</a>
+        <a href="#g24" class="cat-pill">🚗 Lun 24 · Rientro</a>
+        <a href="#casa" class="cat-pill">🏠 Alloggio</a>
+        <a href="#cene" class="cat-pill">🍕 Cene & Cibo</a>
+        <a href="#checklist" class="cat-pill">🎒 Checklist Bagagli</a>
+        <a href="#mappe" class="cat-pill">🗺️ Accessi Rapidi</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    
+    <!-- ==========================================================================
+         HERO SECTION (AIRBNB LISTING SHOWCASE)
+         ========================================================================== -->
+    <section class="hero-section" id="overview">
+      <div class="listing-meta-top">
+        <span class="badge-superhost">🌴 Salento Summer Edition</span>
+        <div class="listing-rating">★ 5.0 (4 amici)</div>
+        <span style="color: var(--border-strong);">·</span>
+        <span class="listing-location">Marina di Mancaversa & Gallipoli (LE), Puglia</span>
+      </div>
+
+      <h1 class="listing-title">Tre giorni di mare nel Salento,<br>senza complicazioni.</h1>
+
+      <!-- Bento Photo Gallery -->
+      <div class="bento-gallery">
+        <div class="gallery-item gallery-item-main" onclick="scrollToSection('g22')">
+          <div class="gallery-badge gallery-badge-large">
+            <span>🏖️ Baia Verde · Gallipoli</span>
+          </div>
+        </div>
+        <div class="gallery-item gallery-item-2" onclick="scrollToSection('g23')">
+          <div class="gallery-badge">
+            <span>🌊 Mare dei Cavalli</span>
+          </div>
+        </div>
+        <div class="gallery-item gallery-item-3" onclick="scrollToSection('cene')">
+          <div class="gallery-badge">
+            <span>🍕 Pizza & Frittura</span>
+          </div>
+        </div>
+        <div class="gallery-item gallery-item-4" onclick="scrollToSection('casa')">
+          <div class="gallery-badge">
+            <span>🏠 Via Egnazia 44</span>
+          </div>
+        </div>
+        <div class="gallery-item gallery-item-5" onclick="scrollToSection('g24')">
+          <div class="gallery-badge">
+            <span>🌅 Tramonto Ionio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Highlights Ribbon -->
+      <div class="specs-ribbon">
+        <div class="spec-item">
+          <div class="spec-icon">👥</div>
+          <div class="spec-text">
+            <strong>4 Persone</strong>
+            <span>Gruppo di amici</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-icon">🗓️</div>
+          <div class="spec-text">
+            <strong>3 Giorni / 2 Notti</strong>
+            <span>22 — 24 Agosto 2026</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-icon">🏖️</div>
+          <div class="spec-text">
+            <strong>Spiagge Libere</strong>
+            <span>Baia Verde & Mancaversa</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-icon">🍕</div>
+          <div class="spec-text">
+            <strong>2 Cene Asporto</strong>
+            <span>Pizza forno & pesce fritto</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         PROGRAMMA GIORNO PER GIORNO (AIRBNB ITINERARY CARDS)
+         ========================================================================== -->
+    <section class="section-block" id="programma">
+      <div class="section-header">
+        <div class="section-eyebrow">Itinerario Completo</div>
+        <h2 class="section-title">Il programma delle 3 giornate</h2>
+        <p class="section-subtitle">Orari indicativi e comodi: l'obiettivo è massimizzare il tempo di relax in riva al mare.</p>
+      </div>
+
+      <!-- Giorno 1: Sabato 22 Agosto -->
+      <article class="airbnb-card" id="g22">
+        <div class="card-header-bar">
+          <div>
+            <div class="card-date-badge">Giorno 1 · Sabato 22 Agosto</div>
+            <h3 class="card-header-title">Baia Verde & Check-in</h3>
+            <p class="card-header-sub">Spiaggia libera sabbiosa, mare cristallino, arrivo presto e cena con pizza a casa</p>
+          </div>
+          <span class="pill-tag tag-rausch">🏖️ Giornata Intera Mare</span>
+        </div>
+
+        <div class="timeline-container">
+          
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">05:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Partenza da Potenza</strong>
+              <p>Auto già pronta con tutto il necessario: ombrellone, teli mare, borsa termica con ghiaccio e costume indosso per andare subito in spiaggia.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">08:00 – 08:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Arrivo a Baia Verde (Gallipoli)</strong>
+              <p>Raggiungiamo il parcheggio comodo vicino alla spiaggia libera prima che si riempia. Posizionamento ombrellone nei punti migliori della baia.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Baia+Verde%2C+Gallipoli%2C+LE">
+                  📍 Naviga a Baia Verde
+                </a>
+                <button class="btn-action btn-action-outline" onclick="copyToClipboard('Baia Verde, Gallipoli LE', 'Indirizzo Baia Verde copiato!')">
+                  📋 Copia Posizione
+                </button>
+              </div>
+
+              <div class="tip-box">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span><strong>Consiglio Salento:</strong> In agosto arrivare entro le 08:30 a Baia Verde garantisce parcheggio vicinissimo alla spiaggia e i posti migliori in riva al mare.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">09:00 – 18:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Mare, sole e relax totale</strong>
+              <p>Giornata intera di mare senza più spostare l'auto. Bagni, musica, pranzo al sacco con borsa termica e chiacchiere.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">18:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Rientro verso Marina di Mancaversa</strong>
+              <p>Spostamento breve in auto verso l'Airbnb (circa 15 minuti di tragitto lungo la litoranea).</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">19:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Check-in alloggio, docce e cena con pizza</strong>
+              <p>Presa di possesso dell'appartamento in <b>Via Egnazia 44</b>. Doccia rigenerante post-mare, ritiro pizze e rustici da <b>Panetteria Primavera</b> e cena tranquilla in casa.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-outline" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE">
+                  🏠 Naviga all'Airbnb
+                </a>
+                <a class="btn-action btn-action-subtle" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panetteria+Primavera+di+Savino+Antonio%2C+Via+Portofino+20%2C+Marina+di+Mancaversa">
+                  🍕 Naviga a Panetteria Primavera
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+
+      <!-- Giorno 2: Domenica 23 Agosto -->
+      <article class="airbnb-card" id="g23">
+        <div class="card-header-bar">
+          <div>
+            <div class="card-date-badge">Giorno 2 · Domenica 23 Agosto</div>
+            <h3 class="card-header-title">Marina di Mancaversa (Mare dei Cavalli)</h3>
+            <p class="card-header-sub">Giornata a piedi a km zero, spiaggia libera sabbiosa e cena a base di pesce d'asporto</p>
+          </div>
+          <span class="pill-tag tag-green">🌊 Zero Spostamenti Auto</span>
+        </div>
+
+        <div class="timeline-container">
+          
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">08:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Colazione rilassata in casa</strong>
+              <p>Caffè con vista, preparazione senza fretta. Nessuno spostamento in auto per l'intera giornata.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">09:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Spiaggia libera · Mare dei Cavalli</strong>
+              <p>Raggiungiamo a piedi il principale tratto sabbioso di Mancaversa (Via Belvedere). Zona suggestiva con sabbia chiara e scogli bassi per tuffi e snorkeling.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
+                  🏖️ Apri Spiaggia su Maps
+                </a>
+                <a class="btn-action btn-action-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE&destination=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa">
+                  🚶 Percorso a piedi da casa (5 min)
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">09:00 – 18:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Mare, relax e pranzo in spiaggia</strong>
+              <p>Giornata rilassante al 100%. Possibilità di tornare a casa in 5 minuti a piedi in qualsiasi momento se serve qualcosa.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">19:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Cena con frittura di pesce d'asporto</strong>
+              <p>Ritiro del pesce fritto caldo e polpette da <b>Marenostrum 2.0 (La Friggitoria)</b> in Via Taormina 4. Cena speciale in veranda/terrazzo all'Airbnb.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=MARENOSTRUM+2.0+LA+FRIGGITORIA%2C+Via+Taormina+4%2C+Marina+di+Mancaversa">
+                  📍 Maps Marenostrum 2.0
+                </a>
+                <a class="btn-action btn-action-outline" target="_blank" href="https://www.menudigitale.io/marenostrum2-0-lafriggitoria/?lang=it">
+                  📖 Sfoglia Menu Digitale
+                </a>
+                <a class="btn-action btn-action-subtle" href="tel:+393505778892">
+                  📞 Chiama per Ordinare
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+
+      <!-- Giorno 3: Lunedì 24 Agosto -->
+      <article class="airbnb-card" id="g24">
+        <div class="card-header-bar">
+          <div>
+            <div class="card-date-badge">Giorno 3 · Lunedì 24 Agosto</div>
+            <h3 class="card-header-title">Check-out, Ultimo Mare & Rientro</h3>
+            <p class="card-header-sub">Valigie in auto, ultima mattinata di mare salentino e partenza comoda nel pomeriggio</p>
+          </div>
+          <span class="pill-tag tag-blue">🧳 Check-out & Rientro</span>
+        </div>
+
+        <div class="timeline-container">
+          
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">08:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Preparazione bagagli & valigie in auto</strong>
+              <p>Sistemazione della casa, chiusura bagagli e carico dell'auto con borsa termica e cambio per il viaggio.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">09:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Check-out dall'Airbnb</strong>
+              <p>Lasciamo l'alloggio con tutto già riposto in macchina. Pronti per l'ultima sessione di spiaggia.</p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">09:15 – 15:30</span>
+            </div>
+            <div class="step-content">
+              <strong>Ultimo mare a Mancaversa (Mare dei Cavalli)</strong>
+              <p>Spiaggia comoda senza dover fare spostamenti impegnativi. Ultimi tuffi, pranzo leggero e cambio asciutto prima della guida.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
+                  🏖️ Posizione Spiaggia
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-time-col">
+              <span class="step-time-badge">15:30 – 16:00</span>
+            </div>
+            <div class="step-content">
+              <strong>Partenza per Potenza</strong>
+              <p>Inizio del viaggio di rientro verso Potenza. Orario flessibile per godersi l'ultimo bagno in totale serenità.</p>
+              
+              <div class="step-actions">
+                <a class="btn-action btn-action-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa&destination=Potenza%2C+Italy">
+                  🚗 Calcola Percorso per Potenza
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ==========================================================================
+         ALLOGGIO: LA BASE (AIRBNB LISTING DETAILS)
+         ========================================================================== -->
+    <section class="section-block" id="casa">
+      <div class="section-header">
+        <div class="section-eyebrow">La Base Operativa</div>
+        <h2 class="section-title">L'Alloggio a Marina di Mancaversa</h2>
+        <p class="section-subtitle">Un solo punto di riferimento per dormire, rinfrescarsi e cenare insieme.</p>
+      </div>
+
+      <div class="listing-details-grid">
+        
+        <!-- Main Listing Info -->
+        <div class="listing-main-card">
+          <div class="host-header">
+            <div>
+              <h3>Via Egnazia 44</h3>
+              <p>Marina di Mancaversa · Taviano (LE) · Salento</p>
+            </div>
+            <div class="host-avatar">🏠</div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 15px; color: var(--gray-dark); line-height: 1.6;">
+              Posizione strategica per esplorare la costa: a 5 minuti a piedi dal mare di Mancaversa e a 12 minuti di macchina dalla sabbia di Baia Verde.
+            </p>
+          </div>
+
+          <h4 style="font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--charcoal);">I servizi principali</h4>
+          <div class="amenities-grid">
+            <div class="amenity-item">
+              <div class="amenity-icon">❄️</div>
+              <span>Aria condizionata</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon">🚗</div>
+              <span>Parcheggio agevole</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon">🚿</div>
+              <span>Doccia post-mare</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon">🍽️</div>
+              <span>Tavolo e cucina</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon">🚶</div>
+              <span>5 min a piedi dal mare</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon">🍕</div>
+              <span>Asporto a 300 metri</span>
+            </div>
+          </div>
+
+          <div class="step-actions" style="margin-top: 24px;">
+            <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE">
+              📍 Apri Indirizzo su Google Maps
+            </a>
+            <button class="btn-action btn-action-outline" onclick="copyToClipboard('Via Egnazia 44, Marina di Mancaversa, Taviano LE', 'Indirizzo alloggio copiato!')">
+              📋 Copia Indirizzo
+            </button>
+          </div>
+        </div>
+
+        <!-- House Rules & Check-in / Check-out -->
+        <div class="house-rules-card">
+          <div>
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 18px; color: var(--charcoal);">Regole & Orari</h3>
+            
+            <div class="rule-item">
+              <div class="rule-badge">🔑</div>
+              <div class="rule-text">
+                <strong>Check-in: Sabato 22 · Ore 19:30</strong>
+                <span>Si arriva all'Airbnb dopo la giornata di mare a Baia Verde per la doccia serale.</span>
+              </div>
+            </div>
+
+            <div class="rule-item">
+              <div class="rule-badge">🚪</div>
+              <div class="rule-text">
+                <strong>Check-out: Lunedì 24 · Ore 09:00</strong>
+                <span>Valigie già caricate in auto prima di andare all'ultimo bagno.</span>
+              </div>
+            </div>
+
+            <div class="rule-item">
+              <div class="rule-badge">🚗</div>
+              <div class="rule-text">
+                <strong>Parcheggio in zona</strong>
+                <span>Parcheggiare lungo le vie residenziali di Mancaversa rispettando la segnaletica.</span>
+              </div>
+            </div>
+
+            <div class="rule-item">
+              <div class="rule-badge">🏖️</div>
+              <div class="rule-text">
+                <strong>Rientro dalla spiaggia</strong>
+                <span>Sciacquare sabbia e stuoie prima di entrare in casa per massimo comfort.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tip-box" style="margin-top: 18px;">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span><strong>Zero pensieri:</strong> Chiavi e alloggio sono a disposizione del gruppo per tutta la durata del soggiorno.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         LE CENE DA ASPORTO (FOOD & DINING GUIDE)
+         ========================================================================== -->
+    <section class="section-block" id="cene">
+      <div class="section-header">
+        <div class="section-eyebrow">Sapori Salentini</div>
+        <h2 class="section-title">Le cene tipiche da asporto</h2>
+        <p class="section-subtitle">Piatti gustosi, veloci e da godersi comodamente a casa dopo la doccia.</p>
+      </div>
+
+      <div class="dining-grid">
+        
+        <!-- Panetteria Primavera -->
+        <div class="dining-card">
+          <div>
+            <div class="dining-tag">Sabato 22 Agosto · Pizza & Rustici</div>
+            <h3 class="dining-title">Panetteria Primavera</h3>
+            <p class="dining-addr">📍 Via Portofino 20 · Marina di Mancaversa</p>
+            <p class="dining-desc">
+              Forno storico per pizza al taglio e da asporto, focacce salentine calde con pomodorini, rustici leccesi appena sfornati e pucce tradizionali.
+            </p>
+            <div class="dining-specialty">
+              <span>🍕</span>
+              <span>Consiglio: Pizza margherita con impasto soffice + rustici caldi</span>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panetteria+Primavera+di+Savino+Antonio%2C+Via+Portofino+20%2C+Marina+di+Mancaversa">
+              📍 Mappa Maps
+            </a>
+            <a class="btn-action btn-action-outline" href="tel:+3908331624313">
+              📞 Chiama: 0833 1624313
+            </a>
+            <button class="btn-action btn-action-subtle" onclick="copyToClipboard('Panetteria Primavera, Via Portofino 20, Marina di Mancaversa', 'Indirizzo pizzeria copiato!')">
+              📋 Copia
+            </button>
+          </div>
+        </div>
+
+        <!-- Marenostrum 2.0 -->
+        <div class="dining-card">
+          <div>
+            <div class="dining-tag">Domenica 23 Agosto · Pesce & Friggitoria</div>
+            <h3 class="dining-title">Marenostrum 2.0 (La Friggitoria)</h3>
+            <p class="dining-addr">📍 Via Taormina 4 · Marina di Mancaversa</p>
+            <p class="dining-desc">
+              Friggitoria di mare espresso: paranza dorata, calamari croccanti, polpette di polpo, cartocci di mare e panini con pesce fresco da ritirare caldo.
+            </p>
+            <div class="dining-specialty">
+              <span>🦐</span>
+              <span>Consiglio: Cartoccio di paranza mista + polpette di polpo</span>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=MARENOSTRUM+2.0+LA+FRIGGITORIA%2C+Via+Taormina+4%2C+Marina+di+Mancaversa">
+              📍 Mappa Maps
+            </a>
+            <a class="btn-action btn-action-outline" target="_blank" href="https://www.menudigitale.io/marenostrum2-0-lafriggitoria/?lang=it">
+              📖 Menu Digitale
+            </a>
+            <a class="btn-action btn-action-subtle" href="tel:+393505778892">
+              📞 Chiama: 350 5778892
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         CHECKLIST INTERATTIVA & GUIDA DEL SALENTO
+         ========================================================================== -->
+    <section class="section-block" id="checklist">
+      <div class="section-header">
+        <div class="section-eyebrow">Preparativi & Vento</div>
+        <h2 class="section-title">Cosa portare & Segreti del Salento</h2>
+        <p class="section-subtitle">Spunta gli elementi prima di partire: la lista viene salvata in automatico sul tuo telefono.</p>
+      </div>
+
+      <div class="tips-checklist-grid">
+        
+        <!-- Interactive Checklist Card -->
+        <div class="checklist-card">
+          <div class="checklist-header">
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--charcoal);">Checklist Bagagli & Spiaggia</h3>
+            <span class="checklist-progress-text" id="checklistProgress">0/8 Pronti</span>
+          </div>
+
+          <div class="checklist-items" id="checklistContainer">
+            <!-- Rendered by JS with localStorage support -->
+          </div>
+        </div>
+
+        <!-- Local Salento Wind Guide -->
+        <div class="salento-guide-card">
+          <h3 style="font-size: 20px; font-weight: 800; color: var(--charcoal); margin-bottom: 8px;">Regola d'oro del Vento Salentino</h3>
+          <p style="font-size: 14.5px; color: var(--gray-dark); line-height: 1.5;">
+            Nel Salento la limpidezza del mare dipende dalla direzione del vento:
+          </p>
+
+          <div class="wind-rule-box">
+            <div class="wind-rule-title">
+              <span>💨</span> <b>Con Tramontana / Vento da Nord</b>
+            </div>
+            <p>
+              Il versante <b>Ionio</b> (Mancaversa, Baia Verde, Gallipoli) diventa una <b>piscina trasparente e piatta come l'olio</b>! È la condizione ideale per il nostro programma.
+            </p>
+          </div>
+
+          <div class="wind-rule-box" style="background: linear-gradient(135deg, #FFF7ED 0%, #FEF2F2 100%); border-color: #FED7AA; margin-top: 12px;">
+            <div class="wind-rule-title" style="color: var(--amber-dark);">
+              <span>💨</span> <b>Con Scirocco / Vento da Sud</b>
+            </div>
+            <p>
+              Il versante Ionico si increspa e diventa invece calmissimo l'Adriatico (Otranto, Castro).
+            </p>
+          </div>
+
+          <div class="tip-box" style="margin-top: 16px;">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span><strong>Regola per l'auto:</strong> Non lasciare mai borse o oggetti di valore visibili nell'abitacolo durante le soste.</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         ACCESSI RAPIDI & MAPPE
+         ========================================================================== -->
+    <section class="section-block" id="mappe">
+      <div class="section-header">
+        <div class="section-eyebrow">Tutti i Link</div>
+        <h2 class="section-title">Accessi Rapidi con un Tap</h2>
+        <p class="section-subtitle">Tutti i punti strategici del viaggio a portata di mano.</p>
+      </div>
+
+      <div class="maps-grid">
+        
+        <div class="map-quick-card">
+          <div>
+            <div class="map-card-icon">🏠</div>
+            <div class="map-card-title">Airbnb Alloggio</div>
+            <div class="map-card-desc">Via Egnazia 44 · Mancaversa</div>
+          </div>
+          <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE">
+            📍 Apri Maps
+          </a>
+        </div>
+
+        <div class="map-quick-card">
+          <div>
+            <div class="map-card-icon">🏖️</div>
+            <div class="map-card-title">Baia Verde</div>
+            <div class="map-card-desc">Spiaggia libera sabbiosa (22 ago)</div>
+          </div>
+          <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Baia+Verde%2C+Gallipoli%2C+LE">
+            📍 Apri Maps
+          </a>
+        </div>
+
+        <div class="map-quick-card">
+          <div>
+            <div class="map-card-icon">🌊</div>
+            <div class="map-card-title">Mare dei Cavalli</div>
+            <div class="map-card-desc">Spiaggia a piedi (23-24 ago)</div>
+          </div>
+          <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
+            📍 Apri Maps
+          </a>
+        </div>
+
+        <div class="map-quick-card">
+          <div>
+            <div class="map-card-icon">🍕</div>
+            <div class="map-card-title">Panetteria Primavera</div>
+            <div class="map-card-desc">Pizza & rustici (22 ago)</div>
+          </div>
+          <a class="btn-action btn-action-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panetteria+Primavera+di+Savino+Antonio%2C+Marina+di+Mancaversa">
+            📍 Apri Maps
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       FLOATING ACTION BAR FOR MOBILE
+       ========================================================================== -->
+  <aside class="mobile-floating-bar" aria-label="Navigazione rapida">
+    <div class="floating-bar-inner">
+      <a href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE" target="_blank" class="floating-btn highlight">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Alloggio</span>
+      </a>
+      <a href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa" target="_blank" class="floating-btn">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <span>Spiaggia</span>
+      </a>
+      <button class="floating-btn" onclick="scrollToSection('programma')">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+        <span>Programma</span>
+      </button>
+      <button class="floating-btn" onclick="shareTrip()">
+        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+        <span>Condividi</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       TOAST NOTIFICATION PILL
+       ========================================================================== -->
+  <div class="toast-pill" id="toastPill">
+    <span>✓</span>
+    <span id="toastMessage">Indirizzo copiato negli appunti!</span>
+  </div>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="#overview">Panoramica</a>
+        <a href="#programma">Programma</a>
+        <a href="#casa">Alloggio</a>
+        <a href="#cene">Cene</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#mappe">Mappe</a>
+      </div>
+      <p style="margin-top: 8px;">
+        Mancaversa · 22–24 Agosto 2026 · 4 persone · Salento Mare & Relax
+      </p>
+      <p style="font-size: 12px; color: var(--gray-light); margin-top: 8px;">
+        Realizzato con stile minimale ispirato ad Airbnb
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       CLIENT SCRIPTS & INTERACTIONS
+       ========================================================================== -->
+  <script>
+    // 1. Checklist Items Data & State in localStorage
+    const defaultChecklist = [
+      { id: 'item_1', text: '🏖️ Ombrellone e teli mare' },
+      { id: 'item_2', text: '🧊 Borsa termica con ghiaccio e borracce' },
+      { id: 'item_3', text: '🧴 Crema solare 30/50 e doposole' },
+      { id: 'item_4', text: '🤿 Maschera subacquea e scarpette scoglio' },
+      { id: 'item_5', text: '🔋 Powerbank e cavi di ricarica' },
+      { id: 'item_6', text: '🎵 Cassa Bluetooth per musica in spiaggia' },
+      { id: 'item_7', text: '🃏 Carte da gioco o passatempi' },
+      { id: 'item_8', text: '🚗 Monete / contanti per parcheggi o chioschi' }
+    ];
+
+    function initChecklist() {
+      const container = document.getElementById('checklistContainer');
+      const savedState = JSON.parse(localStorage.getItem('mancaversa_checklist') || '{}');
+      
+      container.innerHTML = '';
+      let completedCount = 0;
+
+      defaultChecklist.forEach(item => {
+        const isDone = !!savedState[item.id];
+        if (isDone) completedCount++;
+
+        const label = document.createElement('label');
+        label.className = `check-label ${isDone ? 'completed' : ''}`;
+        label.setAttribute('data-id', item.id);
+        label.innerHTML = `
+          <div class="custom-checkbox">${isDone ? '✓' : ''}</div>
+          <span>${item.text}</span>
+        `;
+        
+        label.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleChecklistItem(item.id);
+        });
+
+        container.appendChild(label);
+      });
+
+      updateChecklistProgress(completedCount, defaultChecklist.length);
+    }
+
+    function toggleChecklistItem(id) {
+      const savedState = JSON.parse(localStorage.getItem('mancaversa_checklist') || '{}');
+      savedState[id] = !savedState[id];
+      localStorage.setItem('mancaversa_checklist', JSON.stringify(savedState));
+      initChecklist();
+    }
+
+    function updateChecklistProgress(done, total) {
+      const progressEl = document.getElementById('checklistProgress');
+      if (progressEl) {
+        progressEl.textContent = `${done}/${total} Pronti`;
+        if (done === total) {
+          progressEl.textContent = `🎉 Tutti pronti!`;
+          progressEl.style.background = '#E6F7F4';
+          progressEl.style.color = '#008A05';
+        } else {
+          progressEl.style.background = 'var(--rausch-light)';
+          progressEl.style.color = 'var(--rausch)';
+        }
+      }
+    }
+
+    // 2. Toast Notification Helper
+    let toastTimeout = null;
+    function showToast(message) {
+      const toast = document.getElementById('toastPill');
+      const msgEl = document.getElementById('toastMessage');
+      if (!toast || !msgEl) return;
+
+      msgEl.textContent = message;
+      toast.classList.add('visible');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2600);
+    }
+
+    // 3. Clipboard Copy Helper
+    function copyToClipboard(text, successMessage) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(successMessage || 'Copiato negli appunti!');
+        }).catch(() => fallbackCopy(text, successMessage));
+      } else {
+        fallbackCopy(text, successMessage);
+      }
+    }
+
+    function fallbackCopy(text, successMessage) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      tempInput.style.position = 'fixed';
+      tempInput.style.opacity = '0';
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMessage || 'Copiato!');
+      } catch (err) {
+        showToast('Seleziona e copia manualmente: ' + text);
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    // 4. Web Share API or Clipboard Fallback
+    function shareTrip() {
+      const shareData = {
+        title: 'Mancaversa 2026 · Salento Trip',
+        text: 'Ecco il programma, alloggio e mappe per il nostro weekend a Mancaversa e Baia Verde (22–24 agosto 2026)!',
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData).catch(err => {
+          if (err.name !== 'AbortError') {
+            copyToClipboard(window.location.href, 'Link copiato negli appunti!');
+          }
+        });
+      } else {
+        copyToClipboard(window.location.href, 'Link dell\'itinerario copiato negli appunti!');
+      }
+    }
+
+    // 5. Scroll and Active Tab Indicator
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    // Active Category Pill on Scroll
+    window.addEventListener('scroll', () => {
+      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
+      const scrollPos = window.scrollY + 180;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && el.offsetTop <= scrollPos) {
+          document.querySelectorAll('.cat-pill').forEach(pill => {
+            const href = pill.getAttribute('href').replace('#', '');
+            if (href === sections[i]) {
+              pill.classList.add('active');
+            } else {
+              pill.classList.remove('active');
+            }
+          });
+          break;
+        }
+      }
+    }, { passive: true });
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      initChecklist();
+    });
+  </script>
+</body>
+</html>
