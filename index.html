@@ -339,6 +339,170 @@
     }
 
     /* ==========================================================================
+       VERTICAL WINDING ROAD TRIP TIMELINE (SCROLL VERTICALE CON AUTOMOBILE ROSSA)
+       ========================================================================== */
+    .vertical-road-timeline {
+      position: relative;
+      padding-left: 28px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 420px) {
+      .vertical-road-timeline {
+        padding-left: 36px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .vertical-road-timeline {
+        padding-left: 56px;
+      }
+    }
+
+    /* Vertical Asphalt Track on the left */
+    .vertical-road-track {
+      position: absolute;
+      top: 12px;
+      bottom: 24px;
+      left: 2px;
+      width: 14px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    @media (min-width: 420px) {
+      .vertical-road-track {
+        left: 6px;
+        width: 18px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .vertical-road-track {
+        left: 14px;
+        width: 24px;
+      }
+    }
+
+    .vertical-road-asphalt {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #334155;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+
+    /* Vertical Dashed Center Line */
+    .vertical-road-dashes {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      transform: translateX(-50%);
+      background-image: repeating-linear-gradient(180deg, #FFFFFF 0px, #FFFFFF 7px, transparent 7px, transparent 14px);
+      opacity: 0.9;
+    }
+
+    /* Red Progress Fill from top down */
+    .vertical-road-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      background: linear-gradient(180deg, rgba(255,56,92,0.4) 0%, rgba(255,56,92,0.92) 100%);
+      transition: height 0.06s ease-out;
+    }
+
+    /* Vertical Moving Car (Top-Down Cute Red Car) */
+    .vertical-car-holder {
+      position: absolute;
+      top: 0%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 26px;
+      height: 42px;
+      pointer-events: none;
+      transition: top 0.06s ease-out;
+      z-index: 20;
+    }
+
+    @media (min-width: 420px) {
+      .vertical-car-holder {
+        width: 32px;
+        height: 50px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .vertical-car-holder {
+        width: 40px;
+        height: 64px;
+      }
+    }
+
+    .vert-car-tooltip {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #18181B;
+      color: #FFFFFF;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+      pointer-events: none;
+      letter-spacing: -0.2px;
+    }
+
+    @media (min-width: 420px) {
+      .vert-car-tooltip {
+        top: -22px;
+        font-size: 10px;
+        padding: 2px 7px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .vert-car-tooltip {
+        top: -24px;
+        font-size: 11px;
+        padding: 3px 8px;
+      }
+    }
+
+    .vert-car-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 3px 3px 0 3px;
+      border-style: solid;
+      border-color: #18181B transparent transparent transparent;
+    }
+
+    .vertical-car-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      transition: transform 0.15s ease;
+    }
+
+    .timeline-cards-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ==========================================================================
        HERO & SHOWCASE
        ========================================================================== */
     .hero-section {
@@ -1907,218 +2071,279 @@
         <p class="section-sub">Orari indicativi per il massimo relax in spiaggia.</p>
       </div>
 
-      <!-- Giorno 1: Sabato 22 -->
-      <article class="airbnb-card" id="g22">
-        <div class="card-header-bar">
-          <div class="card-date-badge">Sabato 22 Agosto</div>
-          <div class="card-title-row">
-            <div>
-              <h3 class="card-header-title">Baia Verde & Check-in</h3>
-              <p class="card-header-desc">Spiaggia libera a Gallipoli e pizza serale</p>
-            </div>
-            <span class="pill-tag tag-rausch">🏖️ Mare Day</span>
+      <!-- Vertical Road Timeline Container -->
+      <div class="vertical-road-timeline" id="verticalRoadContainer">
+        
+        <!-- Vertical Asphalt Track on the left -->
+        <div class="vertical-road-track" id="vertRoadTrack">
+          <div class="vertical-road-asphalt">
+            <div class="vertical-road-dashes"></div>
+            <div class="vertical-road-fill" id="vertRoadFill"></div>
+          </div>
+
+          <!-- Vertical Moving Red Car (Top-Down Cute Red Car with Roof Surfboard) -->
+          <div class="vertical-car-holder" id="vertCarHolder">
+            <div class="vert-car-tooltip" id="vertCarTooltip">Potenza 🏁</div>
+            <svg class="vertical-car-svg" id="vertCarSvg" viewBox="0 0 50 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Shadow -->
+              <ellipse cx="25" cy="42" rx="20" ry="34" fill="rgba(0,0,0,0.25)"/>
+              
+              <!-- 4 Black Tires -->
+              <rect x="3" y="14" width="7" height="14" rx="3.5" fill="#18181B"/>
+              <rect x="40" y="14" width="7" height="14" rx="3.5" fill="#18181B"/>
+              <rect x="3" y="52" width="7" height="14" rx="3.5" fill="#18181B"/>
+              <rect x="40" y="52" width="7" height="14" rx="3.5" fill="#18181B"/>
+              
+              <!-- Red Car Body (PietroBnB Rausch) -->
+              <rect x="8" y="8" width="34" height="64" rx="14" fill="#FF385C"/>
+              <rect x="9" y="10" width="32" height="60" rx="12" fill="#E00B41"/>
+              
+              <!-- Front & Rear Glass Windows -->
+              <path d="M12 24C12 20 16 18 25 18C34 18 38 20 38 24L37 32H13L12 24Z" fill="#E0F2FE"/>
+              <path d="M13 54C13 58 17 60 25 60C33 60 37 58 37 54L36 48H14L13 54Z" fill="#E0F2FE"/>
+              
+              <!-- Sunroof / Cabrio Interior -->
+              <rect x="14" y="32" width="22" height="16" rx="4" fill="#27272A"/>
+              
+              <!-- Yellow Surfboard on roof -->
+              <ellipse cx="25" cy="40" rx="4.5" ry="24" fill="#FBBF24"/>
+              <line x1="25" y1="18" x2="25" y2="62" stroke="#F59E0B" stroke-width="1.5"/>
+              <line x1="22" y1="36" x2="28" y2="36" stroke="#333333" stroke-width="1.5"/>
+              <line x1="22" y1="44" x2="28" y2="44" stroke="#333333" stroke-width="1.5"/>
+
+              <!-- Headlights (Front / Downwards) -->
+              <circle cx="14" cy="70" r="3" fill="#FEF08A"/>
+              <circle cx="36" cy="70" r="3" fill="#FEF08A"/>
+              
+              <!-- Taillights (Rear / Upwards) -->
+              <circle cx="14" cy="10" r="2.5" fill="#EF4444"/>
+              <circle cx="36" cy="10" r="2.5" fill="#EF4444"/>
+              
+              <!-- Side Mirrors -->
+              <circle cx="6" cy="26" r="2.5" fill="#E00B41"/>
+              <circle cx="44" cy="26" r="2.5" fill="#E00B41"/>
+            </svg>
           </div>
         </div>
 
-        <div class="timeline-list">
-          
-          <div class="timeline-item">
-            <span class="timeline-time-badge">05:00</span>
-            <div class="timeline-content">
-              <strong>Partenza da Potenza</strong>
-              <p>Auto già pronta con teli, ombrellone, borsa termica e costume indosso.</p>
-            </div>
-          </div>
+        <!-- Cards Flow Along the Vertical Road -->
+        <div class="timeline-cards-flow">
 
-          <div class="timeline-item">
-            <span class="timeline-time-badge">08:00 – 08:30</span>
-            <div class="timeline-content">
-              <strong>Arrivo a Baia Verde</strong>
-              <p>Parcheggio comodo prima dell'affollamento e scelta del miglior punto sulla spiaggia libera.</p>
+          <!-- Giorno 1: Sabato 22 -->
+          <article class="airbnb-card" id="g22">
+            <div class="card-header-bar">
+              <div class="card-date-badge">Sabato 22 Agosto</div>
+              <div class="card-title-row">
+                <div>
+                  <h3 class="card-header-title">Baia Verde & Check-in</h3>
+                  <p class="card-header-desc">Spiaggia libera a Gallipoli e pizza serale</p>
+                </div>
+                <span class="pill-tag tag-rausch">🏖️ Tappa 1</span>
+              </div>
+            </div>
+
+            <div class="timeline-list">
               
-              <div class="btn-group-row">
-                <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Baia+Verde%2C+Gallipoli%2C+LE">
-                  📍 Naviga a Baia Verde
-                </a>
-                <button class="btn-action btn-subtle" onclick="copyText('Baia Verde, Gallipoli LE', 'Posizione Baia Verde copiata!')">
-                  📋 Copia Posizione
-                </button>
+              <div class="timeline-item">
+                <span class="timeline-time-badge">05:00</span>
+                <div class="timeline-content">
+                  <strong>Partenza da Potenza</strong>
+                  <p>Auto già pronta con teli, ombrellone, borsa termica e costume indosso.</p>
+                </div>
               </div>
 
-              <div class="tip-callout">
-                💡 <b>Consiglio:</b> Arrivare a Baia Verde entro le 08:30 garantisce parcheggio vicinissimo e i posti migliori in riva al mare.
+              <div class="timeline-item">
+                <span class="timeline-time-badge">08:00 – 08:30</span>
+                <div class="timeline-content">
+                  <strong>Arrivo a Baia Verde</strong>
+                  <p>Parcheggio comodo prima dell'affollamento e scelta del miglior punto sulla spiaggia libera.</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Baia+Verde%2C+Gallipoli%2C+LE">
+                      📍 Naviga a Baia Verde
+                    </a>
+                    <button class="btn-action btn-subtle" onclick="copyText('Baia Verde, Gallipoli LE', 'Posizione Baia Verde copiata!')">
+                      📋 Copia Posizione
+                    </button>
+                  </div>
+
+                  <div class="tip-callout">
+                    💡 <b>Consiglio:</b> Arrivare a Baia Verde entro le 08:30 garantisce parcheggio vicinissimo e i posti migliori in riva al mare.
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">09:00 – 18:30</span>
+                <div class="timeline-content">
+                  <strong>Mare & Relax totale</strong>
+                  <p>Bagni, musica, tuffi e pranzo a sacco senza muovere la macchina.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">18:30</span>
+                <div class="timeline-content">
+                  <strong>Rientro a Mancaversa</strong>
+                  <p>15 minuti di auto lungo la costa verso l'Airbnb.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">19:30</span>
+                <div class="timeline-content">
+                  <strong>Check-in, docce & cena con pizza</strong>
+                  <p>Presa di possesso in <b>Via Egnazia 44</b>. Docce, ritiro pizza e rustici da <b>Panetteria Primavera</b> e cena in casa.</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE">
+                      🏠 Naviga a Casa
+                    </a>
+                    <a class="btn-action btn-subtle" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panetteria+Primavera+di+Savino+Antonio%2C+Via+Portofino+20%2C+Marina+di+Mancaversa">
+                      🍕 Panetteria Primavera
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- Giorno 2: Domenica 23 -->
+          <article class="airbnb-card" id="g23">
+            <div class="card-header-bar">
+              <div class="card-date-badge">Domenica 23 Agosto</div>
+              <div class="card-title-row">
+                <div>
+                  <h3 class="card-header-title">Mancaversa (Mare dei Cavalli)</h3>
+                  <p class="card-header-desc">Spiaggia a piedi a 5 min da casa e frittura di pesce</p>
+                </div>
+                <span class="pill-tag tag-green">🌊 Tappa 2</span>
               </div>
             </div>
-          </div>
 
-          <div class="timeline-item">
-            <span class="timeline-time-badge">09:00 – 18:30</span>
-            <div class="timeline-content">
-              <strong>Mare & Relax totale</strong>
-              <p>Bagni, musica, tuffi e pranzo a sacco senza muovere la macchina.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">18:30</span>
-            <div class="timeline-content">
-              <strong>Rientro a Mancaversa</strong>
-              <p>15 minuti di auto lungo la costa verso l'Airbnb.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">19:30</span>
-            <div class="timeline-content">
-              <strong>Check-in, docce & cena con pizza</strong>
-              <p>Presa di possesso in <b>Via Egnazia 44</b>. Docce, ritiro pizza e rustici da <b>Panetteria Primavera</b> e cena in casa.</p>
+            <div class="timeline-list">
               
-              <div class="btn-group-row">
-                <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE">
-                  🏠 Naviga a Casa
-                </a>
-                <a class="btn-action btn-subtle" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panetteria+Primavera+di+Savino+Antonio%2C+Via+Portofino+20%2C+Marina+di+Mancaversa">
-                  🍕 Panetteria Primavera
-                </a>
+              <div class="timeline-item">
+                <span class="timeline-time-badge">08:30</span>
+                <div class="timeline-content">
+                  <strong>Colazione rilassata in casa</strong>
+                  <p>Caffè, calma e preparazione per la spiaggia sotto casa.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">09:00</span>
+                <div class="timeline-content">
+                  <strong>Spiaggia del Mare dei Cavalli</strong>
+                  <p>Tratto sabbioso principale di Mancaversa raggiungibile a piedi (5 minuti).</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
+                      🏖️ Spiaggia su Maps
+                    </a>
+                    <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE&destination=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa">
+                      🚶 Percorso a piedi (5 min)
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">09:00 – 18:00</span>
+                <div class="timeline-content">
+                  <strong>Mare, sole e pranzo in spiaggia</strong>
+                  <p>Zero stress da parcheggio, possibilità di tornare a casa a piedi in qualunque momento.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">19:30</span>
+                <div class="timeline-content">
+                  <strong>Cena con frittura di pesce d'asporto</strong>
+                  <p>Ritiro pesce fritto e polpette da <b>Marenostrum 2.0</b> e cena sul terrazzo dell'Airbnb.</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=MARENOSTRUM+2.0+LA+FRIGGITORIA%2C+Via+Taormina+4%2C+Marina+di+Mancaversa">
+                      📍 Maps Marenostrum
+                    </a>
+                    <a class="btn-action btn-outline" target="_blank" href="https://www.menudigitale.io/marenostrum2-0-lafriggitoria/?lang=it">
+                      📖 Menu Digitale
+                    </a>
+                    <a class="btn-action btn-subtle" href="tel:+393505778892">
+                      📞 Chiama: 350 5778892
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- Giorno 3: Lunedì 24 -->
+          <article class="airbnb-card" id="g24">
+            <div class="card-header-bar">
+              <div class="card-date-badge">Lunedì 24 Agosto</div>
+              <div class="card-title-row">
+                <div>
+                  <h3 class="card-header-title">Ultimo Mare & Rientro</h3>
+                  <p class="card-header-desc">Check-out alle 09:00, ultimo bagno e rientro a Potenza</p>
+                </div>
+                <span class="pill-tag tag-blue">🧳 Tappa 3</span>
               </div>
             </div>
-          </div>
+
+            <div class="timeline-list">
+              
+              <div class="timeline-item">
+                <span class="timeline-time-badge">08:00</span>
+                <div class="timeline-content">
+                  <strong>Valigie caricate in auto</strong>
+                  <p>Chiusura bagagli e preparazione per liberare l'alloggio.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">09:00</span>
+                <div class="timeline-content">
+                  <strong>Check-out</strong>
+                  <p>Lasciamo l'alloggio con tutto già pronto in macchina.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">09:15 – 15:30</span>
+                <div class="timeline-content">
+                  <strong>Ultimo mare al Mare dei Cavalli</strong>
+                  <p>Mattinata di sole, bagni e pranzo leggero.</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
+                      🏖️ Spiaggia Mare dei Cavalli
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <span class="timeline-time-badge">15:30 – 16:00</span>
+                <div class="timeline-content">
+                  <strong>Partenza per Potenza</strong>
+                  <p>Viaggio di rientro nel pomeriggio.</p>
+                  
+                  <div class="btn-group-row">
+                    <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa&destination=Potenza%2C+Italy">
+                      🚗 Naviga per Potenza
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </article>
 
         </div>
-      </article>
-
-      <!-- Giorno 2: Domenica 23 -->
-      <article class="airbnb-card" id="g23">
-        <div class="card-header-bar">
-          <div class="card-date-badge">Domenica 23 Agosto</div>
-          <div class="card-title-row">
-            <div>
-              <h3 class="card-header-title">Mancaversa (Mare dei Cavalli)</h3>
-              <p class="card-header-desc">Spiaggia a piedi a 5 min da casa e frittura di pesce</p>
-            </div>
-            <span class="pill-tag tag-green">🌊 Zero Auto</span>
-          </div>
-        </div>
-
-        <div class="timeline-list">
-          
-          <div class="timeline-item">
-            <span class="timeline-time-badge">08:30</span>
-            <div class="timeline-content">
-              <strong>Colazione rilassata in casa</strong>
-              <p>Caffè, calma e preparazione per la spiaggia sotto casa.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">09:00</span>
-            <div class="timeline-content">
-              <strong>Spiaggia del Mare dei Cavalli</strong>
-              <p>Tratto sabbioso principale di Mancaversa raggiungibile a piedi (5 minuti).</p>
-              
-              <div class="btn-group-row">
-                <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
-                  🏖️ Spiaggia su Maps
-                </a>
-                <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Via+Egnazia+44%2C+Marina+di+Mancaversa%2C+Taviano+LE&destination=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa">
-                  🚶 Percorso a piedi (5 min)
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">09:00 – 18:00</span>
-            <div class="timeline-content">
-              <strong>Mare, sole e pranzo in spiaggia</strong>
-              <p>Zero stress da parcheggio, possibilità di tornare a casa a piedi in qualunque momento.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">19:30</span>
-            <div class="timeline-content">
-              <strong>Cena con frittura di pesce d'asporto</strong>
-              <p>Ritiro pesce fritto e polpette da <b>Marenostrum 2.0</b> e cena sul terrazzo dell'Airbnb.</p>
-              
-              <div class="btn-group-row">
-                <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=MARENOSTRUM+2.0+LA+FRIGGITORIA%2C+Via+Taormina+4%2C+Marina+di+Mancaversa">
-                  📍 Maps Marenostrum
-                </a>
-                <a class="btn-action btn-outline" target="_blank" href="https://www.menudigitale.io/marenostrum2-0-lafriggitoria/?lang=it">
-                  📖 Menu Digitale
-                </a>
-                <a class="btn-action btn-subtle" href="tel:+393505778892">
-                  📞 Chiama: 350 5778892
-                </a>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </article>
-
-      <!-- Giorno 3: Lunedì 24 -->
-      <article class="airbnb-card" id="g24">
-        <div class="card-header-bar">
-          <div class="card-date-badge">Lunedì 24 Agosto</div>
-          <div class="card-title-row">
-            <div>
-              <h3 class="card-header-title">Ultimo Mare & Rientro</h3>
-              <p class="card-header-desc">Check-out alle 09:00, ultimo bagno e rientro a Potenza</p>
-            </div>
-            <span class="pill-tag tag-blue">🧳 Check-out</span>
-          </div>
-        </div>
-
-        <div class="timeline-list">
-          
-          <div class="timeline-item">
-            <span class="timeline-time-badge">08:00</span>
-            <div class="timeline-content">
-              <strong>Valigie caricate in auto</strong>
-              <p>Chiusura bagagli e preparazione per liberare l'alloggio.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">09:00</span>
-            <div class="timeline-content">
-              <strong>Check-out</strong>
-              <p>Lasciamo l'alloggio con tutto già pronto in macchina.</p>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">09:15 – 15:30</span>
-            <div class="timeline-content">
-              <strong>Ultimo mare al Mare dei Cavalli</strong>
-              <p>Mattinata di sole, bagni e pranzo leggero.</p>
-              
-              <div class="btn-group-row">
-                <a class="btn-action btn-primary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Spiaggia+del+Mare+dei+Cavalli%2C+Via+Belvedere%2C+Marina+di+Mancaversa">
-                  🏖️ Spiaggia Mare dei Cavalli
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="timeline-item">
-            <span class="timeline-time-badge">15:30 – 16:00</span>
-            <div class="timeline-content">
-              <strong>Partenza per Potenza</strong>
-              <p>Viaggio di rientro nel pomeriggio.</p>
-              
-              <div class="btn-group-row">
-                <a class="btn-action btn-outline" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Spiaggia+del+Mare+dei+Cavalli%2C+Marina+di+Mancaversa&destination=Potenza%2C+Italy">
-                  🚗 Naviga per Potenza
-                </a>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </article>
+      </div>
 
     </section>
 
@@ -3246,6 +3471,55 @@
       }
     }
 
+    // --------------------------------------------------------------------------
+    // 6. Vertical Road Trip Timeline Animation (Cute Top-Down Red Car)
+    // --------------------------------------------------------------------------
+    let isRoadScrollTicking = false;
+    function updateVerticalRoadProgress() {
+      const container = document.getElementById('verticalRoadContainer');
+      const vertCarHolder = document.getElementById('vertCarHolder');
+      const vertRoadFill = document.getElementById('vertRoadFill');
+      const vertCarTooltip = document.getElementById('vertCarTooltip');
+      const vertCarSvg = document.getElementById('vertCarSvg');
+
+      if (!container || !vertCarHolder || !vertRoadFill) return;
+
+      const rect = container.getBoundingClientRect();
+      const windowH = window.innerHeight;
+
+      // Start moving when container enters the middle/upper portion of viewport
+      const startTrigger = windowH * 0.65;
+      const totalH = rect.height;
+
+      const currentY = startTrigger - rect.top;
+      const progress = Math.max(0, Math.min(1, totalH > 0 ? currentY / totalH : 0));
+      const percentage = progress * 100;
+
+      vertCarHolder.style.top = `${percentage}%`;
+      vertRoadFill.style.height = `${percentage}%`;
+
+      // Status text & gentle steering rotation based on progress
+      let tooltipText = 'Potenza 🏁';
+      const wobbleDeg = Math.sin(progress * Math.PI * 6) * 5; // gentle natural steering wobble
+
+      if (progress < 0.05) {
+        tooltipText = '05:00 · Potenza 🏁';
+      } else if (progress < 0.38) {
+        tooltipText = 'Sab 22 · Baia Verde 🏖️';
+      } else if (progress < 0.72) {
+        tooltipText = 'Dom 23 · Mancaversa 🌊';
+      } else if (progress < 0.94) {
+        tooltipText = 'Lun 24 · Check-out 🧳';
+      } else {
+        tooltipText = 'Rientro a Casa 🏠';
+      }
+
+      if (vertCarTooltip) vertCarTooltip.textContent = tooltipText;
+      if (vertCarSvg) vertCarSvg.style.transform = `rotate(${wobbleDeg}deg)`;
+
+      isRoadScrollTicking = false;
+    }
+
     window.addEventListener('scroll', () => {
       const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
       const currentPos = window.scrollY + 130;
@@ -3265,12 +3539,22 @@
           break;
         }
       }
+
+      if (!isRoadScrollTicking) {
+        requestAnimationFrame(updateVerticalRoadProgress);
+        isRoadScrollTicking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      updateVerticalRoadProgress();
     }, { passive: true });
 
     document.addEventListener('DOMContentLoaded', () => {
       initUserIdentity();
       initRealtimeBoard();
       renderChecklist();
+      updateVerticalRoadProgress();
     });
   </script>
 </body>
