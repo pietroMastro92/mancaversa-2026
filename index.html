@@ -2852,6 +2852,49 @@
       }
     ];
 
+    function mergeMessageLists(listA, listB) {
+      const map = new Map();
+      (listA || []).forEach(m => {
+        if (m && m.id) map.set(m.id, m);
+      });
+      (listB || []).forEach(m => {
+        if (m && m.id) {
+          if (map.has(m.id)) {
+            const existing = map.get(m.id);
+            if (m.isEdited || (m.timestamp && m.timestamp >= (existing.timestamp || 0))) {
+              map.set(m.id, { ...existing, ...m });
+            }
+          } else {
+            map.set(m.id, m);
+          }
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    }
+
+    function recalculateUnreadCount() {
+      const lastReadTs = parseInt(localStorage.getItem('mancaversa_last_read_ts') || '0', 10);
+      const unreadMessages = boardMessages.filter(m => {
+        if (m.id === 'init_welcome_pietro') return false;
+        const isMine = currentUser && (m.userId === currentUser.id || (m.author === currentUser.name && currentUser.isCustom));
+        return (m.timestamp || 0) > lastReadTs && !isMine;
+      });
+
+      unreadCount = unreadMessages.length;
+      updateUnreadBadges();
+
+      // Notifica specifica se c'è una risposta diretta non letta
+      if (!isDrawerOpen && unreadMessages.length > 0) {
+        const unreadReply = unreadMessages.find(m => {
+          return m.replyTo && currentUser && (m.replyTo.userId === currentUser.id || m.replyTo.author === currentUser.name);
+        });
+
+        if (unreadReply) {
+          showToast(`↩️ ${unreadReply.author} ha risposto al tuo messaggio!`);
+        }
+      }
+    }
+
     function initRealtimeBoard() {
       // 1. Carica prima dalla cache locale istantanea
       const cached = localStorage.getItem(CACHE_KEY);
@@ -2866,6 +2909,7 @@
         boardMessages = [...singleWelcomeNote];
       }
       renderDrawerMessages();
+      recalculateUnreadCount();
 
       // 2. Sincronizza con il Cloud Database Permanente
       fetchCloudDatabase();
@@ -2882,9 +2926,10 @@
         .then(res => res.json())
         .then(json => {
           if (json && json.data && Array.isArray(json.data.messages) && json.data.messages.length > 0) {
-            boardMessages = json.data.messages;
+            boardMessages = mergeMessageLists(boardMessages, json.data.messages);
             localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
             renderDrawerMessages();
+            recalculateUnreadCount();
           }
         })
         .catch(err => {
@@ -3016,6 +3061,7 @@
       cancelCurrentContext();
       unreadCount = 0;
       updateUnreadBadges();
+      localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
     }
 
     function scrollMessagesToBottom() {
@@ -3271,6 +3317,7 @@
         replyTo: activeReplyingMsg ? {
           id: activeReplyingMsg.id,
           author: activeReplyingMsg.author,
+          userId: activeReplyingMsg.userId || '',
           text: activeReplyingMsg.text
         } : null
       };
@@ -3288,10 +3335,13 @@
     }
 
     function addMessageToBoard(msg, isNewIncoming = false) {
-      if (boardMessages.some(m => m.id === msg.id)) return;
-
-      boardMessages.push(msg);
-      if (boardMessages.length > 70) boardMessages = boardMessages.slice(-70);
+      const existingIdx = boardMessages.findIndex(m => m.id === msg.id);
+      if (existingIdx !== -1) {
+        boardMessages[existingIdx] = msg;
+      } else {
+        boardMessages.push(msg);
+      }
+      if (boardMessages.length > 100) boardMessages = boardMessages.slice(-100);
 
       localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
       renderDrawerMessages();
@@ -3303,7 +3353,13 @@
       if (isNewIncoming && !isDrawerOpen) {
         unreadCount++;
         updateUnreadBadges();
-        showToast(`💬 ${msg.author}: "${msg.text.substring(0, 22)}..."`);
+
+        const isReplyToMe = msg.replyTo && currentUser && (msg.replyTo.userId === currentUser.id || msg.replyTo.author === currentUser.name);
+        if (isReplyToMe) {
+          showToast(`↩️ ${msg.author} ha risposto al tuo messaggio: "${msg.text.substring(0, 24)}..."`);
+        } else {
+          showToast(`💬 ${msg.author}: "${msg.text.substring(0, 24)}..."`);
+        }
       }
     }
 
