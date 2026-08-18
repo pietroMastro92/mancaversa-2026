@@ -2596,10 +2596,13 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (VisualViewport Keyboard Pinning & Zero-Jump Engine)
+    // 3. Real-Time Group Board con Cloud DB Permanente & Zero-Jump Engine
     // --------------------------------------------------------------------------
-    const TOPIC_NAME = 'mancaversa-2026-travel-notes';
+    const TOPIC_NAME = 'pietrobnb-mancaversa-2026-live';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
+    const CLOUD_DB_URL = 'https://api.restful-api.dev/objects/ff8081819ff5b11001a0165b04cb4733';
+    const CACHE_KEY = 'pietrobnb_board_data_v6';
+
     let boardMessages = [];
     let isDrawerOpen = false;
     let unreadCount = 0;
@@ -2618,14 +2621,15 @@
         bg: '#FFF0F2',
         text: '🌴 Benvenuti su PietroBnB! Scrivete qui sotto idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
         time: '22 ago',
-        timestamp: Date.now() - 10000,
+        timestamp: 1787080000000,
         isEdited: false,
         replyTo: null
       }
     ];
 
     function initRealtimeBoard() {
-      const cached = localStorage.getItem('mancaversa_board_cache_v5');
+      // 1. Carica prima dalla cache locale istantanea
+      const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
           boardMessages = JSON.parse(cached);
@@ -2633,13 +2637,45 @@
           boardMessages = [];
         }
       }
-      if (boardMessages.length === 0) {
+      if (!boardMessages || boardMessages.length === 0) {
         boardMessages = [...singleWelcomeNote];
       }
       renderDrawerMessages();
-      fetchPastMessages();
+
+      // 2. Sincronizza con il Cloud Database Permanente
+      fetchCloudDatabase();
+
+      // 3. Connetti al flusso live in tempo reale (SSE)
       connectToLiveStream();
+
+      // 4. Inizializza il motore anti-jump tastiera
       setupMobileViewportHandling();
+    }
+
+    function fetchCloudDatabase() {
+      fetch(CLOUD_DB_URL)
+        .then(res => res.json())
+        .then(json => {
+          if (json && json.data && Array.isArray(json.data.messages) && json.data.messages.length > 0) {
+            boardMessages = json.data.messages;
+            localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
+            renderDrawerMessages();
+          }
+        })
+        .catch(err => {
+          console.warn('Cloud DB fetch fallback', err);
+        });
+    }
+
+    function saveToCloudDB(messagesList) {
+      fetch(CLOUD_DB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'pietrobnb_mancaversa_board',
+          data: { messages: messagesList }
+        })
+      }).catch(err => console.warn('Cloud DB save error', err));
     }
 
     // Dynamic keyboard pinning engine
@@ -2934,8 +2970,9 @@
 
       if (confirm(`Vuoi eliminare questo messaggio?\n"${msg.text.substring(0, 40)}..."`)) {
         boardMessages = boardMessages.filter(m => m.id !== msgId);
-        localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+        localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
         renderDrawerMessages();
+        saveToCloudDB(boardMessages);
 
         const deletePayload = {
           action: 'delete',
@@ -2972,8 +3009,9 @@
         if (msgIdx !== -1) {
           boardMessages[msgIdx].text = text;
           boardMessages[msgIdx].isEdited = true;
-          localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
           renderDrawerMessages();
+          saveToCloudDB(boardMessages);
 
           const editPayload = {
             action: 'edit',
@@ -3013,6 +3051,7 @@
       };
 
       addMessageToBoard(newMsg, false);
+      saveToCloudDB(boardMessages);
       input.value = '';
       cancelCurrentContext();
 
@@ -3029,7 +3068,7 @@
       boardMessages.push(msg);
       if (boardMessages.length > 70) boardMessages = boardMessages.slice(-70);
 
-      localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+      localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
       renderDrawerMessages();
 
       if (isDrawerOpen) {
@@ -3048,42 +3087,17 @@
 
       if (payload.action === 'delete') {
         boardMessages = boardMessages.filter(m => m.id !== payload.id);
-        localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+        localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
         renderDrawerMessages();
       } else if (payload.action === 'edit') {
         const msg = boardMessages.find(m => m.id === payload.id);
         if (msg) {
           msg.text = payload.text;
           msg.isEdited = true;
-          localStorage.setItem('mancaversa_board_cache_v5', JSON.stringify(boardMessages));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
           renderDrawerMessages();
         }
       }
-    }
-
-    function fetchPastMessages() {
-      fetch(`${NTFY_URL}/json?poll=1&since=12h`)
-        .then(res => res.text())
-        .then(text => {
-          if (!text) return;
-          const lines = text.trim().split('\n');
-          lines.forEach(line => {
-            try {
-              const data = JSON.parse(line);
-              if (data && data.message) {
-                const parsedMsg = JSON.parse(data.message);
-                if (parsedMsg && parsedMsg.action) {
-                  handleIncomingAction(parsedMsg);
-                } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
-                  addMessageToBoard(parsedMsg, false);
-                }
-              }
-            } catch (e) {}
-          });
-        })
-        .catch(err => {
-          console.warn('Realtime fetch offline fallback', err);
-        });
     }
 
     function connectToLiveStream() {
