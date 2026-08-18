@@ -10,6 +10,10 @@
   <meta name="description" content="PietroBnB · Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde (22–24 agosto 2026).">
   <title>PietroBnB · Mancaversa & Gallipoli 2026</title>
 
+  <!-- PWA Manifest & Web Push Notification Support -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23FF385C'/%3E%3Cpath d='M30 35C30 24 40 18 50 18C60 18 70 24 70 35C70 48 50 68 50 68C50 68 30 48 30 35Z' fill='white'/%3E%3Ccircle cx='50' cy='36' r='8' fill='%23FF385C'/%3E%3Ctext x='50' y='86' font-family='sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'%3EPietroBnB%3C/text%3E%3C/svg%3E">
+
   <!-- Open Graph / WhatsApp Preview -->
   <meta property="og:title" content="PietroBnB · Salento 2026">
   <meta property="og:description" content="Tre giorni di mare nel Salento organizzati da Pietro. Programma orario, alloggio a Via Egnazia 44, mappe e bacheca live.">
@@ -1524,10 +1528,40 @@
       background: var(--rausch-light);
       white-space: nowrap;
       flex-shrink: 0;
+      border: none;
+      cursor: pointer;
     }
 
     .btn-edit-name:active {
       transform: scale(0.95);
+    }
+
+    .btn-notif-perm {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--charcoal);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: #FFFFFF;
+      border: 1px solid var(--border-strong);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-notif-perm:active {
+      transform: scale(0.95);
+      background: var(--surface-subtle);
+    }
+
+    .btn-notif-perm.granted {
+      color: var(--green-dark);
+      background: var(--green-bg);
+      border-color: rgba(16, 185, 129, 0.4);
     }
 
     /* Messages Stream Container */
@@ -2605,9 +2639,14 @@
         <div class="user-avatar-badge" id="drawerAvatarBadge">🐬</div>
         <strong class="user-name-text" id="drawerNameDisplay">Delfino Anonimo</strong>
       </div>
-      <button class="btn-edit-name" onclick="openNameModal()">
-        ✎ Cambia nome
-      </button>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button type="button" class="btn-notif-perm" id="btnNotifPerm" onclick="toggleSystemNotifications()" title="Attiva o gestisci notifiche per il tuo smartphone">
+          🔔 Notifiche
+        </button>
+        <button type="button" class="btn-edit-name" onclick="openNameModal()">
+          ✎ Nome
+        </button>
+      </div>
     </div>
 
     <!-- Messages Container -->
@@ -3037,6 +3076,7 @@
 
       unreadCount = 0;
       updateUnreadBadges();
+      updateNotificationButtonUI();
       localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
 
       setTimeout(scrollMessagesToBottom, 100);
@@ -3334,6 +3374,108 @@
       }).catch(err => console.warn('Sync post error', err));
     }
 
+    // --------------------------------------------------------------------------
+    // 3b. Smartphone System Push & Native Notifications
+    // --------------------------------------------------------------------------
+    function registerNotificationServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then(reg => {
+            console.log('PietroBnB SW Registered');
+          })
+          .catch(err => {
+            console.warn('SW registration warning', err);
+          });
+
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.action === 'openBoard') {
+            openBoardDrawer();
+          }
+        });
+      }
+    }
+
+    function updateNotificationButtonUI() {
+      const btn = document.getElementById('btnNotifPerm');
+      if (!btn) return;
+
+      if (!('Notification' in window)) {
+        btn.style.display = 'none';
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        btn.textContent = '🔔 Notifiche: Attive ✓';
+        btn.classList.add('granted');
+      } else if (Notification.permission === 'denied') {
+        btn.textContent = '🔕 Notifiche Bloccate';
+        btn.classList.remove('granted');
+      } else {
+        btn.textContent = '🔔 Notifiche: Attiva';
+        btn.classList.remove('granted');
+      }
+    }
+
+    function toggleSystemNotifications() {
+      if (!('Notification' in window)) {
+        showToast('Il tuo browser non supporta le notifiche push.');
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        showToast('🔔 Notifiche di sistema già attive!');
+        sendSystemNotification('PietroBnB · Salento 2026', 'Le notifiche di sistema sono attive sul tuo smartphone! 🌴🍹');
+        return;
+      }
+
+      if (Notification.permission === 'denied') {
+        showToast('⚠️ Notifiche disattivate nelle impostazioni del browser.');
+        return;
+      }
+
+      Notification.requestPermission().then((permission) => {
+        updateNotificationButtonUI();
+        if (permission === 'granted') {
+          showToast('🔔 Notifiche smartphone attivate!');
+          sendSystemNotification('PietroBnB · Mancaversa 2026', 'Riceverai avvisi nel centro notifiche quando qualcuno scrive in bacheca! 😎🌴');
+        } else {
+          showToast('Notifiche non autorizzate.');
+        }
+      });
+    }
+
+    function sendSystemNotification(title, body, tag = 'board-msg', replyId = null) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+      }
+
+      const notifOptions = {
+        body: body,
+        icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" rx="24" fill="%23FF385C"/%3E%3Cpath d="M30 35C30 24 40 18 50 18C60 18 70 24 70 35C70 48 50 68 50 68C50 68 30 48 30 35Z" fill="white"/%3E%3Ccircle cx="50" cy="36" r="8" fill="%23FF385C"/%3E%3C/svg%3E',
+        badge: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="%23FF385C"/%3E%3C/svg%3E',
+        tag: tag,
+        renotify: true,
+        vibrate: [200, 100, 200],
+        data: { url: './index.html?openBoard=1', replyId: replyId }
+      };
+
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SHOW_NOTIFICATION',
+          title: title,
+          options: notifOptions
+        });
+      } else if (navigator.serviceWorker && 'ready' in navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, notifOptions);
+        }).catch(() => {
+          try { new Notification(title, notifOptions); } catch (e) {}
+        });
+      } else {
+        try { new Notification(title, notifOptions); } catch (e) {}
+      }
+    }
+
     function addMessageToBoard(msg, isNewIncoming = false) {
       const existingIdx = boardMessages.findIndex(m => m.id === msg.id);
       if (existingIdx !== -1) {
@@ -3350,16 +3492,23 @@
         scrollMessagesToBottom();
       }
 
-      if (isNewIncoming && !isDrawerOpen) {
-        unreadCount++;
-        updateUnreadBadges();
+      if (isNewIncoming) {
+        if (!isDrawerOpen) {
+          unreadCount++;
+          updateUnreadBadges();
+        }
 
         const isReplyToMe = msg.replyTo && currentUser && (msg.replyTo.userId === currentUser.id || msg.replyTo.author === currentUser.name);
-        if (isReplyToMe) {
-          showToast(`↩️ ${msg.author} ha risposto al tuo messaggio: "${msg.text.substring(0, 24)}..."`);
-        } else {
-          showToast(`💬 ${msg.author}: "${msg.text.substring(0, 24)}..."`);
+        const notifTitle = isReplyToMe ? `↩️ ${msg.author} ha risposto al tuo messaggio` : `💬 ${msg.author} su PietroBnB`;
+        const notifBody = msg.text;
+
+        // In-app toast se drawer chiuso
+        if (!isDrawerOpen) {
+          showToast(`${isReplyToMe ? '↩️' : '💬'} ${msg.author}: "${msg.text.substring(0, 24)}..."`);
         }
+
+        // Notifica nativa di sistema nel centro notifiche dello smartphone
+        sendSystemNotification(notifTitle, notifBody, `msg_${msg.id}`, msg.id);
       }
     }
 
@@ -3611,6 +3760,14 @@
       initRealtimeBoard();
       renderChecklist();
       updateVerticalRoadProgress();
+      registerNotificationServiceWorker();
+      updateNotificationButtonUI();
+
+      // Se aperto da notifica di sistema (?openBoard=1)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('openBoard') === '1') {
+        setTimeout(openBoardDrawer, 350);
+      }
     });
   </script>
 </body>
