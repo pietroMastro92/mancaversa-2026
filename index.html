@@ -7,12 +7,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Mancaversa 2026">
-  <meta name="description" content="Guida e programma per il weekend a Marina di Mancaversa e Baia Verde (Gallipoli) · 22–24 agosto 2026. 4 persone, spiagge libere, alloggio e cene tipiche.">
+  <meta name="description" content="Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde · 22–24 agosto 2026.">
   <title>Mancaversa & Gallipoli · 22–24 Agosto 2026</title>
 
   <!-- Open Graph / WhatsApp Preview -->
   <meta property="og:title" content="Mancaversa & Gallipoli · 22–24 Agosto 2026">
-  <meta property="og:description" content="Tre giorni di mare nel Salento senza complicazioni. Programma orario, alloggio a Via Egnazia 44, mappe e cene da asporto.">
+  <meta property="og:description" content="Tre giorni di mare nel Salento. Programma orario, alloggio a Via Egnazia 44, mappe e bacheca in tempo reale.">
   <meta property="og:type" content="website">
 
   <!-- Favicon -->
@@ -120,7 +120,7 @@
     }
 
     /* ==========================================================================
-       STICKY TOP HEADER (NO OVERFLOW ON IPHONE)
+       STICKY TOP HEADER
        ========================================================================== */
     .site-header {
       position: sticky;
@@ -167,10 +167,8 @@
 
     .brand-logo span {
       color: var(--charcoal);
-      display: inline;
     }
 
-    /* Compact Search Pill - Strictly sized for mobile */
     .search-pill {
       display: flex;
       align-items: center;
@@ -195,8 +193,6 @@
       font-weight: 700;
       color: var(--charcoal);
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .search-pill-sub {
@@ -265,7 +261,7 @@
     }
 
     /* ==========================================================================
-       SWIPEABLE CATEGORY PILLS BAR
+       CATEGORY BAR
        ========================================================================== */
     .category-bar-wrapper {
       background: #FFFFFF;
@@ -376,7 +372,6 @@
       margin-bottom: 14px;
     }
 
-    /* Mobile Responsive Bento Gallery */
     .hero-gallery {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -476,7 +471,6 @@
       left: 12px;
     }
 
-    /* Specs 2x2 Grid */
     .specs-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -563,7 +557,6 @@
       margin-top: 2px;
     }
 
-    /* Card Container */
     .airbnb-card {
       background: #FFFFFF;
       border: 1px solid var(--border-subtle);
@@ -642,7 +635,6 @@
     .tag-green { background: var(--green-bg); color: var(--green-dark); }
     .tag-blue { background: var(--blue-bg); color: var(--blue-dark); }
 
-    /* Timeline on Mobile */
     .timeline-list {
       padding: 4px 16px 14px;
     }
@@ -690,7 +682,6 @@
       line-height: 1.4;
     }
 
-    /* Buttons */
     .btn-group-row {
       display: grid;
       grid-template-columns: 1fr;
@@ -753,7 +744,6 @@
       background: #EBEBEB;
     }
 
-    /* Tip Callout */
     .tip-callout {
       margin-top: 8px;
       background: #FFFDF8;
@@ -1026,7 +1016,6 @@
       color: #FFFFFF;
     }
 
-    /* Salento Wind Box */
     .wind-card {
       background: linear-gradient(135deg, #F0F9FF 0%, #ECFDF5 100%);
       border: 1px solid #BAE6FD;
@@ -1049,6 +1038,289 @@
       font-size: 12.5px;
       color: #1E293B;
       line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       BACHECA DEL GRUPPO (REAL-TIME SYNC & GOOGLE DOCS ANIMAL IDENTITY)
+       ========================================================================== */
+    .bacheca-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 14px;
+      box-shadow: var(--shadow-xs);
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .bacheca-card {
+        border-radius: var(--radius-lg);
+        padding: 22px;
+      }
+    }
+
+    /* User Identity Banner */
+    .identity-banner {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .identity-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .user-avatar-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .user-name-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--charcoal);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-name-sub {
+      font-size: 11px;
+      color: var(--gray-muted);
+      display: block;
+    }
+
+    .btn-edit-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--rausch);
+      padding: 4px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--rausch-light);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-edit-name:active {
+      transform: scale(0.95);
+    }
+
+    /* Message Input Form */
+    .board-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .board-input {
+      flex: 1;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      color: var(--charcoal);
+      background: #FFFFFF;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .board-input:focus {
+      border-color: var(--charcoal);
+      box-shadow: 0 0 0 1px var(--charcoal);
+    }
+
+    .board-send-btn {
+      background: var(--rausch);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .board-send-btn:active {
+      background: var(--rausch-dark);
+      transform: scale(0.96);
+    }
+
+    /* Real-time Message Stream */
+    .board-messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .board-msg-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 11px 13px;
+      animation: fadeInMsg 0.3s ease-out;
+      transition: var(--transition);
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .msg-author-info {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .msg-avatar {
+      font-size: 16px;
+    }
+
+    .msg-author {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--charcoal);
+    }
+
+    .msg-time {
+      font-size: 11px;
+      color: var(--gray-muted);
+    }
+
+    .msg-body {
+      font-size: 13.5px;
+      color: var(--gray-dark);
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .board-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green-dark);
+      background: var(--green-bg);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green-dark);
+      border-radius: 50%;
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+
+    .empty-board-notice {
+      text-align: center;
+      padding: 24px 10px;
+      color: var(--gray-muted);
+      font-size: 13px;
+    }
+
+    /* Modal for Name Change */
+    .name-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .name-modal-overlay.active {
+      display: flex;
+    }
+
+    .name-modal {
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow-floating);
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .name-modal h4 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .name-modal p {
+      font-size: 12.5px;
+      color: var(--gray-muted);
+      margin-bottom: 14px;
+    }
+
+    .name-modal input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      margin-bottom: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .name-modal input:focus {
+      border-color: var(--charcoal);
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
     }
 
     /* ==========================================================================
@@ -1134,7 +1406,7 @@
       align-items: center;
       gap: 2px;
       color: #FFFFFF;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       padding: 5px 8px;
       border-radius: var(--radius-pill);
@@ -1268,6 +1540,7 @@
         <a href="#g24" class="cat-pill">🚗 Lun 24</a>
         <a href="#casa" class="cat-pill">🏠 Casa</a>
         <a href="#cene" class="cat-pill">🍕 Cene</a>
+        <a href="#bacheca" class="cat-pill">💬 Bacheca</a>
         <a href="#checklist" class="cat-pill">🎒 Valigia</a>
         <a href="#mappe" class="cat-pill">🗺️ Mappe</a>
       </nav>
@@ -1715,6 +1988,66 @@
     </section>
 
     <!-- ==========================================================================
+         BACHECA & COMMENTI LIVE (CON ANIMALI ANONIMI STILE GOOGLE DOCS)
+         ========================================================================== -->
+    <section class="section-block" id="bacheca">
+      <div class="section-head">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="section-eyebrow">Spazio Condiviso</div>
+          <div class="board-live-badge">
+            <span class="pulse-dot"></span> Live Sync
+          </div>
+        </div>
+        <h2 class="section-title">Bacheca del Gruppo</h2>
+        <p class="section-sub">Scrivi idee, promemoria o note per il viaggio in tempo reale.</p>
+      </div>
+
+      <div class="bacheca-card">
+        
+        <!-- User Identity Banner (Google Docs Animal Style) -->
+        <div class="identity-banner">
+          <div class="identity-user">
+            <div class="user-avatar-badge" id="currentAvatarBadge">🐬</div>
+            <div>
+              <span class="user-name-sub">Stai partecipando come:</span>
+              <strong class="user-name-text" id="currentNameDisplay">Delfino Anonimo</strong>
+            </div>
+          </div>
+          <button class="btn-edit-name" onclick="openNameModal()">
+            ✎ Cambia nome
+          </button>
+        </div>
+
+        <!-- Form for New Message -->
+        <form class="board-form" onsubmit="handleSendMessage(event)">
+          <input 
+            type="text" 
+            id="boardInputText" 
+            class="board-input" 
+            placeholder="Scrivi un messaggio o un promemoria..." 
+            autocomplete="off" 
+            required
+          >
+          <button type="submit" class="board-send-btn">
+            <span>Invia</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Live Messages Stream Container -->
+        <div class="board-messages-list" id="boardMessagesContainer">
+          <div class="empty-board-notice" id="emptyBoardNotice">
+            Caricamento bacheca live...
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
          CHECKLIST INTERATTIVA & VENTO
          ========================================================================== -->
     <section class="section-block" id="checklist">
@@ -1797,6 +2130,25 @@
   </main>
 
   <!-- ==========================================================================
+       MODAL CAMBIA NOME (IDENTITY)
+       ========================================================================== -->
+  <div class="name-modal-overlay" id="nameModalOverlay" onclick="closeNameModal(event)">
+    <div class="name-modal" onclick="event.stopPropagation()">
+      <h4>Come ti chiami?</h4>
+      <p>Inserisci il tuo nome oppure lascia il tuo animale anonimo assegnato.</p>
+      <input type="text" id="modalNameInput" placeholder="Es. Pietro, Marco..." maxlength="30">
+      <div class="modal-btn-row">
+        <button class="btn-action btn-subtle" style="min-height:36px; padding:6px 12px;" onclick="resetToRandomAnimal()">
+          🎲 Animale a caso
+        </button>
+        <button class="btn-action btn-primary" style="min-height:36px; padding:6px 14px;" onclick="saveCustomName()">
+          Salva
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
        FLOATING BOTTOM BAR
        ========================================================================== -->
   <aside class="floating-bar-mobile" aria-label="Navigazione rapida mobile">
@@ -1812,6 +2164,10 @@
       <button class="float-item" onclick="scrollToId('programma')">
         <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
         <span>Orari</span>
+      </button>
+      <button class="float-item" onclick="scrollToId('bacheca')">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+        <span>Bacheca</span>
       </button>
       <button class="float-item" onclick="shareTrip()">
         <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
@@ -1838,6 +2194,7 @@
         <a href="#programma">Programma</a>
         <a href="#casa">Casa</a>
         <a href="#cene">Cene</a>
+        <a href="#bacheca">Bacheca</a>
         <a href="#checklist">Checklist</a>
         <a href="#mappe">Mappe</a>
       </div>
@@ -1846,10 +2203,297 @@
   </footer>
 
   <!-- ==========================================================================
-       INTERACTIVE CLIENT SCRIPTS
+       INTERACTIVE CLIENT SCRIPTS (SYNC REAL-TIME & GOOGLE DOCS ANIMALS)
        ========================================================================== -->
   <script>
-    // Checklist items
+    // --------------------------------------------------------------------------
+    // 1. Google Docs Anonymous Animals Identity System
+    // --------------------------------------------------------------------------
+    const ANONYMOUS_ANIMALS = [
+      { name: 'Delfino Anonimo', avatar: '🐬', bg: '#E0F2FE', color: '#0284C7' },
+      { name: 'Fenicottero Anonimo', avatar: '🦩', bg: '#FCE7F3', color: '#DB2777' },
+      { name: 'Polpo Anonimo', avatar: '🐙', bg: '#EDE9FE', color: '#7C3AED' },
+      { name: 'Tartaruga Anonima', avatar: '🐢', bg: '#DCFCE7', color: '#16A34A' },
+      { name: 'Granchio Anonimo', avatar: '🦀', bg: '#FEE2E2', color: '#DC2626' },
+      { name: 'Gabbiano Anonimo', avatar: '🐦', bg: '#F1F5F9', color: '#475569' },
+      { name: 'Cavalluccio Anonimo', avatar: '🌊', bg: '#CCFBF1', color: '#0D9488' },
+      { name: 'Volpe Anonima', avatar: '🦊', bg: '#FFEDD5', color: '#EA580C' },
+      { name: 'Geco Anonimo', avatar: '🦎', bg: '#FEF9C3', color: '#CA8A04' },
+      { name: 'Riccio Anonimo', avatar: '🦔', bg: '#F5F5F4', color: '#57534E' },
+      { name: 'Pinguino Anonimo', avatar: '🐧', bg: '#E2E8F0', color: '#334155' },
+      { name: 'Koala Anonimo', avatar: '🐨', bg: '#E0E7FF', color: '#4F46E5' }
+    ];
+
+    let currentUser = null;
+
+    function initUserIdentity() {
+      const saved = localStorage.getItem('mancaversa_user_identity_v2');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+        } catch (e) {
+          currentUser = null;
+        }
+      }
+
+      if (!currentUser || !currentUser.name) {
+        const randomAnimal = ANONYMOUS_ANIMALS[Math.floor(Math.random() * ANONYMOUS_ANIMALS.length)];
+        currentUser = {
+          id: 'user_' + Math.random().toString(36).substring(2, 9),
+          name: randomAnimal.name,
+          avatar: randomAnimal.avatar,
+          bg: randomAnimal.bg,
+          color: randomAnimal.color,
+          isCustom: false
+        };
+        localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+      }
+
+      updateIdentityUI();
+    }
+
+    function updateIdentityUI() {
+      const nameEl = document.getElementById('currentNameDisplay');
+      const avatarEl = document.getElementById('currentAvatarBadge');
+      if (nameEl && avatarEl && currentUser) {
+        nameEl.textContent = currentUser.name;
+        avatarEl.textContent = currentUser.avatar;
+        avatarEl.style.background = currentUser.bg || '#E0F2FE';
+      }
+    }
+
+    function openNameModal() {
+      const modal = document.getElementById('nameModalOverlay');
+      const input = document.getElementById('modalNameInput');
+      if (modal && input) {
+        input.value = currentUser.isCustom ? currentUser.name : '';
+        modal.classList.add('active');
+        input.focus();
+      }
+    }
+
+    function closeNameModal(e) {
+      const modal = document.getElementById('nameModalOverlay');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function saveCustomName() {
+      const input = document.getElementById('modalNameInput');
+      const val = input ? input.value.trim() : '';
+
+      if (val) {
+        currentUser.name = val;
+        currentUser.isCustom = true;
+      } else {
+        resetToRandomAnimal();
+        return;
+      }
+
+      localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+      updateIdentityUI();
+      closeNameModal();
+      showToast(`Nome salvato: ${currentUser.name}`);
+    }
+
+    function resetToRandomAnimal() {
+      const randomAnimal = ANONYMOUS_ANIMALS[Math.floor(Math.random() * ANONYMOUS_ANIMALS.length)];
+      currentUser.name = randomAnimal.name;
+      currentUser.avatar = randomAnimal.avatar;
+      currentUser.bg = randomAnimal.bg;
+      currentUser.color = randomAnimal.color;
+      currentUser.isCustom = false;
+
+      localStorage.setItem('mancaversa_user_identity_v2', JSON.stringify(currentUser));
+      updateIdentityUI();
+      closeNameModal();
+      showToast(`Assegnato: ${currentUser.name}`);
+    }
+
+    // --------------------------------------------------------------------------
+    // 2. Real-Time Group Board (Live Sync via NTFY.sh SSE & Local Storage)
+    // --------------------------------------------------------------------------
+    const TOPIC_NAME = 'mancaversa-2026-travel-notes';
+    const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
+    let boardMessages = [];
+
+    // Pre-populated default notes if board is completely new
+    const initialWelcomeNotes = [
+      {
+        id: 'init_1',
+        author: 'Delfino Anonimo',
+        avatar: '🐬',
+        bg: '#E0F2FE',
+        text: 'Benvenuti nella bacheca del viaggio! Qui possiamo organizzarci per chi porta cosa e le cene.',
+        time: '22 ago'
+      },
+      {
+        id: 'init_2',
+        author: 'Fenicottero Anonimo',
+        avatar: '🦩',
+        bg: '#FCE7F3',
+        text: '🏖️ Io porto una cassa Bluetooth per la musica in spiaggia a Baia Verde!',
+        time: '22 ago'
+      }
+    ];
+
+    function initRealtimeBoard() {
+      // 1. Load cached local messages first
+      const cached = localStorage.getItem('mancaversa_board_cache');
+      if (cached) {
+        try {
+          boardMessages = JSON.parse(cached);
+        } catch (e) {
+          boardMessages = [];
+        }
+      }
+      if (boardMessages.length === 0) {
+        boardMessages = [...initialWelcomeNotes];
+      }
+      renderBoardMessages();
+
+      // 2. Fetch past server messages
+      fetchPastMessages();
+
+      // 3. Connect to SSE Live Stream
+      connectToLiveStream();
+    }
+
+    function renderBoardMessages() {
+      const container = document.getElementById('boardMessagesContainer');
+      if (!container) return;
+
+      if (boardMessages.length === 0) {
+        container.innerHTML = `<div class="empty-board-notice">Nessun messaggio. Scrivi il primo promemoria!</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      boardMessages.forEach(msg => {
+        const item = document.createElement('div');
+        item.className = 'board-msg-item';
+        item.setAttribute('data-id', msg.id);
+
+        item.innerHTML = `
+          <div class="msg-header">
+            <div class="msg-author-info">
+              <span class="msg-avatar">${escapeHTML(msg.avatar || '🐬')}</span>
+              <span class="msg-author">${escapeHTML(msg.author || 'Anonimo')}</span>
+            </div>
+            <span class="msg-time">${escapeHTML(msg.time || 'Adesso')}</span>
+          </div>
+          <div class="msg-body">${escapeHTML(msg.text || '')}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function addMessageToBoard(msg, prepend = false) {
+      if (boardMessages.some(m => m.id === msg.id)) return; // prevent duplicate
+
+      if (prepend) {
+        boardMessages.unshift(msg);
+      } else {
+        boardMessages.push(msg);
+      }
+
+      // Keep max 50 recent messages
+      if (boardMessages.length > 50) boardMessages = boardMessages.slice(0, 50);
+
+      localStorage.setItem('mancaversa_board_cache', JSON.stringify(boardMessages));
+      renderBoardMessages();
+    }
+
+    function fetchPastMessages() {
+      fetch(`${NTFY_URL}/json?poll=1&since=12h`)
+        .then(res => res.text())
+        .then(text => {
+          if (!text) return;
+          const lines = text.trim().split('\n');
+          lines.forEach(line => {
+            try {
+              const data = JSON.parse(line);
+              if (data && data.message) {
+                const parsedMsg = JSON.parse(data.message);
+                if (parsedMsg && parsedMsg.id && parsedMsg.text) {
+                  addMessageToBoard(parsedMsg, false);
+                }
+              }
+            } catch (e) {}
+          });
+        })
+        .catch(err => {
+          console.warn('Realtime fetch offline fallback', err);
+        });
+    }
+
+    function connectToLiveStream() {
+      if (!window.EventSource) return;
+
+      try {
+        const eventSource = new EventSource(`${NTFY_URL}/sse`);
+        eventSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data && data.message) {
+              const parsedMsg = JSON.parse(data.message);
+              if (parsedMsg && parsedMsg.id && parsedMsg.text) {
+                addMessageToBoard(parsedMsg, true);
+                showToast(`Nuovo messaggio da ${parsedMsg.author}`);
+              }
+            }
+          } catch (err) {}
+        };
+
+        eventSource.onerror = () => {
+          // Reconnect automatically handled by browser EventSource
+        };
+      } catch (e) {}
+    }
+
+    function handleSendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('boardInputText');
+      if (!input) return;
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const newMsg = {
+        id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        author: currentUser.name,
+        avatar: currentUser.avatar,
+        bg: currentUser.bg,
+        text: text,
+        time: timeStr
+      };
+
+      // 1. Optimistic local update
+      addMessageToBoard(newMsg, true);
+      input.value = '';
+
+      // 2. Publish to live stream for everyone
+      fetch(NTFY_URL, {
+        method: 'POST',
+        headers: { 'Title': 'Mancaversa Board' },
+        body: JSON.stringify(newMsg)
+      }).catch(err => console.warn('Sync post error', err));
+    }
+
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // --------------------------------------------------------------------------
+    // 3. Checklist Items & LocalStorage
+    // --------------------------------------------------------------------------
     const checklistItems = [
       { id: 'c1', text: '🏖️ Ombrellone e teli mare' },
       { id: 'c2', text: '🧊 Borsa termica con ghiaccio e acqua' },
@@ -1895,7 +2539,9 @@
       }
     }
 
-    // Toast pill
+    // --------------------------------------------------------------------------
+    // 4. Utility: Toast & Clipboard & Share
+    // --------------------------------------------------------------------------
     let toastTimer = null;
     function showToast(msg) {
       const box = document.getElementById('toastBox');
@@ -1911,7 +2557,6 @@
       }, 2400);
     }
 
-    // Copy to clipboard
     function copyText(text, successMsg) {
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1938,11 +2583,10 @@
       document.body.removeChild(area);
     }
 
-    // Share trip
     function shareTrip() {
       const shareData = {
         title: 'Mancaversa 2026 · Salento Trip',
-        text: 'Programma, alloggio e mappe per il weekend a Mancaversa & Gallipoli (22–24 agosto 2026)!',
+        text: 'Programma, alloggio, mappe e bacheca del viaggio per Mancaversa & Gallipoli (22–24 agosto 2026)!',
         url: window.location.href
       };
 
@@ -1955,7 +2599,6 @@
       }
     }
 
-    // Scroll helper
     function scrollToId(id) {
       const el = document.getElementById(id);
       if (el) {
@@ -1965,7 +2608,7 @@
 
     // Highlight active pill on scroll
     window.addEventListener('scroll', () => {
-      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
+      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'bacheca', 'checklist', 'mappe'];
       const currentPos = window.scrollY + 130;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -1985,7 +2628,12 @@
       }
     }, { passive: true });
 
-    document.addEventListener('DOMContentLoaded', renderChecklist);
+    // Initialize all modules on load
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserIdentity();
+      initRealtimeBoard();
+      renderChecklist();
+    });
   </script>
 </body>
 </html>
