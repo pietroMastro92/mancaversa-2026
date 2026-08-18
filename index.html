@@ -1519,13 +1519,9 @@
           <path d="M50 8C38 8 28 17 22 28C14 42 22 72 45 92C48 94.5 52 94.5 55 92C78 72 86 42 78 28C72 17 62 8 50 8ZM50 20C57 20 63 25.5 66 33C71 44 65 67 50 82C35 67 29 44 34 33C37 25.5 43 20 50 20Z" fill="#FF385C"/>
           
           <!-- Occhiali da Sole Estivi Neri 😎 -->
-          <!-- Lente Sinistra -->
           <path d="M30 38C30 35 34 34 47 34C48 34 49 37 49 42C49 47 43 49 35 49C31 49 30 43 30 38Z" fill="#18181B"/>
-          <!-- Lente Destra -->
           <path d="M51 34C64 34 68 35 68 38C68 43 67 49 63 49C55 49 51 47 51 42C51 37 51 34 51 34Z" fill="#18181B"/>
-          <!-- Ponte Occhiali -->
           <path d="M46 37H54" stroke="#18181B" stroke-width="3" stroke-linecap="round"/>
-          <!-- Riflessi Lenti Bianche -->
           <path d="M34 37L39 44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
           <path d="M55 37L60 44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
           
@@ -1955,8 +1951,8 @@
     </section>
 
     <!-- ==========================================================================
-         CENE & RISTORANTI
-         ========================================================================== -->
+       CENE & RISTORANTI
+       ========================================================================== -->
     <section class="section-block" id="cene">
       <div class="section-head">
         <div class="section-eyebrow">Cibo Locale</div>
@@ -2366,33 +2362,26 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Live Sync via NTFY.sh SSE & Local Storage)
+    // 3. Real-Time Group Board (Solo Unico Messaggio Iniziale di Benvenuto)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
     let boardMessages = [];
 
-    const initialWelcomeNotes = [
+    // Singolo messaggio di benvenuto iniziale
+    const singleWelcomeNote = [
       {
-        id: 'init_1',
+        id: 'init_welcome_pietro',
         author: 'Superhost Pietro',
         avatar: '😎',
         bg: '#FFF0F2',
-        text: 'Benvenuti su Pietrobnb! Ragazzi scrivete qui promemoria e idee per il weekend!',
-        time: '22 ago'
-      },
-      {
-        id: 'init_2',
-        author: 'Delfino Anonimo',
-        avatar: '🐬',
-        bg: '#E0F2FE',
-        text: '🏖️ Io porto una cassa Bluetooth per la musica in spiaggia a Baia Verde!',
+        text: '🌴 Benvenuti su Pietrobnb! Scrivete qui idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
         time: '22 ago'
       }
     ];
 
     function initRealtimeBoard() {
-      const cached = localStorage.getItem('mancaversa_board_cache');
+      const cached = localStorage.getItem('mancaversa_board_cache_v3');
       if (cached) {
         try {
           boardMessages = JSON.parse(cached);
@@ -2401,7 +2390,7 @@
         }
       }
       if (boardMessages.length === 0) {
-        boardMessages = [...initialWelcomeNotes];
+        boardMessages = [...singleWelcomeNote];
       }
       renderBoardMessages();
       fetchPastMessages();
@@ -2448,7 +2437,7 @@
 
       if (boardMessages.length > 50) boardMessages = boardMessages.slice(0, 50);
 
-      localStorage.setItem('mancaversa_board_cache', JSON.stringify(boardMessages));
+      localStorage.setItem('mancaversa_board_cache_v3', JSON.stringify(boardMessages));
       renderBoardMessages();
     }
 
@@ -2649,7 +2638,6 @@
       }
     }
 
-    // Highlight active pill on scroll
     window.addEventListener('scroll', () => {
       const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'bacheca', 'checklist', 'mappe'];
       const currentPos = window.scrollY + 130;
