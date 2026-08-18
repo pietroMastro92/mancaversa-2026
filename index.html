@@ -63,6 +63,7 @@
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
       --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
       --shadow-floating: 0 10px 28px rgba(0, 0, 0, 0.16);
+      --shadow-drawer: 0 -8px 30px rgba(0, 0, 0, 0.18);
       
       --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
@@ -120,7 +121,7 @@
     }
 
     /* ==========================================================================
-       STICKY TOP HEADER CON LOGO GIOCCOSO PIETROBNB
+       STICKY TOP HEADER CON LOGO PIETROBNB
        ========================================================================== */
     .site-header {
       position: sticky;
@@ -148,7 +149,6 @@
       }
     }
 
-    /* Brand Mascot Logo */
     .brand-logo {
       display: flex;
       align-items: center;
@@ -166,7 +166,6 @@
       transform: scale(0.95);
     }
 
-    /* Logo Animato con Occhiali da Sole e Sorriso */
     .pietro-mascot-icon {
       width: 32px;
       height: 32px;
@@ -265,6 +264,7 @@
       justify-content: center;
       color: var(--charcoal);
       transition: var(--transition);
+      position: relative;
     }
 
     .btn-header-icon:active {
@@ -325,6 +325,7 @@
       flex-shrink: 0;
       scroll-snap-align: start;
       transition: var(--transition);
+      position: relative;
     }
 
     .cat-pill:active {
@@ -956,286 +957,6 @@
     }
 
     /* ==========================================================================
-       BACHECA & COMMENTI LIVE (CON ANIMALI ANONIMI STILE GOOGLE DOCS)
-       ========================================================================== */
-    .bacheca-card {
-      background: #FFFFFF;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px 14px;
-      box-shadow: var(--shadow-xs);
-      margin-bottom: 16px;
-    }
-
-    @media (min-width: 768px) {
-      .bacheca-card {
-        border-radius: var(--radius-lg);
-        padding: 22px;
-      }
-    }
-
-    .identity-banner {
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .identity-user {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 0;
-    }
-
-    .user-avatar-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-pill);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-xs);
-    }
-
-    .user-name-text {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--charcoal);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .user-name-sub {
-      font-size: 11px;
-      color: var(--gray-muted);
-      display: block;
-    }
-
-    .btn-edit-name {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--rausch);
-      padding: 4px 8px;
-      border-radius: var(--radius-pill);
-      background: var(--rausch-light);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .btn-edit-name:active {
-      transform: scale(0.95);
-    }
-
-    .board-form {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .board-input {
-      flex: 1;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      font-size: 13.5px;
-      font-family: inherit;
-      color: var(--charcoal);
-      background: #FFFFFF;
-      outline: none;
-      transition: var(--transition);
-    }
-
-    .board-input:focus {
-      border-color: var(--charcoal);
-      box-shadow: 0 0 0 1px var(--charcoal);
-    }
-
-    .board-send-btn {
-      background: var(--rausch);
-      color: #FFFFFF;
-      font-weight: 700;
-      font-size: 13px;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
-      transition: var(--transition);
-    }
-
-    .board-send-btn:active {
-      background: var(--rausch-dark);
-      transform: scale(0.96);
-    }
-
-    .board-messages-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 480px;
-      overflow-y: auto;
-      padding-right: 2px;
-    }
-
-    .board-msg-item {
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 11px 13px;
-      animation: fadeInMsg 0.3s ease-out;
-      transition: var(--transition);
-    }
-
-    @keyframes fadeInMsg {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .msg-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 5px;
-    }
-
-    .msg-author-info {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .msg-avatar {
-      font-size: 16px;
-    }
-
-    .msg-author {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--charcoal);
-    }
-
-    .msg-time {
-      font-size: 11px;
-      color: var(--gray-muted);
-    }
-
-    .msg-body {
-      font-size: 13.5px;
-      color: var(--gray-dark);
-      line-height: 1.45;
-      word-break: break-word;
-    }
-
-    .board-live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--green-dark);
-      background: var(--green-bg);
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-    }
-
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background: var(--green-dark);
-      border-radius: 50%;
-      animation: pulse 1.6s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.7; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.7; }
-    }
-
-    .empty-board-notice {
-      text-align: center;
-      padding: 24px 10px;
-      color: var(--gray-muted);
-      font-size: 13px;
-    }
-
-    /* Modal for Name Change */
-    .name-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .name-modal-overlay.active {
-      display: flex;
-    }
-
-    .name-modal {
-      background: #FFFFFF;
-      border-radius: var(--radius-md);
-      padding: 20px;
-      width: 100%;
-      max-width: 340px;
-      box-shadow: var(--shadow-floating);
-      animation: popIn 0.2s ease-out;
-    }
-
-    @keyframes popIn {
-      from { transform: scale(0.92); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .name-modal h4 {
-      font-size: 17px;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .name-modal p {
-      font-size: 12.5px;
-      color: var(--gray-muted);
-      margin-bottom: 14px;
-    }
-
-    .name-modal input {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 14px;
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-xs);
-      margin-bottom: 14px;
-      font-family: inherit;
-      outline: none;
-    }
-
-    .name-modal input:focus {
-      border-color: var(--charcoal);
-    }
-
-    .modal-btn-row {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    /* ==========================================================================
        CHECKLIST INTERATTIVA CON LOCALSTORAGE
        ========================================================================== */
     .checklist-wrapper {
@@ -1394,7 +1115,7 @@
     }
 
     /* ==========================================================================
-       FLOATING BOTTOM BAR
+       FLOATING ACTION BAR & UNREAD BADGES
        ========================================================================== */
     .floating-bar-mobile {
       position: fixed;
@@ -1430,6 +1151,7 @@
       padding: 5px 8px;
       border-radius: var(--radius-pill);
       transition: var(--transition);
+      position: relative;
     }
 
     .float-item:active {
@@ -1445,6 +1167,437 @@
 
     .float-item.rausch-tint {
       color: #FF5A78;
+    }
+
+    /* Red Notification Badge */
+    .unread-badge {
+      position: absolute;
+      top: 1px;
+      right: 4px;
+      background: #FF385C;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 17px;
+      height: 17px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid #1E1E1E;
+      box-shadow: 0 2px 5px rgba(255, 56, 92, 0.5);
+      animation: badgePulse 1.8s infinite;
+    }
+
+    .cat-pill-badge {
+      background: #FF385C;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+      margin-left: 2px;
+      animation: badgePulse 1.8s infinite;
+    }
+
+    @keyframes badgePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Floating Board Quick FAB (Bottom Right on Desktop / Mobile) */
+    .floating-fab-corner {
+      position: fixed;
+      bottom: calc(75px + env(safe-area-inset-bottom));
+      right: 16px;
+      z-index: 98;
+      background: #FFFFFF;
+      color: var(--charcoal);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      padding: 8px 14px 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow-floating);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .floating-fab-corner:active {
+      transform: scale(0.94);
+      background: var(--surface-subtle);
+    }
+
+    .floating-fab-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-pill);
+      background: var(--rausch);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       BACHECA SLIDE-UP BOTTOM SHEET (DRAWER)
+       ========================================================================== */
+    .board-drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .board-drawer-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .board-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 100%;
+      max-width: 540px;
+      height: 84vh;
+      max-height: 720px;
+      background: #FFFFFF;
+      border-top-left-radius: var(--radius-lg);
+      border-top-right-radius: var(--radius-lg);
+      box-shadow: var(--shadow-drawer);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .board-drawer.active {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Drag handle */
+    .drawer-handle-bar {
+      width: 38px;
+      height: 4px;
+      background: #D1D5DB;
+      border-radius: var(--radius-pill);
+      margin: 8px auto 4px;
+      cursor: pointer;
+    }
+
+    /* Drawer Header */
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .drawer-title-group {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .drawer-title {
+      font-size: 16.5px;
+      font-weight: 800;
+      color: var(--charcoal);
+    }
+
+    .board-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--green-dark);
+      background: var(--green-bg);
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green-dark);
+      border-radius: 50%;
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+
+    .btn-close-drawer {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      color: var(--charcoal);
+      font-weight: 700;
+    }
+
+    .btn-close-drawer:active {
+      background: #E5E7EB;
+    }
+
+    /* Identity Banner inside Drawer */
+    .identity-banner {
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .identity-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .user-avatar-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .user-name-text {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--charcoal);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-edit-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--rausch);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--rausch-light);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-edit-name:active {
+      transform: scale(0.95);
+    }
+
+    /* Messages Stream Container */
+    .drawer-messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .board-msg-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      animation: fadeInMsg 0.25s ease-out;
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .msg-author-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .msg-avatar {
+      font-size: 15px;
+    }
+
+    .msg-author {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--charcoal);
+    }
+
+    .msg-time {
+      font-size: 10.5px;
+      color: var(--gray-muted);
+    }
+
+    .msg-body {
+      font-size: 13.5px;
+      color: var(--gray-dark);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .empty-board-notice {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--gray-muted);
+      font-size: 13px;
+    }
+
+    /* Message Input Form at bottom of Drawer */
+    .drawer-form {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-subtle);
+      background: #FFFFFF;
+      display: flex;
+      gap: 8px;
+    }
+
+    .drawer-input {
+      flex: 1;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      padding: 9px 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      color: var(--charcoal);
+      background: #FFFFFF;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .drawer-input:focus {
+      border-color: var(--charcoal);
+    }
+
+    .drawer-send-btn {
+      background: var(--rausch);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 16px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .drawer-send-btn:active {
+      background: var(--rausch-dark);
+      transform: scale(0.96);
+    }
+
+    /* Modal for Name Change */
+    .name-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .name-modal-overlay.active {
+      display: flex;
+    }
+
+    .name-modal {
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow-floating);
+      animation: popIn 0.2s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .name-modal h4 {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .name-modal p {
+      font-size: 12.5px;
+      color: var(--gray-muted);
+      margin-bottom: 14px;
+    }
+
+    .name-modal input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xs);
+      margin-bottom: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .name-modal input:focus {
+      border-color: var(--charcoal);
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
     }
 
     /* ==========================================================================
@@ -1571,7 +1724,9 @@
         <a href="#g24" class="cat-pill">🚗 Lun 24</a>
         <a href="#casa" class="cat-pill">🏠 Casa</a>
         <a href="#cene" class="cat-pill">🍕 Cene</a>
-        <a href="#bacheca" class="cat-pill">💬 Bacheca</a>
+        <a href="javascript:void(0)" onclick="openBoardDrawer()" class="cat-pill" style="color: var(--rausch); font-weight: 700;">
+          💬 Bacheca <span class="cat-pill-badge" id="catPillBadge" style="display: none;">0</span>
+        </a>
         <a href="#checklist" class="cat-pill">🎒 Valigia</a>
         <a href="#mappe" class="cat-pill">🗺️ Mappe</a>
       </nav>
@@ -2019,66 +2174,6 @@
     </section>
 
     <!-- ==========================================================================
-         BACHECA & COMMENTI LIVE (CON ANIMALI ANONIMI STILE GOOGLE DOCS)
-         ========================================================================== -->
-    <section class="section-block" id="bacheca">
-      <div class="section-head">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div class="section-eyebrow">Spazio Condiviso</div>
-          <div class="board-live-badge">
-            <span class="pulse-dot"></span> Live Sync
-          </div>
-        </div>
-        <h2 class="section-title">Bacheca del Gruppo</h2>
-        <p class="section-sub">Scrivi idee, promemoria o note per il viaggio in tempo reale.</p>
-      </div>
-
-      <div class="bacheca-card">
-        
-        <!-- User Identity Banner -->
-        <div class="identity-banner">
-          <div class="identity-user">
-            <div class="user-avatar-badge" id="currentAvatarBadge">🐬</div>
-            <div>
-              <span class="user-name-sub">Stai partecipando come:</span>
-              <strong class="user-name-text" id="currentNameDisplay">Delfino Anonimo</strong>
-            </div>
-          </div>
-          <button class="btn-edit-name" onclick="openNameModal()">
-            ✎ Cambia nome
-          </button>
-        </div>
-
-        <!-- Form for New Message -->
-        <form class="board-form" onsubmit="handleSendMessage(event)">
-          <input 
-            type="text" 
-            id="boardInputText" 
-            class="board-input" 
-            placeholder="Scrivi un messaggio o un promemoria..." 
-            autocomplete="off" 
-            required
-          >
-          <button type="submit" class="board-send-btn">
-            <span>Invia</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-          </button>
-        </form>
-
-        <!-- Live Messages Stream Container -->
-        <div class="board-messages-list" id="boardMessagesContainer">
-          <div class="empty-board-notice" id="emptyBoardNotice">
-            Caricamento bacheca live...
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ==========================================================================
          CHECKLIST INTERATTIVA & VENTO
          ========================================================================== -->
     <section class="section-block" id="checklist">
@@ -2161,6 +2256,78 @@
   </main>
 
   <!-- ==========================================================================
+       FLOATING CORNER FAB (SEMPRE VISIBILE IN BASSO A DESTRA)
+       ========================================================================== -->
+  <div class="floating-fab-corner" onclick="openBoardDrawer()" id="fabCornerButton">
+    <div class="floating-fab-icon">
+      💬
+      <span class="unread-badge" id="cornerFabBadge" style="display: none;">0</span>
+    </div>
+    <span>Bacheca</span>
+  </div>
+
+  <!-- ==========================================================================
+       BACHECA SLIDE-UP BOTTOM SHEET (DRAWER FLOTTANTE)
+       ========================================================================== -->
+  <div class="board-drawer-overlay" id="boardDrawerOverlay" onclick="closeBoardDrawer()"></div>
+
+  <div class="board-drawer" id="boardDrawer">
+    
+    <!-- Drag Handle -->
+    <div class="drawer-handle-bar" onclick="closeBoardDrawer()"></div>
+
+    <!-- Header Drawer -->
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <span style="font-size: 18px;">💬</span>
+        <h3 class="drawer-title">Bacheca del Gruppo</h3>
+        <div class="board-live-badge">
+          <span class="pulse-dot"></span> Live
+        </div>
+      </div>
+      <button class="btn-close-drawer" onclick="closeBoardDrawer()" title="Chiudi">✕</button>
+    </div>
+
+    <!-- Identity Banner inside Drawer -->
+    <div class="identity-banner">
+      <div class="identity-user">
+        <div class="user-avatar-badge" id="drawerAvatarBadge">🐬</div>
+        <strong class="user-name-text" id="drawerNameDisplay">Delfino Anonimo</strong>
+      </div>
+      <button class="btn-edit-name" onclick="openNameModal()">
+        ✎ Cambia nome
+      </button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="drawer-messages-list" id="drawerMessagesContainer">
+      <div class="empty-board-notice" id="drawerEmptyNotice">
+        Caricamento messaggi in tempo reale...
+      </div>
+    </div>
+
+    <!-- Form for New Message -->
+    <form class="drawer-form" onsubmit="handleSendDrawerMessage(event)">
+      <input 
+        type="text" 
+        id="drawerInputText" 
+        class="drawer-input" 
+        placeholder="Scrivi un messaggio o promemoria..." 
+        autocomplete="off" 
+        required
+      >
+      <button type="submit" class="drawer-send-btn">
+        <span>Invia</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </form>
+
+  </div>
+
+  <!-- ==========================================================================
        MODAL CAMBIA NOME (IDENTITY)
        ========================================================================== -->
   <div class="name-modal-overlay" id="nameModalOverlay" onclick="closeNameModal(event)">
@@ -2196,9 +2363,10 @@
         <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
         <span>Orari</span>
       </button>
-      <button class="float-item" onclick="scrollToId('bacheca')">
+      <button class="float-item" onclick="openBoardDrawer()">
         <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
         <span>Bacheca</span>
+        <span class="unread-badge" id="bottomBarBadge" style="display: none;">0</span>
       </button>
       <button class="float-item" onclick="shareTrip()">
         <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
@@ -2225,7 +2393,7 @@
         <a href="#programma">Programma</a>
         <a href="#casa">Casa</a>
         <a href="#cene">Cene</a>
-        <a href="#bacheca">Bacheca</a>
+        <a href="javascript:void(0)" onclick="openBoardDrawer()">Bacheca</a>
         <a href="#checklist">Checklist</a>
         <a href="#mappe">Mappe</a>
       </div>
@@ -2305,8 +2473,8 @@
     }
 
     function updateIdentityUI() {
-      const nameEl = document.getElementById('currentNameDisplay');
-      const avatarEl = document.getElementById('currentAvatarBadge');
+      const nameEl = document.getElementById('drawerNameDisplay');
+      const avatarEl = document.getElementById('drawerAvatarBadge');
       if (nameEl && avatarEl && currentUser) {
         nameEl.textContent = currentUser.name;
         avatarEl.textContent = currentUser.avatar;
@@ -2362,26 +2530,28 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board (Solo Unico Messaggio Iniziale di Benvenuto)
+    // 3. Real-Time Group Board (Drawer & Unread Badge Counter)
     // --------------------------------------------------------------------------
     const TOPIC_NAME = 'mancaversa-2026-travel-notes';
     const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
     let boardMessages = [];
+    let isDrawerOpen = false;
+    let unreadCount = 0;
 
-    // Singolo messaggio di benvenuto iniziale
     const singleWelcomeNote = [
       {
         id: 'init_welcome_pietro',
         author: 'Superhost Pietro',
         avatar: '😎',
         bg: '#FFF0F2',
-        text: '🌴 Benvenuti su Pietrobnb! Scrivete qui idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
-        time: '22 ago'
+        text: '🌴 Benvenuti su Pietrobnb! Scrivete qui sotto idee, proposte e promemoria per il weekend nel Salento! 😎🍹',
+        time: '22 ago',
+        timestamp: Date.now() - 10000
       }
     ];
 
     function initRealtimeBoard() {
-      const cached = localStorage.getItem('mancaversa_board_cache_v3');
+      const cached = localStorage.getItem('mancaversa_board_cache_v4');
       if (cached) {
         try {
           boardMessages = JSON.parse(cached);
@@ -2392,13 +2562,65 @@
       if (boardMessages.length === 0) {
         boardMessages = [...singleWelcomeNote];
       }
-      renderBoardMessages();
+      renderDrawerMessages();
       fetchPastMessages();
       connectToLiveStream();
     }
 
-    function renderBoardMessages() {
-      const container = document.getElementById('boardMessagesContainer');
+    function openBoardDrawer() {
+      isDrawerOpen = true;
+      const overlay = document.getElementById('boardDrawerOverlay');
+      const drawer = document.getElementById('boardDrawer');
+      if (overlay && drawer) {
+        overlay.classList.add('active');
+        drawer.classList.add('active');
+      }
+
+      // Clear unread count
+      unreadCount = 0;
+      updateUnreadBadges();
+      localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
+
+      // Auto scroll to bottom
+      const container = document.getElementById('drawerMessagesContainer');
+      if (container) {
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight;
+        }, 100);
+      }
+    }
+
+    function closeBoardDrawer() {
+      isDrawerOpen = false;
+      const overlay = document.getElementById('boardDrawerOverlay');
+      const drawer = document.getElementById('boardDrawer');
+      if (overlay && drawer) {
+        overlay.classList.remove('active');
+        drawer.classList.remove('active');
+      }
+      unreadCount = 0;
+      updateUnreadBadges();
+    }
+
+    function updateUnreadBadges() {
+      const cornerBadge = document.getElementById('cornerFabBadge');
+      const bottomBarBadge = document.getElementById('bottomBarBadge');
+      const catPillBadge = document.getElementById('catPillBadge');
+
+      const badges = [cornerBadge, bottomBarBadge, catPillBadge];
+      badges.forEach(b => {
+        if (!b) return;
+        if (unreadCount > 0) {
+          b.textContent = unreadCount > 9 ? '9+' : unreadCount;
+          b.style.display = 'inline-flex';
+        } else {
+          b.style.display = 'none';
+        }
+      });
+    }
+
+    function renderDrawerMessages() {
+      const container = document.getElementById('drawerMessagesContainer');
       if (!container) return;
 
       if (boardMessages.length === 0) {
@@ -2426,19 +2648,26 @@
       });
     }
 
-    function addMessageToBoard(msg, prepend = false) {
+    function addMessageToBoard(msg, isNewIncoming = false) {
       if (boardMessages.some(m => m.id === msg.id)) return;
 
-      if (prepend) {
-        boardMessages.unshift(msg);
-      } else {
-        boardMessages.push(msg);
+      boardMessages.push(msg);
+      if (boardMessages.length > 60) boardMessages = boardMessages.slice(-60);
+
+      localStorage.setItem('mancaversa_board_cache_v4', JSON.stringify(boardMessages));
+      renderDrawerMessages();
+
+      const container = document.getElementById('drawerMessagesContainer');
+      if (container && isDrawerOpen) {
+        container.scrollTop = container.scrollHeight;
       }
 
-      if (boardMessages.length > 50) boardMessages = boardMessages.slice(0, 50);
-
-      localStorage.setItem('mancaversa_board_cache_v3', JSON.stringify(boardMessages));
-      renderBoardMessages();
+      // If new incoming message and drawer is closed, increment unread badge!
+      if (isNewIncoming && !isDrawerOpen) {
+        unreadCount++;
+        updateUnreadBadges();
+        showToast(`💬 Nuovo messaggio da ${msg.author}: "${msg.text.substring(0, 24)}..."`);
+      }
     }
 
     function fetchPastMessages() {
@@ -2475,8 +2704,9 @@
             if (data && data.message) {
               const parsedMsg = JSON.parse(data.message);
               if (parsedMsg && parsedMsg.id && parsedMsg.text) {
-                addMessageToBoard(parsedMsg, true);
-                showToast(`Nuovo messaggio da ${parsedMsg.author}`);
+                // If message sent by another user, mark as new incoming
+                const isFromOther = parsedMsg.author !== currentUser.name;
+                addMessageToBoard(parsedMsg, isFromOther);
               }
             }
           } catch (err) {}
@@ -2484,9 +2714,9 @@
       } catch (e) {}
     }
 
-    function handleSendMessage(e) {
+    function handleSendDrawerMessage(e) {
       e.preventDefault();
-      const input = document.getElementById('boardInputText');
+      const input = document.getElementById('drawerInputText');
       if (!input) return;
 
       const text = input.value.trim();
@@ -2501,10 +2731,11 @@
         avatar: currentUser.avatar,
         bg: currentUser.bg,
         text: text,
-        time: timeStr
+        time: timeStr,
+        timestamp: Date.now()
       };
 
-      addMessageToBoard(newMsg, true);
+      addMessageToBoard(newMsg, false);
       input.value = '';
 
       fetch(NTFY_URL, {
@@ -2586,7 +2817,7 @@
       if (toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
         box.classList.remove('visible');
-      }, 2600);
+      }, 2800);
     }
 
     function copyText(text, successMsg) {
@@ -2639,18 +2870,18 @@
     }
 
     window.addEventListener('scroll', () => {
-      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'bacheca', 'checklist', 'mappe'];
+      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
       const currentPos = window.scrollY + 130;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const el = document.getElementById(sections[i]);
         if (el && el.offsetTop <= currentPos) {
           document.querySelectorAll('.cat-pill').forEach(pill => {
-            const href = pill.getAttribute('href').replace('#', '');
-            if (href === sections[i]) {
+            const href = pill.getAttribute('href');
+            if (href && href.replace('#', '') === sections[i]) {
               pill.classList.add('active');
               pill.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
-            } else {
+            } else if (href && href.startsWith('#')) {
               pill.classList.remove('active');
             }
           });
