@@ -3,16 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#FF385C">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="PietroBnB 2026">
+  <meta name="apple-mobile-web-app-title" content="PietroBnB">
+  <meta name="application-name" content="PietroBnB">
   <meta name="description" content="PietroBnB · Guida, programma e bacheca in tempo reale per il weekend a Marina di Mancaversa e Baia Verde (22–24 agosto 2026).">
   <title>PietroBnB · Mancaversa & Gallipoli 2026</title>
 
-  <!-- PWA Manifest & Web Push Notification Support -->
+  <!-- PWA Manifest & App Icons -->
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23FF385C'/%3E%3Cpath d='M30 35C30 24 40 18 50 18C60 18 70 24 70 35C70 48 50 68 50 68C50 68 30 48 30 35Z' fill='white'/%3E%3Ccircle cx='50' cy='36' r='8' fill='%23FF385C'/%3E%3Ctext x='50' y='86' font-family='sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'%3EPietroBnB%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
 
   <!-- Open Graph / WhatsApp Preview -->
   <meta property="og:title" content="PietroBnB · Salento 2026">
@@ -1883,6 +1887,107 @@
     }
 
     /* ==========================================================================
+       PWA INSTALL MODAL & INSTRUCTIONS
+       ========================================================================== */
+    .pwa-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      touch-action: none;
+    }
+
+    .pwa-modal-overlay.active {
+      display: flex;
+    }
+
+    .pwa-modal {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      max-width: 400px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: var(--shadow-modal);
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pwa-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .pwa-app-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pwa-steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pwa-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--charcoal);
+      line-height: 1.45;
+    }
+
+    .pwa-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--rausch);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .pwa-benefits-box {
+      background: var(--rausch-light);
+      border: 1px solid rgba(255, 56, 92, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--rausch-dark);
+      line-height: 1.4;
+    }
+
+    .btn-header-install {
+      background: var(--rausch-light);
+      color: var(--rausch);
+      border: 1px solid rgba(255, 56, 92, 0.2);
+      font-size: 14px;
+    }
+
+    .cat-pill-install {
+      background: var(--rausch-light) !important;
+      color: var(--rausch) !important;
+      font-weight: 700 !important;
+      border-color: rgba(255, 56, 92, 0.25) !important;
+    }
+
+    /* ==========================================================================
        TOAST PILL
        ========================================================================== */
     .toast-pill {
@@ -1981,8 +2086,11 @@
         </div>
       </div>
 
-      <!-- Single Icon Share Button -->
+      <!-- Header Actions: Install PWA & Share -->
       <div class="header-actions">
+        <button class="btn-header-icon btn-header-install" id="btnHeaderInstall" onclick="promptInstallPWA()" title="Installa PietroBnB come App su Schermata Home">
+          📲
+        </button>
         <button class="btn-header-icon" onclick="shareTrip()" title="Condividi">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"></circle>
@@ -2003,6 +2111,7 @@
   <div class="category-bar-wrapper">
     <div class="container">
       <nav class="category-bar" id="categoryNav">
+        <a href="javascript:void(0)" onclick="promptInstallPWA()" class="cat-pill cat-pill-install" id="catPillInstall">📲 Installa</a>
         <a href="#overview" class="cat-pill active">✨ Info</a>
         <a href="#g22" class="cat-pill">🏖️ Sab 22</a>
         <a href="#g23" class="cat-pill">🌊 Dom 23</a>
@@ -2701,6 +2810,28 @@
         <button class="btn-action btn-primary" style="min-height:36px; padding:6px 14px;" onclick="saveCustomName()">
           Salva
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL INSTALLAZIONE PWA (HOMESCREEN)
+       ========================================================================== -->
+  <div class="pwa-modal-overlay" id="pwaModalOverlay" onclick="closePwaModal(event)">
+    <div class="pwa-modal" onclick="event.stopPropagation()">
+      <div class="pwa-modal-header">
+        <div class="pwa-app-icon">
+          <img src="./icon-192.png" alt="PietroBnB" width="50" height="50" style="border-radius: 12px; box-shadow: var(--shadow-sm);">
+          <div>
+            <h4 style="font-size: 16px; font-weight: 800; color: var(--charcoal); margin-bottom: 2px;">PietroBnB · Salento</h4>
+            <div style="font-size: 12px; color: var(--gray-muted);">Aggiungi alla schermata Home</div>
+          </div>
+        </div>
+        <button class="btn-close-drawer" onclick="closePwaModal()" style="width:28px; height:28px;">✕</button>
+      </div>
+
+      <div class="pwa-modal-body" id="pwaModalBody">
+        <!-- Generato dinamicamente via JS per iOS / Android -->
       </div>
     </div>
   </div>
@@ -3606,6 +3737,122 @@
       }
     }
 
+    // --------------------------------------------------------------------------
+    // 3c. PWA Installation Management (iOS, Android & Desktop)
+    // --------------------------------------------------------------------------
+    let deferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btnInstall = document.getElementById('btnHeaderInstall');
+      const pillInstall = document.getElementById('catPillInstall');
+      if (btnInstall) btnInstall.style.display = 'inline-flex';
+      if (pillInstall) pillInstall.style.display = 'inline-flex';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      showToast('PietroBnB installata sulla tua Schermata Home! 🎉');
+      updateInstallUI();
+    });
+
+    function isRunningStandalone() {
+      return (window.navigator.standalone === true) || window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    function updateInstallUI() {
+      if (isRunningStandalone()) {
+        const btnInstall = document.getElementById('btnHeaderInstall');
+        const pillInstall = document.getElementById('catPillInstall');
+        if (btnInstall) btnInstall.style.display = 'none';
+        if (pillInstall) pillInstall.style.display = 'none';
+      }
+    }
+
+    function promptInstallPWA() {
+      if (isRunningStandalone()) {
+        showToast('PietroBnB è già aperta come App a schermo intero! ✨');
+        return;
+      }
+
+      const overlay = document.getElementById('pwaModalOverlay');
+      const body = document.getElementById('pwaModalBody');
+      if (!overlay || !body) return;
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+      if (isIOS) {
+        body.innerHTML = `
+          <div class="pwa-steps-list">
+            <div class="pwa-step-item">
+              <div class="pwa-step-num">1</div>
+              <div class="pwa-step-text">Tocca l'icona <strong>Condividi</strong> in basso nella barra di Safari: <strong style="font-size:15px;">⎋</strong> (il quadrato con la freccia rivolta verso l'alto).</div>
+            </div>
+            <div class="pwa-step-item">
+              <div class="pwa-step-num">2</div>
+              <div class="pwa-step-text">Scorri verso il basso e seleziona <strong>"Aggiungi alla schermata Home"</strong> ➕.</div>
+            </div>
+            <div class="pwa-step-item">
+              <div class="pwa-step-num">3</div>
+              <div class="pwa-step-text">Tocca <strong>"Aggiungi"</strong> in alto a destra. L'icona PietroBnB apparirà tra le tue app!</div>
+            </div>
+          </div>
+          <div class="pwa-benefits-box">
+            🌴 <strong>Vantaggi:</strong> apertura a schermo intero senza barre del browser, avvio istantaneo e notifiche bacheca!
+          </div>
+        `;
+      } else if (deferredInstallPrompt) {
+        body.innerHTML = `
+          <p style="font-size: 13px; color: var(--charcoal); margin-bottom: 14px; line-height: 1.4;">
+            Installa PietroBnB per aprire il programma, le mappe e la bacheca del gruppo direttamente dalla tua Schermata Home!
+          </p>
+          <button class="btn-action btn-primary" style="width:100%; min-height:42px;" onclick="triggerAndroidInstall()">
+            📲 Installa Ora su Schermata Home
+          </button>
+        `;
+      } else {
+        body.innerHTML = `
+          <div class="pwa-steps-list">
+            <div class="pwa-step-item">
+              <div class="pwa-step-num">1</div>
+              <div class="pwa-step-text">Apri il menu del browser (i <strong>tre puntini ⋮</strong> in alto o in basso).</div>
+            </div>
+            <div class="pwa-step-item">
+              <div class="pwa-step-num">2</div>
+              <div class="pwa-step-text">Seleziona <strong>"Installa app"</strong> oppure <strong>"Aggiungi a schermata Home"</strong>.</div>
+            </div>
+          </div>
+          <div class="pwa-benefits-box">
+            ✨ L'icona PietroBnB verrà aggiunta alla tua Home per un accesso rapido a schermo intero!
+          </div>
+        `;
+      }
+
+      overlay.classList.add('active');
+    }
+
+    function triggerAndroidInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('PietroBnB installata con successo! 🎉');
+          }
+          deferredInstallPrompt = null;
+          closePwaModal();
+        });
+      } else {
+        closePwaModal();
+      }
+    }
+
+    function closePwaModal(e) {
+      if (e && e.target && e.target.id !== 'pwaModalOverlay' && !e.target.classList.contains('btn-close-drawer')) return;
+      const overlay = document.getElementById('pwaModalOverlay');
+      if (overlay) overlay.classList.remove('active');
+    }
+
     function escapeHTML(str) {
       return String(str)
         .replace(/&/g, '&amp;')
@@ -3816,6 +4063,7 @@
       updateVerticalRoadProgress();
       registerNotificationServiceWorker();
       updateNotificationButtonUI();
+      updateInstallUI();
 
       // Se aperto da notifica di sistema (?openBoard=1)
       const urlParams = new URLSearchParams(window.location.search);
