@@ -3008,7 +3008,7 @@
     let activeReplyingMsg = null;
     let activeEditingMsgId = null;
 
-    const singleWelcomeNote = [
+    const HISTORICAL_BASE_MESSAGES = [
       {
         id: 'init_welcome_pietro',
         userId: 'host_pietro_01',
@@ -3020,35 +3020,154 @@
         timestamp: 1787080000000,
         isEdited: false,
         replyTo: null
+      },
+      {
+        id: 'msg_1787083580551_5ay5z',
+        userId: 'usr_1787080997958_j8wva',
+        author: 'Pietro il Delfino',
+        avatar: '🐬',
+        bg: '#E0F2FE',
+        text: 'Ciaooooo ☺️',
+        time: '22:06',
+        timestamp: 1787083580551,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787083717334_vifho',
+        userId: 'usr_1787083549454_h0k3x',
+        author: 'Volpe Anonima',
+        avatar: '🦊',
+        bg: '#FFEDD5',
+        text: 'Ciao 😝',
+        time: '22:08',
+        timestamp: 1787083717334,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787083895247_yksv5',
+        userId: 'usr_1787082719723_8ay3n',
+        author: 'Tartaruga Anonima',
+        avatar: '🐢',
+        bg: '#DCFCE7',
+        text: 'Cazz d Pitr!',
+        time: '22:11',
+        timestamp: 1787083895247,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787084532643_t4mxf',
+        userId: 'usr_1787082719723_8ay3n',
+        author: 'Mr. Minchione',
+        avatar: '🌊',
+        bg: '#CCFBF1',
+        text: '🤣',
+        time: '22:22',
+        timestamp: 1787084532643,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787084962577_04uir',
+        userId: 'usr_1787080997958_j8wva',
+        author: 'Pietro il Delfino',
+        avatar: '🐬',
+        bg: '#E0F2FE',
+        text: 'Ahahah Enrico sei tu?',
+        time: '22:29',
+        timestamp: 1787084962577,
+        isEdited: false,
+        replyTo: {
+          id: 'msg_1787084532643_t4mxf',
+          author: 'Mr. Minchione',
+          userId: 'usr_1787082719723_8ay3n',
+          text: '🤣'
+        }
+      },
+      {
+        id: 'msg_1787084971279_xty3x',
+        userId: 'usr_1787080997958_j8wva',
+        author: 'Pietro il Delfino',
+        avatar: '🐬',
+        bg: '#E0F2FE',
+        text: '🤣',
+        time: '22:29',
+        timestamp: 1787084971279,
+        isEdited: false,
+        replyTo: {
+          id: 'msg_1787083895247_yksv5',
+          author: 'Tartaruga Anonima',
+          userId: 'usr_1787082719723_8ay3n',
+          text: 'Cazz d Pitr!'
+        }
+      },
+      {
+        id: 'msg_1787086058634_vc69s',
+        userId: 'usr_1787080997958_j8wva',
+        author: 'Pietro il Delfino',
+        avatar: '🐬',
+        bg: '#E0F2FE',
+        text: 'Vabbè, fatemi sapere se vi piace l’itinerario 👀',
+        time: '22:47',
+        timestamp: 1787086058634,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787087699737_l4p9u',
+        userId: 'usr_1787087135354_49hsy',
+        author: 'Geco Anonimo',
+        avatar: '🦎',
+        bg: '#FEF9C3',
+        text: 'Ciaoooo',
+        time: '23:14',
+        timestamp: 1787087699737,
+        isEdited: false,
+        replyTo: null
+      },
+      {
+        id: 'msg_1787087720230_1fm0n',
+        userId: 'usr_1787087135354_49hsy',
+        author: 'Geco Anonimo',
+        avatar: '🦎',
+        bg: '#FEF9C3',
+        text: 'Ma mr minchione e Enrico? Ahahah',
+        time: '23:15',
+        timestamp: 1787087720230,
+        isEdited: false,
+        replyTo: null
       }
     ];
 
-    // State Reducer: Elabora l'intero flusso di eventi in ordine cronologico
+    // State Reducer: Elabora l'intero flusso di eventi in ordine cronologico partendo dallo storico
     function reduceRawEventsToMessages(events) {
-      let messages = [...singleWelcomeNote];
+      const map = new Map();
+      HISTORICAL_BASE_MESSAGES.forEach(m => map.set(m.id, { ...m }));
 
       events.forEach(payload => {
         if (!payload) return;
 
         if (payload.action === 'delete' && payload.id) {
-          messages = messages.filter(m => m.id !== payload.id);
+          map.delete(payload.id);
         } else if (payload.action === 'edit' && payload.id) {
-          const m = messages.find(m => m.id === payload.id);
+          const m = map.get(payload.id);
           if (m) {
             m.text = payload.text;
             m.isEdited = true;
           }
         } else if (payload.id && payload.text) {
-          const existingIdx = messages.findIndex(m => m.id === payload.id);
-          if (existingIdx !== -1) {
-            messages[existingIdx] = { ...messages[existingIdx], ...payload };
+          const existing = map.get(payload.id);
+          if (existing) {
+            map.set(payload.id, { ...existing, ...payload });
           } else {
-            messages.push(payload);
+            map.set(payload.id, payload);
           }
         }
       });
 
-      return messages;
+      return Array.from(map.values()).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     }
 
     function mergeMessageLists(listA, listB) {
@@ -3104,7 +3223,7 @@
         }
       }
       if (!boardMessages || boardMessages.length === 0) {
-        boardMessages = [...singleWelcomeNote];
+        boardMessages = HISTORICAL_BASE_MESSAGES.map(m => ({ ...m }));
       }
       renderDrawerMessages();
       recalculateUnreadCount();
