@@ -2860,17 +2860,18 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. Real-Time Group Board con Cloud DB Permanente & Zero-Jump Engine
+    // 3. Realtime Board (Multi-Device Active Sync & State Reducer Engine)
     // --------------------------------------------------------------------------
-    const TOPIC_NAME = 'pietrobnb-mancaversa-2026-live';
-    const NTFY_URL = `https://ntfy.sh/${TOPIC_NAME}`;
-    const CLOUD_DB_URL = 'https://api.restful-api.dev/objects/ff8081819ff5b11001a0165b04cb4733';
-    const CACHE_KEY = 'pietrobnb_board_data_v6';
+    const NTFY_TOPIC = 'pietrobnb-mancaversa-2026-live';
+    const NTFY_URL = 'https://ntfy.sh/' + NTFY_TOPIC;
+    const CACHE_KEY = 'pietrobnb_board_data_v7';
 
     let boardMessages = [];
     let isDrawerOpen = false;
     let unreadCount = 0;
     let savedScrollPosition = 0;
+    let liveEventSource = null;
+    let syncIntervalId = null;
 
     // State for Reply & Edit
     let activeReplyingMsg = null;
@@ -2890,6 +2891,34 @@
         replyTo: null
       }
     ];
+
+    // State Reducer: Elabora l'intero flusso di eventi in ordine cronologico
+    function reduceRawEventsToMessages(events) {
+      let messages = [...singleWelcomeNote];
+
+      events.forEach(payload => {
+        if (!payload) return;
+
+        if (payload.action === 'delete' && payload.id) {
+          messages = messages.filter(m => m.id !== payload.id);
+        } else if (payload.action === 'edit' && payload.id) {
+          const m = messages.find(m => m.id === payload.id);
+          if (m) {
+            m.text = payload.text;
+            m.isEdited = true;
+          }
+        } else if (payload.id && payload.text) {
+          const existingIdx = messages.findIndex(m => m.id === payload.id);
+          if (existingIdx !== -1) {
+            messages[existingIdx] = { ...messages[existingIdx], ...payload };
+          } else {
+            messages.push(payload);
+          }
+        }
+      });
+
+      return messages;
+    }
 
     function mergeMessageLists(listA, listB) {
       const map = new Map();
@@ -2922,7 +2951,6 @@
       unreadCount = unreadMessages.length;
       updateUnreadBadges();
 
-      // Notifica specifica se c'è una risposta diretta non letta
       if (!isDrawerOpen && unreadMessages.length > 0) {
         const unreadReply = unreadMessages.find(m => {
           return m.replyTo && currentUser && (m.replyTo.userId === currentUser.id || m.replyTo.author === currentUser.name);
@@ -2935,7 +2963,7 @@
     }
 
     function initRealtimeBoard() {
-      // 1. Carica prima dalla cache locale istantanea
+      // 1. Carica prima dalla cache locale istantanea a zero secondi
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {
@@ -2950,41 +2978,69 @@
       renderDrawerMessages();
       recalculateUnreadCount();
 
-      // 2. Sincronizza con il Cloud Database Permanente
-      fetchCloudDatabase();
+      // 2. Sincronizzazione completa con il Cloud Feed degli eventi
+      syncWithCloudFeed();
 
-      // 3. Connetti al flusso live in tempo reale (SSE)
+      // 3. Connessione live stream (SSE)
       connectToLiveStream();
 
-      // 4. Inizializza il motore anti-jump tastiera
+      // 4. Inizializzazione motore anti-jump viewport
       setupMobileViewportHandling();
+
+      // 5. Polling continuo di sincronizzazione (ogni 6 secondi) per prevenire freeze in background
+      if (syncIntervalId) clearInterval(syncIntervalId);
+      syncIntervalId = setInterval(syncWithCloudFeed, 6000);
+
+      // Risincronizza immediatamente quando l'utente sblocca il telefono o torna sulla scheda
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          syncWithCloudFeed();
+          connectToLiveStream();
+        }
+      });
+
+      window.addEventListener('focus', () => {
+        syncWithCloudFeed();
+      });
     }
 
-    function fetchCloudDatabase() {
-      fetch(CLOUD_DB_URL)
-        .then(res => res.json())
-        .then(json => {
-          if (json && json.data && Array.isArray(json.data.messages) && json.data.messages.length > 0) {
-            boardMessages = mergeMessageLists(boardMessages, json.data.messages);
+    // Recupera l'intero stream di eventi storici da ntfy e ricostruisce lo stato perfetto
+    function syncWithCloudFeed() {
+      fetch(`${NTFY_URL}/json?poll=1&since=all`)
+        .then(res => res.text())
+        .then(text => {
+          if (!text || !text.trim()) return;
+
+          const lines = text.trim().split('\n');
+          const rawEvents = [];
+
+          lines.forEach(line => {
+            try {
+              const item = JSON.parse(line);
+              if (item.event === 'message' && item.message) {
+                const payload = JSON.parse(item.message);
+                rawEvents.push(payload);
+              }
+            } catch (e) {}
+          });
+
+          if (rawEvents.length > 0) {
+            const reducedFromCloud = reduceRawEventsToMessages(rawEvents);
+            const prevCount = boardMessages.length;
+            boardMessages = mergeMessageLists(boardMessages, reducedFromCloud);
+
             localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
             renderDrawerMessages();
             recalculateUnreadCount();
+
+            if (isDrawerOpen && boardMessages.length > prevCount) {
+              scrollMessagesToBottom();
+            }
           }
         })
         .catch(err => {
-          console.warn('Cloud DB fetch fallback', err);
+          console.warn('Sync feed warning', err);
         });
-    }
-
-    function saveToCloudDB(messagesList) {
-      fetch(CLOUD_DB_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'pietrobnb_mancaversa_board',
-          data: { messages: messagesList }
-        })
-      }).catch(err => console.warn('Cloud DB save error', err));
     }
 
     // Dynamic keyboard pinning engine
@@ -3079,6 +3135,9 @@
       updateNotificationButtonUI();
       localStorage.setItem('mancaversa_last_read_ts', Date.now().toString());
 
+      // Sincronizza subito i messaggi all'apertura
+      syncWithCloudFeed();
+
       setTimeout(scrollMessagesToBottom, 100);
     }
 
@@ -3145,7 +3204,6 @@
         item.className = 'board-msg-item';
         item.id = `msg_node_${msg.id}`;
 
-        // Reply quote HTML (WhatsApp style)
         let replyQuoteHtml = '';
         if (msg.replyTo && msg.replyTo.text) {
           replyQuoteHtml = `
@@ -3156,7 +3214,6 @@
           `;
         }
 
-        // Actions row (Rispondi, Modifica, Elimina)
         let actionsHtml = '';
         if (!isWelcomeNote) {
           actionsHtml = `
@@ -3214,9 +3271,6 @@
       }
     }
 
-    // --------------------------------------------------------------------------
-    // Context Management: Reply and Edit Handlers
-    // --------------------------------------------------------------------------
     function startReplyToMessage(msgId) {
       const msg = boardMessages.find(m => m.id === msgId);
       if (!msg) return;
@@ -3283,7 +3337,6 @@
         boardMessages = boardMessages.filter(m => m.id !== msgId);
         localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
         renderDrawerMessages();
-        saveToCloudDB(boardMessages);
 
         const deletePayload = {
           action: 'delete',
@@ -3301,9 +3354,6 @@
       }
     }
 
-    // --------------------------------------------------------------------------
-    // Send / Edit Message Submit Handler
-    // --------------------------------------------------------------------------
     function handleSendDrawerMessage(e) {
       e.preventDefault();
       const input = document.getElementById('drawerInputText');
@@ -3322,7 +3372,6 @@
           boardMessages[msgIdx].isEdited = true;
           localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
           renderDrawerMessages();
-          saveToCloudDB(boardMessages);
 
           const editPayload = {
             action: 'edit',
@@ -3363,7 +3412,6 @@
       };
 
       addMessageToBoard(newMsg, false);
-      saveToCloudDB(boardMessages);
       input.value = '';
       cancelCurrentContext();
 
@@ -3372,6 +3420,88 @@
         headers: { 'Title': 'Mancaversa Board' },
         body: JSON.stringify(newMsg)
       }).catch(err => console.warn('Sync post error', err));
+    }
+
+    function addMessageToBoard(msg, isNewIncoming = false) {
+      const existingIdx = boardMessages.findIndex(m => m.id === msg.id);
+      if (existingIdx !== -1) {
+        boardMessages[existingIdx] = msg;
+      } else {
+        boardMessages.push(msg);
+      }
+      if (boardMessages.length > 100) boardMessages = boardMessages.slice(-100);
+
+      localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
+      renderDrawerMessages();
+
+      if (isDrawerOpen) {
+        scrollMessagesToBottom();
+      }
+
+      if (isNewIncoming) {
+        if (!isDrawerOpen) {
+          unreadCount++;
+          updateUnreadBadges();
+        }
+
+        const isReplyToMe = msg.replyTo && currentUser && (msg.replyTo.userId === currentUser.id || msg.replyTo.author === currentUser.name);
+        const notifTitle = isReplyToMe ? `↩️ ${msg.author} ha risposto al tuo messaggio` : `💬 ${msg.author} su PietroBnB`;
+        const notifBody = msg.text;
+
+        if (!isDrawerOpen) {
+          showToast(`${isReplyToMe ? '↩️' : '💬'} ${msg.author}: "${msg.text.substring(0, 24)}..."`);
+        }
+
+        sendSystemNotification(notifTitle, notifBody, `msg_${msg.id}`, msg.id);
+      }
+    }
+
+    function handleIncomingAction(payload) {
+      if (!payload || !payload.action || !payload.id) return;
+
+      if (payload.action === 'delete') {
+        boardMessages = boardMessages.filter(m => m.id !== payload.id);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
+        renderDrawerMessages();
+      } else if (payload.action === 'edit') {
+        const msg = boardMessages.find(m => m.id === payload.id);
+        if (msg) {
+          msg.text = payload.text;
+          msg.isEdited = true;
+          localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
+          renderDrawerMessages();
+        }
+      }
+    }
+
+    function connectToLiveStream() {
+      if (!window.EventSource) return;
+
+      if (liveEventSource) {
+        try { liveEventSource.close(); } catch (e) {}
+      }
+
+      try {
+        liveEventSource = new EventSource(`${NTFY_URL}/sse`);
+
+        liveEventSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data && data.message) {
+              const parsedMsg = JSON.parse(data.message);
+              if (parsedMsg && parsedMsg.action) {
+                handleIncomingAction(parsedMsg);
+              } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
+                const isFromOther = !currentUser || (parsedMsg.userId !== currentUser.id && parsedMsg.author !== currentUser.name);
+                addMessageToBoard(parsedMsg, isFromOther);
+              }
+            }
+          } catch (err) {}
+        };
+
+        liveEventSource.onerror = () => {
+        };
+      } catch (e) {}
     }
 
     // --------------------------------------------------------------------------
@@ -3474,82 +3604,6 @@
       } else {
         try { new Notification(title, notifOptions); } catch (e) {}
       }
-    }
-
-    function addMessageToBoard(msg, isNewIncoming = false) {
-      const existingIdx = boardMessages.findIndex(m => m.id === msg.id);
-      if (existingIdx !== -1) {
-        boardMessages[existingIdx] = msg;
-      } else {
-        boardMessages.push(msg);
-      }
-      if (boardMessages.length > 100) boardMessages = boardMessages.slice(-100);
-
-      localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
-      renderDrawerMessages();
-
-      if (isDrawerOpen) {
-        scrollMessagesToBottom();
-      }
-
-      if (isNewIncoming) {
-        if (!isDrawerOpen) {
-          unreadCount++;
-          updateUnreadBadges();
-        }
-
-        const isReplyToMe = msg.replyTo && currentUser && (msg.replyTo.userId === currentUser.id || msg.replyTo.author === currentUser.name);
-        const notifTitle = isReplyToMe ? `↩️ ${msg.author} ha risposto al tuo messaggio` : `💬 ${msg.author} su PietroBnB`;
-        const notifBody = msg.text;
-
-        // In-app toast se drawer chiuso
-        if (!isDrawerOpen) {
-          showToast(`${isReplyToMe ? '↩️' : '💬'} ${msg.author}: "${msg.text.substring(0, 24)}..."`);
-        }
-
-        // Notifica nativa di sistema nel centro notifiche dello smartphone
-        sendSystemNotification(notifTitle, notifBody, `msg_${msg.id}`, msg.id);
-      }
-    }
-
-    function handleIncomingAction(payload) {
-      if (!payload || !payload.action || !payload.id) return;
-
-      if (payload.action === 'delete') {
-        boardMessages = boardMessages.filter(m => m.id !== payload.id);
-        localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
-        renderDrawerMessages();
-      } else if (payload.action === 'edit') {
-        const msg = boardMessages.find(m => m.id === payload.id);
-        if (msg) {
-          msg.text = payload.text;
-          msg.isEdited = true;
-          localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
-          renderDrawerMessages();
-        }
-      }
-    }
-
-    function connectToLiveStream() {
-      if (!window.EventSource) return;
-
-      try {
-        const eventSource = new EventSource(`${NTFY_URL}/sse`);
-        eventSource.onmessage = (e) => {
-          try {
-            const data = JSON.parse(e.data);
-            if (data && data.message) {
-              const parsedMsg = JSON.parse(data.message);
-              if (parsedMsg && parsedMsg.action) {
-                handleIncomingAction(parsedMsg);
-              } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
-                const isFromOther = !currentUser || (parsedMsg.userId !== currentUser.id && parsedMsg.author !== currentUser.name);
-                addMessageToBoard(parsedMsg, isFromOther);
-              }
-            }
-          } catch (err) {}
-        };
-      } catch (e) {}
     }
 
     function escapeHTML(str) {
