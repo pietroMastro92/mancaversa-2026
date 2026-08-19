@@ -3158,7 +3158,7 @@
           if (rawEvents.length > 0) {
             const reducedFromCloud = reduceRawEventsToMessages(rawEvents);
             const prevCount = boardMessages.length;
-            boardMessages = mergeMessageLists(boardMessages, reducedFromCloud);
+            boardMessages = reducedFromCloud;
 
             localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
             renderDrawerMessages();
@@ -3594,6 +3594,7 @@
         boardMessages = boardMessages.filter(m => m.id !== payload.id);
         localStorage.setItem(CACHE_KEY, JSON.stringify(boardMessages));
         renderDrawerMessages();
+        recalculateUnreadCount();
       } else if (payload.action === 'edit') {
         const msg = boardMessages.find(m => m.id === payload.id);
         if (msg) {
