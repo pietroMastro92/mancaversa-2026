@@ -113,7 +113,14 @@
         }
       }
       const btn = document.getElementById('btnSurfMute');
-      if (btn) btn.innerHTML = `<span>${this.isMuted ? '🔇 Muto' : '🔊 Audio'}</span>`;
+      if (btn) {
+        btn.innerHTML = `<span>${this.isMuted ? '🔇' : '🔊'}</span>`;
+        if (this.isMuted) {
+          btn.classList.add('muted');
+        } else {
+          btn.classList.remove('muted');
+        }
+      }
       return this.isMuted;
     }
 
@@ -1387,8 +1394,8 @@
       const center = this.width / 2.0;
       const isFullscreen = this.activeCanvasId === 'surfGameCanvas';
       const topY = isFullscreen ? 12 : 6;
-      const barHeight = 48;
-      const barWidth = Math.min(this.width - 24, 460);
+      const barHeight = 46;
+      const barWidth = isFullscreen ? Math.min(this.width - 116, 360) : 320;
       const barX = center - barWidth / 2;
 
       ctx.save();
