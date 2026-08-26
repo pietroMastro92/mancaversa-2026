@@ -326,12 +326,15 @@
 
     loadSavedScores() {
       try {
-        const saved = localStorage.getItem('salento_surf_best_score_v6');
+        const saved = localStorage.getItem('salento_surf_best_score_clean_v1');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
           this.bestDistance = d.bestDistance || 0;
           this.surfer = d.surfer || 0;
+        } else {
+          this.highScore = 0;
+          this.bestDistance = 0;
         }
       } catch (e) {}
     }
@@ -343,7 +346,7 @@
         const curDist = Math.floor(this.distance / 10.0);
         if (curDist > this.bestDistance) this.bestDistance = curDist;
 
-        localStorage.setItem('salento_surf_best_score_v6', JSON.stringify({
+        localStorage.setItem('salento_surf_best_score_clean_v1', JSON.stringify({
           highScore: this.highScore,
           bestDistance: this.bestDistance,
           surfer: this.surfer

@@ -3853,7 +3853,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_vCleanSubBadge"></script>
+  <script src="./surf-game.js?v=20260826_vZeroLeaderboard"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -4258,7 +4258,7 @@
               const item = JSON.parse(line);
               if (item.event === 'message' && item.message) {
                 const payload = JSON.parse(item.message);
-                if (payload && payload.type === 'surf_score') {
+                if (payload && payload.type === 'surf_score_clean_v1') {
                   handleIncomingSurfScore(payload, true);
                 } else {
                   rawEvents.push(payload);
@@ -4733,7 +4733,7 @@
             const data = JSON.parse(e.data);
             if (data && data.message) {
               const parsedMsg = JSON.parse(data.message);
-              if (parsedMsg && parsedMsg.type === 'surf_score') {
+              if (parsedMsg && parsedMsg.type === 'surf_score_clean_v1') {
                 handleIncomingSurfScore(parsedMsg);
               } else if (parsedMsg && parsedMsg.action) {
                 handleIncomingAction(parsedMsg);
@@ -5237,7 +5237,17 @@
     /* ==========================================================================
        SURF LEADERBOARD (100% REAL SCORES · RECORD SINGOLI AGGIORNATI PER PLAYER)
        ========================================================================== */
-    const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v6';
+    const SURF_LEADERBOARD_KEY = 'salento_surf_leaderboard_clean_v1';
+
+    // Pulizia totale e garantita di tutte le vecchie chiavi storiche
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('salento_surf_') && k !== SURF_LEADERBOARD_KEY && k !== 'salento_surf_best_score_clean_v1') {
+          localStorage.removeItem(k);
+        }
+      }
+    } catch (e) {}
 
     function normalizeLeaderboard(rawList) {
       if (!Array.isArray(rawList)) return [];
@@ -5411,7 +5421,7 @@
       const isNewPersonalBest = score > prevBestScore;
 
       const payload = {
-        type: 'surf_score',
+        type: 'surf_score_clean_v1',
         id: 'lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         userId: myId,
         name: myName,
