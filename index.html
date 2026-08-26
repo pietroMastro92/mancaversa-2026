@@ -2584,6 +2584,116 @@
       flex-direction: column;
       gap: 8px;
     }
+
+    /* ==========================================================================
+       SANDBOX SPOT & WAVE CUSTOMIZER STYLES
+       ========================================================================== */
+    .sandbox-panel-wrap {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sandbox-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--charcoal);
+    }
+    .sandbox-sliders-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 600px) {
+      .sandbox-sliders-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+    .sandbox-slider-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sandbox-slider-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-dark);
+      display: flex;
+      justify-content: space-between;
+    }
+    .sandbox-range-input {
+      width: 100%;
+      accent-color: #0284C7;
+      cursor: pointer;
+    }
+    .spot-preset-pill, .board-type-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--charcoal);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .spot-preset-pill.active, .board-type-pill.active {
+      background: #0284C7;
+      border-color: #0284C7;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    }
+
+    /* In-Game Action Bar on Canvas */
+    .surf-in-game-actions {
+      position: absolute;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 15;
+      pointer-events: auto;
+    }
+    .btn-mobile-game-action {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 10px 14px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      transition: var(--transition);
+      touch-action: manipulation;
+    }
+    .btn-mobile-game-action:active {
+      transform: scale(0.94);
+      background: rgba(2, 132, 199, 0.85);
+    }
+    .btn-mobile-popup-action {
+      background: #10B981;
+      border-color: #34D399;
+      font-size: 13px;
+      padding: 11px 18px;
+    }
   </style>
 </head>
 <body>
@@ -2685,12 +2795,12 @@
       <!-- Post-Vacation Banner & Mini-Game Callout -->
       <div class="post-vacation-banner">
         <div class="post-vacation-content">
-          <div class="post-vacation-tag">🎮 Dopovacanza Arcade · Novità</div>
+          <div class="post-vacation-tag">🎮 Dopovacanza Sandbox · Novità</div>
           <div class="post-vacation-title">La vacanza è finita, ma il mare resta con noi! 🏄‍♂️</div>
-          <div class="post-vacation-sub">Divertiti con <b>Salento Pixel Surf</b>: cavalca le onde dello Ionio, entra nei tubi e sfida gli amici a battere il tuo record!</div>
+          <div class="post-vacation-sub">Divertiti con <b>Salento Surf Sandbox</b>: crea la tua onda perfetta, nuota per prenderla, entra nei tubi o rilassati a guardare il mare dello Ionio!</div>
         </div>
         <button class="btn-play-banner" onclick="openSurfGameModal()">
-          <span>🎮 Gioca Ora</span>
+          <span>🌊 Entra in Acqua</span>
           <span>→</span>
         </button>
       </div>
@@ -2758,24 +2868,99 @@
     </section>
 
     <!-- ==========================================================================
-         SALENTO PIXEL SURF (DOPPO-VACANZA MINI-GAME)
+         SALENTO SURF SANDBOX (CASUAL SURF SIM & WAVE GENERATOR)
          ========================================================================== -->
     <section class="section-block" id="surf">
       <div class="section-head">
-        <div class="section-eyebrow">Dopovacanza Arcade · Novità 🏄‍♂️</div>
-        <h2 class="section-title">Salento Pixel Surf</h2>
-        <p class="section-sub">Il mini-gioco retro a onde dinamiche per continuare a surfare nel mare del Salento.</p>
+        <div class="section-eyebrow">Casual Surf Simulator & Sandbox 🌊</div>
+        <h2 class="section-title">Salento Surf Sandbox</h2>
+        <p class="section-sub">Crea la tua onda perfetta, nuota per prenderla, fatti inglobare nel tubo o rilassati a guardare il mare.</p>
       </div>
 
       <div class="surf-arcade-card">
         <!-- Live Pixel Art Preview Screen -->
         <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero">
-          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="420" height="240"></canvas>
+          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="440" height="250"></canvas>
           <div class="surf-preview-overlay">
             <div class="surf-big-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
-            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE</div>
+            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER ENTRARE IN ACQUA</div>
+          </div>
+        </div>
+
+        <!-- Spot Presets Selector -->
+        <div class="surf-skin-section">
+          <div class="surf-skin-label">
+            <span>📍 Scegli lo Spot del Salento:</span>
+          </div>
+          <div class="surf-skin-pills-row">
+            <button type="button" class="spot-preset-pill active" onclick="selectSpotPreset('baia_verde')" id="spotPill_baia_verde">
+              <span>🏖️ Baia Verde</span>
+            </button>
+            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('mare_cavalli')" id="spotPill_mare_cavalli">
+              <span>🌊 Mare dei Cavalli (Reef)</span>
+            </button>
+            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('scirocco_storm')" id="spotPill_scirocco_storm">
+              <span>🌪️ Scirocco Heavy Shorebreak</span>
+            </button>
+            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('tramontana_zen')" id="spotPill_tramontana_zen">
+              <span>🧘‍♂️ Tramontana Zen (Relax)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Board & Craft Selector -->
+        <div class="surf-skin-section">
+          <div class="surf-skin-label">
+            <span>🏄‍♂️ Scegli la Tavola / Craft:</span>
+          </div>
+          <div class="surf-skin-pills-row">
+            <button type="button" class="board-type-pill active" onclick="selectBoardType('shortboard')" id="boardPill_shortboard">
+              <span>🏄‍♂️ Shortboard</span>
+            </button>
+            <button type="button" class="board-type-pill" onclick="selectBoardType('longboard')" id="boardPill_longboard">
+              <span>🛹 Longboard</span>
+            </button>
+            <button type="button" class="board-type-pill" onclick="selectBoardType('bodyboard')" id="boardPill_bodyboard">
+              <span>🌊 Bodyboard</span>
+            </button>
+            <button type="button" class="board-type-pill" onclick="selectBoardType('bodysurf')" id="boardPill_bodysurf">
+              <span>🏊‍♂️ Bodysurf (Senza Tavola)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sandbox Wave Sliders Panel -->
+        <div class="sandbox-panel-wrap">
+          <div class="sandbox-title-row">
+            <span>🎛️ Sandbox Wave Controls (Modifica Onde in Tempo Reale):</span>
+            <button type="button" class="btn-action btn-subtle" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="window.SalentoSurf.triggerBigSetWave()">
+              🌊 Lancia Set di Onde!
+            </button>
+          </div>
+          <div class="sandbox-sliders-grid">
+            <div class="sandbox-slider-box">
+              <div class="sandbox-slider-label">
+                <span>Altezza Swell (Onda)</span>
+                <span id="labelSwellHeight">32px</span>
+              </div>
+              <input type="range" class="sandbox-range-input" id="rangeSwellHeight" min="10" max="75" value="32" oninput="handleWaveHeightChange(this.value)">
+            </div>
+            <div class="sandbox-slider-box">
+              <div class="sandbox-slider-label">
+                <span>Velocità Swell</span>
+                <span id="labelWaveSpeed">3.8</span>
+              </div>
+              <input type="range" class="sandbox-range-input" id="rangeWaveSpeed" min="1.5" max="7.0" step="0.2" value="3.8" oninput="handleWaveSpeedChange(this.value)">
+            </div>
+            <div class="sandbox-slider-box">
+              <div class="sandbox-slider-label">
+                <span>Vento & Increspatura</span>
+                <span id="labelWind">0.15</span>
+              </div>
+              <input type="range" class="sandbox-range-input" id="rangeWind" min="0.0" max="0.6" step="0.05" value="0.15" oninput="handleWindChange(this.value)">
+            </div>
           </div>
         </div>
 
@@ -2798,48 +2983,28 @@
           </div>
         </div>
 
-        <!-- Skin Selector -->
-        <div class="surf-skin-section">
-          <div class="surf-skin-label">
-            <span>🏄‍♂️ Scegli il tuo Surfer:</span>
-          </div>
-          <div class="surf-skin-pills-row" id="surfSkinRow">
-            <button type="button" class="surf-skin-pill active" onclick="selectSurfSkin('pietro')" id="skinPill_pietro">
-              <span>😎 Pietro Superhost</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('delfino')" id="skinPill_delfino">
-              <span>🐬 Delfino Anonimo</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('fenicottero')" id="skinPill_fenicottero">
-              <span>🦩 Fenicottero</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('scirocco')" id="skinPill_scirocco">
-              <span>🌪️ Scirocco Gold</span>
-            </button>
-          </div>
-        </div>
-
         <!-- Action Buttons -->
         <div class="surf-actions-row">
           <button type="button" class="btn-surf-main" onclick="openSurfGameModal()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span>Avvia Partita a Schermo Intero</span>
+            <span>Apri Sandbox a Schermo Intero</span>
           </button>
           <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()">
             <span>💬 Condividi Record in Bacheca</span>
           </button>
         </div>
 
-        <!-- Mobile & Desktop Instructions -->
+        <!-- Instructions Box -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Surfare da Smartphone & Computer:</span>
+            <span>📱</span> <span>Come Giocare (Simulatore di Surf Realistico):</span>
           </div>
           <div style="line-height: 1.5;">
-            • <b>Carving & Bottom Turn (Trascina Su/Giù o Frecce Su/Giù)</b>: Scendi verso il fondo per accumulare velocità con un Bottom Turn e risali verso la cresta per attaccare il lip!<br>
-            • <b>Stall & Tube Ride (Trascina a Sinistra o Tieni premuto lato sinistro)</b>: Frena e infila la mano nella parete per farti inglobare nel <b>Tubo / Barrel</b> e fare punti a raffica!<br>
-            • <b>Pumping (Trascina a Destra o Tieni premuto lato destro)</b>: Spingi in avanti sulla tavola per superare la sezione chiusa dell'onda.<br>
-            • <b>Snap & Cutback (Doppio Tap sullo schermo o Spazio)</b>: Esegui uno Snap radicale con spruzzi d'acqua in cima all'onda o un Cutback per tornare nella tasca!
+            • <b>Nuota & Prendi l'Onda (Paddle & Catch Wave)</b>: Rema verso destra quando vedi l'onda alzarsi dietro di te.<br>
+            • <b>Pop-Up (Tasto Pop-Up / Spazio)</b>: Quando l'onda ti solleva, alzati in piedi sulla tavola per partire!<br>
+            • <b>Carving & Bottom Turn (Trascina Su/Giù)</b>: Scendi alla base dell'onda per accumulare velocità e risali verso la cresta.<br>
+            • <b>Stall & Tubo (Trascina a Sinistra / Tasto Tubo)</b>: Frena per farti inglobare nel barile dell'onda!<br>
+            • <b>Zen / Relax</b>: Puoi anche solo galleggiare e guardare le onde infrangersi sulla riva!
           </div>
         </div>
       </div>
@@ -3478,7 +3643,7 @@
   </div>
 
   <!-- ==========================================================================
-       SALENTO PIXEL SURF - MODAL SCHERMO INTERO GIOCO
+       SALENTO SURF SANDBOX - FULLSCREEN MODAL
        ========================================================================== -->
   <div class="surf-game-modal-overlay" id="surfGameModalOverlay">
     
@@ -3490,8 +3655,8 @@
       </div>
 
       <div class="surf-hud-stats-mini">
-        <span>🏖️ <span id="surfLiveDist">0m</span></span>
-        <span>🐚 <span id="surfLiveShells">0</span></span>
+        <span>⏱️ <span id="surfLiveDist">0s</span></span>
+        <span>🌊 <span id="surfLiveShells">0.0s Tubo</span></span>
       </div>
 
       <div class="surf-hud-buttons">
@@ -3506,52 +3671,19 @@
 
     <!-- Canvas Wrapper -->
     <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
-      <canvas id="surfGameCanvas" class="surf-active-canvas" width="420" height="240"></canvas>
+      <canvas id="surfGameCanvas" class="surf-active-canvas" width="440" height="250"></canvas>
 
-      <!-- Start Prompt Overlay -->
-      <div class="surf-start-prompt" id="surfStartPrompt" onclick="window.SalentoSurf.startGame()">
-        <h2>🏄‍♂️ SALENTO PIXEL SURF</h2>
-        <p style="font-weight: 700; margin-bottom: 8px;">Tocca lo schermo per iniziare a surfare!</p>
-        <div style="font-size: 11.5px; opacity: 0.85; max-width: 280px; margin: 0 auto;">
-          Tieni premuto per abbassarti e prendere velocità · Rilascia per saltare in aria!
-        </div>
-      </div>
-
-      <!-- Game Over Card Overlay inside game -->
-      <div class="surf-gameover-overlay" id="surfGameOverModal">
-        <div class="surf-gameover-card">
-          <div class="surf-gameover-badge" id="surfNewRecordBadge" style="display:none;">🏆 NUOVO RECORD!</div>
-          <div class="surf-gameover-title">Onda Cavalcata! 🌊</div>
-          <div class="surf-gameover-score-big" id="surfFinalScore">0</div>
-          
-          <div class="surf-gameover-grid">
-            <div class="surf-go-stat">
-              <div class="surf-go-val" id="surfFinalDist">0s</div>
-              <div class="surf-go-lbl">Tempo Onda</div>
-            </div>
-            <div class="surf-go-stat">
-              <div class="surf-go-val" id="surfFinalBarrel">0.0s</div>
-              <div class="surf-go-lbl">Tempo nel Tubo</div>
-            </div>
-          </div>
-
-          <div class="surf-gameover-btns">
-            <button type="button" class="btn-surf-main" onclick="window.SalentoSurf.restartGame()" style="min-height: 44px;">
-              <span>🔄 Gioca Ancora</span>
-            </button>
-            <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()" style="min-height: 42px;">
-              <span>💬 Condividi Record in Bacheca</span>
-            </button>
-            <button type="button" class="btn-action btn-subtle" onclick="closeSurfGameModal()" style="min-height: 38px; justify-content: center; margin-top: 4px;">
-              <span>Chiudi Schermata</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Floating Touch Hint Bar for Mobile -->
-      <div class="surf-touch-hint-pill">
-        👇 Trascina Su/Giù per carvare la parete · Sinistra per entrare nel Tubo · Destra per pump · Doppio tap per Snap!
+      <!-- Floating In-Game Action Bar for Mobile Touch -->
+      <div class="surf-in-game-actions">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileStall(event)" title="Frena ed entra nel Tubo">
+          <span>🛑 Frena / Tubo</span>
+        </button>
+        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobilePopUp" onclick="handleMobilePopUp(event)" title="Pop-Up o Snap">
+          <span>⚡ POP-UP</span>
+        </button>
+        <button type="button" class="btn-mobile-game-action" onclick="window.SalentoSurf.triggerBigSetWave()" title="Lancia serie di onde giganti">
+          <span>🌊 Big Set</span>
+        </button>
       </div>
     </div>
   </div>
@@ -4890,14 +5022,77 @@
       document.body.style.overflow = '';
 
       if (window.SalentoSurf) {
-        window.SalentoSurf.gameState = 'READY';
-        if (window.SalentoSurf.animationFrameId) {
-          cancelAnimationFrame(window.SalentoSurf.animationFrameId);
-        }
         window.SalentoSurf.updateRecordsUI();
+        window.SalentoSurf.init('surfPreviewCanvas');
       }
 
       updateSurfCardStats();
+    }
+
+    function selectSpotPreset(presetId) {
+      if (window.SalentoSurf) {
+        window.SalentoSurf.setSpotPreset(presetId);
+        const p = window.SalentoSurf.waterSim.preset;
+        const hEl = document.getElementById('rangeSwellHeight');
+        const sEl = document.getElementById('rangeWaveSpeed');
+        const wEl = document.getElementById('rangeWind');
+        if (hEl) { hEl.value = p.swellHeight; document.getElementById('labelSwellHeight').textContent = p.swellHeight + 'px'; }
+        if (sEl) { sEl.value = p.waveSpeed; document.getElementById('labelWaveSpeed').textContent = p.waveSpeed; }
+        if (wEl) { wEl.value = p.windChop; document.getElementById('labelWind').textContent = p.windChop; }
+      }
+      document.querySelectorAll('.spot-preset-pill').forEach(p => p.classList.remove('active'));
+      const el = document.getElementById(`spotPill_${presetId}`);
+      if (el) el.classList.add('active');
+    }
+
+    function selectBoardType(boardId) {
+      if (window.SalentoSurf) {
+        window.SalentoSurf.setBoardType(boardId);
+      }
+      document.querySelectorAll('.board-type-pill').forEach(p => p.classList.remove('active'));
+      const el = document.getElementById(`boardPill_${boardId}`);
+      if (el) el.classList.add('active');
+    }
+
+    function handleWaveHeightChange(val) {
+      if (window.SalentoSurf) window.SalentoSurf.setCustomWaveHeight(val);
+      const l = document.getElementById('labelSwellHeight');
+      if (l) l.textContent = `${val}px`;
+    }
+
+    function handleWaveSpeedChange(val) {
+      if (window.SalentoSurf) window.SalentoSurf.setCustomWaveSpeed(val);
+      const l = document.getElementById('labelWaveSpeed');
+      if (l) l.textContent = val;
+    }
+
+    function handleWindChange(val) {
+      if (window.SalentoSurf) window.SalentoSurf.setCustomWind(val);
+      const l = document.getElementById('labelWind');
+      if (l) l.textContent = val;
+    }
+
+    function handleMobilePopUp(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf && window.SalentoSurf.surfer) {
+        if (!window.SalentoSurf.surfer.popUp()) {
+          window.SalentoSurf.surfer.snap();
+        }
+      }
+    }
+
+    function handleMobileStall(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf && window.SalentoSurf.surfer) {
+        window.SalentoSurf.surfer.inputX = -1;
+        window.SalentoSurf.surfer.isStallActive = true;
+        setTimeout(() => {
+          if (window.SalentoSurf && window.SalentoSurf.surfer) {
+            window.SalentoSurf.surfer.inputX = 0;
+            window.SalentoSurf.surfer.isStallActive = false;
+          }
+        }, 1200);
+      }
     }
 
     function selectSurfSkin(skinId) {
