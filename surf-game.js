@@ -507,24 +507,22 @@
       if (brakeBtn) brakeBtn.style.display = 'none';
 
       if (!this.started || this.finished) {
-        if (actionsContainer) actionsContainer.classList.add('start-mode');
-        if (boostBtn) {
-          boostBtn.classList.add('btn-start-mode');
-          boostBtn.innerHTML = '<span style="font-size: 16px; font-weight: 900;">▶ INIZIA</span>';
-          boostBtn.style.display = 'flex';
-          boostBtn.style.opacity = '1';
-        }
+        if (actionsContainer) actionsContainer.style.display = 'none';
+        if (boostBtn) boostBtn.style.display = 'none';
       } else {
-        if (actionsContainer) actionsContainer.classList.remove('start-mode');
+        if (actionsContainer) {
+          actionsContainer.style.display = 'flex';
+          actionsContainer.classList.remove('start-mode');
+        }
         if (boostBtn) {
           boostBtn.classList.remove('btn-start-mode');
-          boostBtn.innerHTML = '<span style="font-size: 30px; line-height: 1;">⚡</span>';
+          boostBtn.innerHTML = '<span style="font-size: 34px; line-height: 1; display: flex; align-items: center; justify-content: center;">⚡</span>';
           boostBtn.style.display = 'flex';
           if (this.power > 0) {
             boostBtn.style.opacity = '1';
-            boostBtn.style.filter = 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.75))';
+            boostBtn.style.filter = 'drop-shadow(0 0 12px rgba(250, 204, 21, 0.85))';
           } else {
-            boostBtn.style.opacity = '0.45';
+            boostBtn.style.opacity = '0.4';
             boostBtn.style.filter = 'none';
           }
         }
@@ -733,7 +731,7 @@
       this.objects.push(this.makeInteractObject(x, y, 7));
     }
 
-    hitPlayer(collidingObj) {
+    hitPlayer() {
       if (this.isInvincible()) return;
       if (this.hasDog) {
         this.kickDog();
@@ -750,11 +748,6 @@
       this.damageFlashTimer = 14;
       this.audio.playHit();
       this.invincibleTimer = 220; // Immunità estesa per dare tutto il tempo di disimpegnarsi
-
-      // Rimuove l'ostacolo impattato per impedire blocchi/incastri ripetuti
-      if (collidingObj) {
-        collidingObj.y = -99999;
-      }
 
       if (this.heart < 1) {
         this.finished = true;
@@ -1069,9 +1062,11 @@
               break;
 
             default:
-              this.hitPlayer(obj);
-              this.objects.splice(i, 1);
-              continue;
+              if (!obj.hasHit && !this.isInvincible()) {
+                obj.hasHit = true;
+                this.hitPlayer();
+              }
+              break;
           }
         }
       }
