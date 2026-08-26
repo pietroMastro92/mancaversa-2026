@@ -305,9 +305,13 @@
       this.bestDistance = 0;
       this.animId = null;
 
-      // Touch tracking
+      // Touch & Analog Stick tracking
       this.isTouchSteering = false;
       this.touchX = this.width / 2.0;
+      this.touchY = this.height * 0.75;
+      this.touchStartX = this.width / 2.0;
+      this.touchStartY = this.height * 0.75;
+      this.damageFlashTimer = 0;
 
       this.loadSavedScores();
       this.loadImages();
@@ -493,13 +497,29 @@
       if (!this.started || this.finished) {
         if (leftBtn) leftBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">◄ Surfer</span>';
         if (rightBtn) rightBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">Surfer ►</span>';
-        if (boostBtn) boostBtn.innerHTML = '<span style="font-size: 14px; font-weight: 900;">▶ INIZIA</span>';
+        if (boostBtn) {
+          boostBtn.innerHTML = '<span style="font-size: 14px; font-weight: 900;">▶ INIZIA</span>';
+          boostBtn.style.background = '#FF385C';
+          boostBtn.style.borderColor = '#FDA4AF';
+          boostBtn.style.opacity = '1';
+        }
         if (brakeBtn) brakeBtn.style.display = 'none';
       } else {
         if (leftBtn) leftBtn.innerHTML = '<span>◄</span>';
         if (rightBtn) rightBtn.innerHTML = '<span>►</span>';
-        if (boostBtn) boostBtn.innerHTML = '<span>⚡ BOOST</span>';
         if (brakeBtn) brakeBtn.style.display = 'flex';
+        if (boostBtn) {
+          boostBtn.innerHTML = `<span>⚡ BOOST <b style="background: rgba(0,0,0,0.22); padding: 1px 6px; border-radius: 99px; font-size: 11px; margin-left: 3px;">x${this.power}</b></span>`;
+          if (this.power > 0) {
+            boostBtn.style.background = '#F59E0B';
+            boostBtn.style.borderColor = '#FDE68A';
+            boostBtn.style.opacity = '1';
+          } else {
+            boostBtn.style.background = 'rgba(255, 255, 255, 0.35)';
+            boostBtn.style.borderColor = 'rgba(255, 255, 255, 0.55)';
+            boostBtn.style.opacity = '0.75';
+          }
+        }
       }
     }
 
@@ -709,7 +729,8 @@
       if (this.isInvincible()) return;
       if (this.hasDog) {
         this.kickDog();
-        this.invincibleTimer = 170;
+        this.invincibleTimer = 180;
+        this.damageFlashTimer = 14;
         this.audio.playHit();
         return;
       }
@@ -718,6 +739,7 @@
       this.paused = true;
       if (--this.heart < 0) this.heart = 0;
       this.surferAction = 6;
+      this.damageFlashTimer = 14;
       this.audio.playHit();
 
       if (this.heart < 1) {
@@ -764,15 +786,15 @@
 
       // Touch following analog steering
       if (this.isTouchSteering && !this.flyingTimer && !this.fallTimer) {
-        const playerScreenX = this.width / 2.0;
-        const dx = this.touchX - playerScreenX;
-        if (dx < -70) {
+        const baseX = this.touchStartX || (this.width / 2.0);
+        const dx = this.touchX - baseX;
+        if (dx < -60) {
           this.surferAction = 1; // Hard left
-        } else if (dx < -18) {
+        } else if (dx < -16) {
           this.surferAction = 2; // Gentle left
-        } else if (dx > 70) {
+        } else if (dx > 60) {
           this.surferAction = 5; // Hard right
-        } else if (dx > 18) {
+        } else if (dx > 16) {
           this.surferAction = 4; // Gentle right
         } else {
           this.surferAction = 3; // Straight
@@ -812,20 +834,21 @@
         if (!this.finished) {
           this.calcOffset();
 
+          // Ripresa automatica fluida dopo la caduta
           if (this.fallTimer) {
             this.fallTimer++;
-            if (this.fallTimer > 180) {
+            if (this.fallTimer > 65) {
               this.fallTimer = 0;
-              this.surferAction = 0;
-              this.paused = true;
-              this.speed = 0;
-              this.invincibleTimer = 1;
+              this.paused = false;
+              this.speed = this.initialSpeed;
+              this.surferAction = 3;
+              this.invincibleTimer = 180;
             }
           }
 
-          if (this.invincibleTimer && this.surferAction !== 0) {
+          if (this.invincibleTimer) {
             this.invincibleTimer++;
-            if (this.invincibleTimer > 300) this.invincibleTimer = 0;
+            if (this.invincibleTimer > 180) this.invincibleTimer = 0;
           }
 
           if (this.flyingTimer > 0) this.flyingTimer--;
@@ -873,12 +896,25 @@
         if (this.enemyTimer) this.drawEnemy(ctx);
         this.drawSurfer(ctx);
         this.drawNaughtySurfer(ctx);
+
+        // 4. Controllo Analogico Virtuale Visivo sul Canvas
+        this.drawAnalogJoystick(ctx);
+
+        // 5. Flash visivo danno / perdita cuore
+        if (this.damageFlashTimer > 0) {
+          ctx.save();
+          ctx.fillStyle = `rgba(239, 68, 68, ${this.damageFlashTimer / 30})`;
+          ctx.fillRect(0, 0, w, h);
+          ctx.restore();
+          this.damageFlashTimer--;
+        }
+
         if (this.finished) this.drawFinishViewer(ctx);
       } else {
         this.drawStarterViewer(ctx);
       }
 
-      // 4. Status Bar in alto
+      // 6. Status Bar in alto
       this.drawStatusBar(ctx);
     }
 
@@ -1281,68 +1317,125 @@
       ctx.restore();
     }
 
+    drawAnalogJoystick(ctx) {
+      if (!this.started || this.finished) return;
+
+      if (this.isTouchSteering) {
+        const baseX = this.touchStartX || (this.width / 2.0);
+        const baseY = this.touchStartY || (this.height * 0.72);
+
+        ctx.save();
+
+        // 1. Cerchio base esterno
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(baseX, baseY, 46, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. Linea asse orizzontale
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(baseX - 42, baseY);
+        ctx.lineTo(baseX + 42, baseY);
+        ctx.stroke();
+
+        // 3. Frecce guida sinistra/destra
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('◄', baseX - 32, baseY + 5);
+        ctx.fillText('►', baseX + 32, baseY + 5);
+
+        // 4. Knob mobile sotto il pollice
+        const dx = Math.max(-42, Math.min(42, this.touchX - baseX));
+        const knobX = baseX + dx;
+        const knobY = baseY;
+
+        // Ombra knob
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+        ctx.beginPath();
+        ctx.arc(knobX, knobY + 3, 23, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Corpo knob luminoso
+        const knobGrad = ctx.createRadialGradient(knobX - 5, knobY - 5, 2, knobX, knobY, 23);
+        knobGrad.addColorStop(0, '#FFFFFF');
+        knobGrad.addColorStop(1, '#CBD5E1');
+        ctx.fillStyle = knobGrad;
+        ctx.strokeStyle = '#0284C7';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(knobX, knobY, 23, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#0284C7';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText('🏄', knobX, knobY + 4);
+
+        ctx.restore();
+      }
+    }
+
     drawStatusBar(ctx) {
       const iface = this.images.interface;
       const center = this.width / 2.0;
-      const barHeight = 54;
+      const isFullscreen = this.activeCanvasId === 'surfGameCanvas';
+      const topY = isFullscreen ? 12 : 6;
+      const barHeight = 48;
+      const barWidth = Math.min(this.width - 24, 460);
+      const barX = center - barWidth / 2;
 
       ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
-      ctx.fillRect(0, 0, this.width, barHeight);
 
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, barHeight);
-      ctx.lineTo(this.width, barHeight);
+      // Sfondo Status Bar Glassmorphic con bordi arrotondati
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      this.drawRoundedRect(ctx, barX, topY, barWidth, barHeight, 24);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // Distanza centrale in metri
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 18px "FiraCode", monospace, sans-serif';
-      ctx.fillStyle = '#0F172A';
-      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 35);
-
-      // Cuori
-      let hLeft = center - 80;
+      // 1. Vite / Cuori (Sinistra)
+      let hLeft = barX + 22;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, hLeft, 15, 24, 24);
-        } else {
-          ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '💖' : '🖤', hLeft + 10, 32);
-        }
-        hLeft -= 26;
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(isFull ? '❤️' : '🖤', hLeft, topY + 31);
+        hLeft += 26;
       }
 
-      // Fulmini Boost
-      let pLeft = center + 56;
-      for (let i = 0; i < 3; i++) {
+      // 2. Distanza (Centro)
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 17px "FiraCode", monospace, sans-serif';
+      ctx.fillStyle = '#0F172A';
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 31);
+
+      // 3. Fulmini Boost (Destra)
+      let pRight = barX + barWidth - 22;
+      for (let i = 2; i >= 0; i--) {
         const isFull = i < this.power;
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, pLeft, 15, 24, 24);
-        } else {
-          ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '⚡' : '⚪', pLeft + 10, 32);
-        }
-        pLeft += 26;
+        ctx.font = '19px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(isFull ? '⚡' : '⚪', pRight, topY + 31);
+        pRight -= 25;
       }
 
-      // Cane e Monete
-      let lLeft = 14;
-      if (this.hasDog && iface && iface.complete) {
-        ctx.drawImage(iface, 24, 48, 24, 24, lLeft, 15, 24, 24);
-        lLeft += 28;
-      }
-      if (this.coinCount > 0) {
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, 24, 72, 24, 24, lLeft, 16, 24, 24);
-        }
+      // 4. Cane e Monete (se presenti)
+      if (this.hasDog || this.coinCount > 0) {
         ctx.textAlign = 'left';
-        ctx.font = 'bold 14px "FiraCode", monospace, sans-serif';
+        ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
         ctx.fillStyle = '#B45309';
-        ctx.fillText(`x${this.coinCount}`, lLeft + 26, 33);
+        let extras = '';
+        if (this.hasDog) extras += '🐕 ';
+        if (this.coinCount > 0) extras += `🪙x${this.coinCount}`;
+        ctx.fillText(extras, center + 46, topY + 30);
       }
 
       ctx.restore();
@@ -1444,7 +1537,10 @@
         }
 
         this.isTouchSteering = true;
+        this.touchStartX = x;
+        this.touchStartY = y;
         this.touchX = x;
+        this.touchY = y;
       };
 
       const handlePointerMove = (e) => {
@@ -1470,6 +1566,7 @@
         if (!this.isTouchSteering || !this.started || this.finished) return;
         if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
         this.touchX = x;
+        this.touchY = y;
       };
 
       const handlePointerUp = (e) => {
@@ -1561,6 +1658,20 @@
 
       if (distEl) distEl.textContent = `${Math.floor(this.distance / 10.0)}m`;
       if (shellsEl) shellsEl.textContent = `x${this.power}`;
+
+      const boostBtn = document.getElementById('btnMobileBoost');
+      if (boostBtn && this.started && !this.finished) {
+        boostBtn.innerHTML = `<span>⚡ BOOST <b style="background: rgba(0,0,0,0.22); padding: 1px 6px; border-radius: 99px; font-size: 11px; margin-left: 3px;">x${this.power}</b></span>`;
+        if (this.power > 0) {
+          boostBtn.style.background = '#F59E0B';
+          boostBtn.style.borderColor = '#FDE68A';
+          boostBtn.style.opacity = '1';
+        } else {
+          boostBtn.style.background = 'rgba(255, 255, 255, 0.35)';
+          boostBtn.style.borderColor = 'rgba(255, 255, 255, 0.55)';
+          boostBtn.style.opacity = '0.75';
+        }
+      }
     }
 
     updateCardUI() {
