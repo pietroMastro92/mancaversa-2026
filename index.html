@@ -3054,13 +3054,13 @@
     </section>
 
     <!-- ==========================================================================
-         MICROSOFT EDGE SURF (SALENTO EDITION)
+         SALENTO SURF (DOPOVACANZA GAME)
          ========================================================================== -->
     <section class="section-block" id="surf">
       <div class="section-head">
-        <div class="section-eyebrow">Dopovacanza Retro Game · Novità 🏄‍♂️</div>
-        <h2 class="section-title">Microsoft Edge Surf</h2>
-        <p class="section-sub">Il leggendario gioco di surf infinito: schiva gli scogli, salta sui trampolini e sfuggi al Kraken gigante!</p>
+        <div class="section-eyebrow">Dopovacanza Game · Novità 🏄‍♂️</div>
+        <h2 class="section-title">Salento Surf</h2>
+        <p class="section-sub">Il gioco di surf a 8-bit nel mare dello Ionio: schiva gli scogli, salta sui trampolini e sfuggi al Kraken gigante!</p>
       </div>
 
       <div class="surf-arcade-card">
@@ -3071,40 +3071,7 @@
             <div class="surf-big-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
-            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE A EDGE SURF</div>
-          </div>
-        </div>
-
-        <!-- Surfer Character Selector -->
-        <div class="surf-skin-section">
-          <div class="surf-skin-label">
-            <span>🏄‍♂️ Scegli il tuo Surfer (8 Personaggi):</span>
-          </div>
-          <div class="surf-skin-pills-row" id="edgeSurferPillRow">
-            <button type="button" class="surf-skin-pill active" onclick="selectEdgeSurfer(0)" id="edgeSurferPill_0">
-              <span>🏄‍♂️ Surfer #1</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(1)" id="edgeSurferPill_1">
-              <span>🏄‍♀️ Surfer #2</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(2)" id="edgeSurferPill_2">
-              <span>😎 Surfer #3</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(3)" id="edgeSurferPill_3">
-              <span>🟢 Surfer #4</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(4)" id="edgeSurferPill_4">
-              <span>🤿 Surfer #5</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(5)" id="edgeSurferPill_5">
-              <span>⚡ Surfer #6</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(6)" id="edgeSurferPill_6">
-              <span>🥷 Surfer #7</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(7)" id="edgeSurferPill_7">
-              <span>🐱 Surfer #8</span>
-            </button>
+            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE A SALENTO SURF</div>
           </div>
         </div>
 
@@ -3141,7 +3108,7 @@
         <!-- Instructions Box -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Giocare a Edge Surf (Smartphone & Computer):</span>
+            <span>📱</span> <span>Come Giocare a Salento Surf (Smartphone & Computer):</span>
           </div>
           <div style="line-height: 1.5;">
             • <b>Guida & Vira (Frecce Sinistra/Destra o Tocca / Trascina sullo schermo)</b>: Vira per evitare scogli, boe e pontili in legno!<br>
@@ -3820,7 +3787,7 @@
     <!-- Top Floating Modal Controls -->
     <div class="surf-modal-hud" style="justify-content: space-between; background: transparent;">
       <div style="font-weight: 800; font-size: 14px; color: #FFFFFF; text-shadow: 0 2px 6px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px;">
-        <span>🏄‍♂️ Edge Surf</span>
+        <span>🏄‍♂️ Salento Surf</span>
       </div>
 
       <div class="surf-hud-buttons">
@@ -5242,19 +5209,6 @@
       if (window.SalentoSurf) {
         window.SalentoSurf.resetGame();
         window.SalentoSurf.startSurfing();
-      }
-    }
-
-    function selectEdgeSurfer(idx) {
-      if (window.SalentoSurf) {
-        window.SalentoSurf.setSurferCharacter(idx);
-      }
-      document.querySelectorAll('#edgeSurferPillRow .surf-skin-pill').forEach(pill => {
-        pill.classList.remove('active');
-      });
-      const selectedPill = document.getElementById(`edgeSurferPill_${idx}`);
-      if (selectedPill) {
-        selectedPill.classList.add('active');
       }
     }
 

@@ -9,7 +9,7 @@
 
 ## 🌟 Funzionalità
 
-- **🏄‍♂️ Microsoft Edge Surf · Salento Edition (Porting originale di edge-surf-game)**: Il leggendario videogioco di surf infinito di Microsoft Edge (`edge://surf`): 8 surfer selezionabili con relative tavole, scorrimento infinito dell'oceano, scogli, pontili, banchi di sabbia, alghe, mulinelli, rampe di salto per fare piroette in aria, fulmini ⚡ Super Boost, cuori extra 💖, cane compagno di salvataggio 🐕 e l'inseguimento del mostro marino gigante Kraken 🐙! Controlli ottimizzati per smartphone (touch swipe/bottoni) e tastiera, con condivisione record istantanea nella Bacheca Live.
+- **🏄‍♂️ Salento Surf · Dopovacanza Game**: Il gioco di surf a 8-bit ambientato nel mare dello Ionio: 8 surfer selezionabili direttamente nella schermata iniziale con le relative tavole, scorrimento infinito dell'oceano, scogli, pontili, banchi di sabbia, alghe, mulinelli, rampe di salto per fare piroette in aria, fulmini ⚡ Super Boost, cuori extra 💖, cane compagno di salvataggio 🐕 e l'inseguimento del mostro marino gigante Kraken 🐙! Controlli ottimizzati per smartphone (touch swipe/bottoni/analogico) e tastiera, con Classifica Top 10 reale e sincronizzata in tempo reale.
 - **Brand & Mascotte PietroBnB**: Simbolo Bélo estivo con occhiali da sole ed Easter Egg interattivo.
 - **Bacheca Live & Floating Drawer**: Chat in tempo reale aperta con slide-up bottom sheet e badge notifiche con contatore messaggi non letti.
 - **Animali Anonimi (Google Docs Style)**: Identità con avatar simpatici estivi (*Delfino Anonimo*, *Fenicottero Anonimo*, ecc.) e possibilità di impostare il proprio vero nome.

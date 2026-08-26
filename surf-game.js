@@ -1326,12 +1326,6 @@
       if (scoreEl) scoreEl.textContent = this.highScore.toLocaleString();
       if (barrelEl) barrelEl.textContent = `${this.bestDistance}m`;
       if (distEl) distEl.textContent = `Surfer #${this.surfer + 1}`;
-
-      // Aggiorna pills esterne
-      document.querySelectorAll('#edgeSurferPillRow .surf-skin-pill').forEach((pill, idx) => {
-        if (idx === this.surfer) pill.classList.add('active');
-        else pill.classList.remove('active');
-      });
     }
   }
 
