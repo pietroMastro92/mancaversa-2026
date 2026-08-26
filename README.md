@@ -9,7 +9,7 @@
 
 ## 🌟 Funzionalità
 
-- **🏄‍♂️ Salento Surf Sandbox (Novità Dopovacanza - Ispirato a Surf Sandbox su Steam!)**: Simulatore di surf casual con fisica idrodinamica dell'acqua a onde continue. Crea la tua onda perfetta, scegli il tuo spot salentino (Baia Verde, Mare dei Cavalli reef, Scirocco Shorebreak, Tramontana Zen), scegli il craft (Shortboard, Longboard, Bodyboard, Bodysurf puro), nuota (paddle), fai il pop-up al momento giusto, carva sulla parete, fatti inglobare nei tubi profondi (barrel) o rilassati a guardare il mare con il rumore rilassante delle onde sintetizzato via Web Audio.
+- **🏄‍♂️ Microsoft Edge Surf · Salento Edition (Porting originale di edge-surf-game)**: Il leggendario videogioco di surf infinito di Microsoft Edge (`edge://surf`): 8 surfer selezionabili con relative tavole, scorrimento infinito dell'oceano, scogli, pontili, banchi di sabbia, alghe, mulinelli, rampe di salto per fare piroette in aria, fulmini ⚡ Super Boost, cuori extra 💖, cane compagno di salvataggio 🐕 e l'inseguimento del mostro marino gigante Kraken 🐙! Controlli ottimizzati per smartphone (touch swipe/bottoni) e tastiera, con condivisione record istantanea nella Bacheca Live.
 - **Brand & Mascotte PietroBnB**: Simbolo Bélo estivo con occhiali da sole ed Easter Egg interattivo.
 - **Bacheca Live & Floating Drawer**: Chat in tempo reale aperta con slide-up bottom sheet e badge notifiche con contatore messaggi non letti.
 - **Animali Anonimi (Google Docs Style)**: Identità con avatar simpatici estivi (*Delfino Anonimo*, *Fenicottero Anonimo*, ecc.) e possibilità di impostare il proprio vero nome.

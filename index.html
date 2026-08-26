@@ -2153,8 +2153,8 @@
       background: #0284C7;
       border-radius: var(--radius-md);
       overflow: hidden;
-      aspect-ratio: 16 / 9;
-      max-height: 280px;
+      aspect-ratio: 3 / 4;
+      max-height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2457,9 +2457,9 @@
     .surf-active-canvas {
       width: 100%;
       height: 100%;
-      max-width: 900px;
-      max-height: 520px;
-      aspect-ratio: 16 / 9;
+      max-width: 480px;
+      max-height: 92vh;
+      aspect-ratio: 3 / 4;
       object-fit: contain;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
@@ -2868,104 +2868,57 @@
     </section>
 
     <!-- ==========================================================================
-         SALENTO SURF SANDBOX (CASUAL SURF SIM & WAVE GENERATOR)
+         MICROSOFT EDGE SURF (SALENTO EDITION)
          ========================================================================== -->
     <section class="section-block" id="surf">
       <div class="section-head">
-        <div class="section-eyebrow">Casual Surf Simulator & Sandbox 🌊</div>
-        <h2 class="section-title">Salento Surf Sandbox</h2>
-        <p class="section-sub">Crea la tua onda perfetta, nuota per prenderla, fatti inglobare nel tubo o rilassati a guardare il mare.</p>
+        <div class="section-eyebrow">Dopovacanza Retro Game · Novità 🏄‍♂️</div>
+        <h2 class="section-title">Microsoft Edge Surf</h2>
+        <p class="section-sub">Il leggendario gioco di surf infinito: schiva gli scogli, salta sui trampolini e sfuggi al Kraken gigante!</p>
       </div>
 
       <div class="surf-arcade-card">
         <!-- Live Pixel Art Preview Screen -->
-        <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero">
-          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="520" height="300"></canvas>
+        <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero" style="aspect-ratio: 4/3; max-height: 380px;">
+          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="480" height="640"></canvas>
           <div class="surf-preview-overlay">
             <div class="surf-big-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
-            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER ENTRARE IN ACQUA</div>
+            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE A EDGE SURF</div>
           </div>
         </div>
 
-        <!-- Spot Presets Selector -->
+        <!-- Surfer Character Selector -->
         <div class="surf-skin-section">
           <div class="surf-skin-label">
-            <span>📍 Scegli lo Spot del Salento:</span>
+            <span>🏄‍♂️ Scegli il tuo Surfer (8 Personaggi):</span>
           </div>
-          <div class="surf-skin-pills-row">
-            <button type="button" class="spot-preset-pill active" onclick="selectSpotPreset('baia_verde')" id="spotPill_baia_verde">
-              <span>🏖️ Baia Verde</span>
+          <div class="surf-skin-pills-row" id="edgeSurferPillRow">
+            <button type="button" class="surf-skin-pill active" onclick="selectEdgeSurfer(0)" id="edgeSurferPill_0">
+              <span>🏄‍♂️ Surfer #1</span>
             </button>
-            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('mare_cavalli')" id="spotPill_mare_cavalli">
-              <span>🌊 Mare dei Cavalli (Reef)</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(1)" id="edgeSurferPill_1">
+              <span>🏄‍♀️ Surfer #2</span>
             </button>
-            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('scirocco_storm')" id="spotPill_scirocco_storm">
-              <span>🌪️ Scirocco Heavy Shorebreak</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(2)" id="edgeSurferPill_2">
+              <span>😎 Surfer #3</span>
             </button>
-            <button type="button" class="spot-preset-pill" onclick="selectSpotPreset('tramontana_zen')" id="spotPill_tramontana_zen">
-              <span>🧘‍♂️ Tramontana Zen (Relax)</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(3)" id="edgeSurferPill_3">
+              <span>🟢 Surfer #4</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Board & Craft Selector -->
-        <div class="surf-skin-section">
-          <div class="surf-skin-label">
-            <span>🏄‍♂️ Scegli la Tavola / Craft:</span>
-          </div>
-          <div class="surf-skin-pills-row">
-            <button type="button" class="board-type-pill active" onclick="selectBoardType('shortboard')" id="boardPill_shortboard">
-              <span>🏄‍♂️ Shortboard</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(4)" id="edgeSurferPill_4">
+              <span>🤿 Surfer #5</span>
             </button>
-            <button type="button" class="board-type-pill" onclick="selectBoardType('longboard')" id="boardPill_longboard">
-              <span>🛹 Longboard</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(5)" id="edgeSurferPill_5">
+              <span>⚡ Surfer #6</span>
             </button>
-            <button type="button" class="board-type-pill" onclick="selectBoardType('bodyboard')" id="boardPill_bodyboard">
-              <span>🌊 Bodyboard</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(6)" id="edgeSurferPill_6">
+              <span>🥷 Surfer #7</span>
             </button>
-            <button type="button" class="board-type-pill" onclick="selectBoardType('bodysurf')" id="boardPill_bodysurf">
-              <span>🏊‍♂️ Bodysurf (Senza Tavola)</span>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(7)" id="edgeSurferPill_7">
+              <span>🐱 Surfer #8</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Sandbox Wave Sliders & Terrain Sculptor Panel -->
-        <div class="sandbox-panel-wrap">
-          <div class="sandbox-title-row">
-            <span>🎛️ Sandbox Wave Controls (Modifica Onde in Tempo Reale):</span>
-            <div style="display:flex; gap:6px;">
-              <button type="button" class="btn-action btn-subtle" id="btnDeskSculpt" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="handleToggleSculpt(event)">
-                🖌️ Pennello Fondale
-              </button>
-              <button type="button" class="btn-action btn-subtle" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="window.SalentoSurf.triggerBigSetWave()">
-                🌊 Lancia Set!
-              </button>
-            </div>
-          </div>
-          <div class="sandbox-sliders-grid">
-            <div class="sandbox-slider-box">
-              <div class="sandbox-slider-label">
-                <span>Altezza Swell (Onda)</span>
-                <span id="labelSwellHeight">34px</span>
-              </div>
-              <input type="range" class="sandbox-range-input" id="rangeSwellHeight" min="10" max="80" value="34" oninput="handleWaveHeightChange(this.value)">
-            </div>
-            <div class="sandbox-slider-box">
-              <div class="sandbox-slider-label">
-                <span>Velocità Swell</span>
-                <span id="labelWaveSpeed">3.6</span>
-              </div>
-              <input type="range" class="sandbox-range-input" id="rangeWaveSpeed" min="1.5" max="7.0" step="0.2" value="3.6" oninput="handleWaveSpeedChange(this.value)">
-            </div>
-            <div class="sandbox-slider-box">
-              <div class="sandbox-slider-label">
-                <span>Vento & Increspatura</span>
-                <span id="labelWind">0.12</span>
-              </div>
-              <input type="range" class="sandbox-range-input" id="rangeWind" min="0.0" max="0.6" step="0.05" value="0.12" oninput="handleWindChange(this.value)">
-            </div>
           </div>
         </div>
 
@@ -2977,14 +2930,14 @@
             <div class="surf-stat-lbl">Record Punti</div>
           </div>
           <div class="surf-stat-box">
-            <div class="surf-stat-icon">🌊</div>
-            <div class="surf-stat-val" id="surfRecordBarrel">0.0s</div>
-            <div class="surf-stat-lbl">Max Tubo</div>
+            <div class="surf-stat-icon">🏖️</div>
+            <div class="surf-stat-val" id="surfRecordBarrel">0m</div>
+            <div class="surf-stat-lbl">Max Distanza</div>
           </div>
           <div class="surf-stat-box">
-            <div class="surf-stat-icon">⏱️</div>
-            <div class="surf-stat-val" id="surfRecordDist">0s</div>
-            <div class="surf-stat-lbl">Tempo Onda</div>
+            <div class="surf-stat-icon">🏄‍♂️</div>
+            <div class="surf-stat-val" id="surfRecordDist">Surfer #1</div>
+            <div class="surf-stat-lbl">Personaggio</div>
           </div>
         </div>
 
@@ -2992,7 +2945,7 @@
         <div class="surf-actions-row">
           <button type="button" class="btn-surf-main" onclick="openSurfGameModal()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            <span>Apri Sandbox a Schermo Intero</span>
+            <span>Avvia Partita a Schermo Intero</span>
           </button>
           <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()">
             <span>💬 Condividi Record in Bacheca</span>
@@ -3002,14 +2955,15 @@
         <!-- Instructions Box -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Fisica Reale di Surf Sandbox & Controlli:</span>
+            <span>📱</span> <span>Come Giocare a Edge Surf (Smartphone & Computer):</span>
           </div>
           <div style="line-height: 1.5;">
-            • <b>Fisica Fluida & Onde Continue</b>: L'onda si propaga dal mare aperto verso il reef, aumentando di ripidezza fino a lanciare il lip in avanti e creare un vero <b>Tubo / Barrel 2D</b>!<br>
-            • <b>Paddle & Pop-Up</b>: Rema verso destra per prendere velocità. Quando l'onda ti solleva, tocca <b>⚡ POP-UP</b> (o <i>Spazio</i>) per metterti in piedi sulla tavola!<br>
-            • <b>Trim & Carving</b>: Trascina verso il basso per scendere la parete e accelerare; trascina verso l'alto per risalire verso la cresta e fare manovre aeree!<br>
-            • <b>Stall & Tubo</b>: Trascina a sinistra (o premi <i>🛑 Frena</i>) per frenare con la mano nell'acqua ed infilarti nel tubo profondo.<br>
-            • <b>Pennello Fondale (Sculpt)</b>: Attiva il pennello e tocca il fondale marino per alzare banchi di sabbia o scavare buche rocciose e veder cambiare l'onda in tempo reale!
+            • <b>Guida & Vira (Frecce Sinistra/Destra o Tocca a Sinistra/Destra dello schermo)</b>: Vira per evitare scogli, boe e pontili in legno!<br>
+            • <b>Accelera / Frena (Freccia Giù / Freccia Su)</b>: Prendi velocità o fermati per scegliere la traiettoria migliore.<br>
+            • <b>Super Boost (Barra Spaziatrice o tasto ⚡ BOOST)</b>: Usa i fulmini raccolti per scattare a velocità supersonica e seminare il mostro!<br>
+            • <b>Rampe di Salto (🦘)</b>: Salta in aria con piroette a 360° e vola sopra ogni ostacolo!<br>
+            • <b>Cuori (💖) & Cane Salvataggio (🐕)</b>: Raccogli cuori extra e salva il cane che nuoterà con te sulla tavola parandoti da uno scontro!<br>
+            • <b>Attento al Kraken (🐙)</b>: Dopo un po' di metri, il leggendario mostro marino gigante emergerà dalle profondità per darti la caccia!
           </div>
         </div>
       </div>
@@ -3660,13 +3614,13 @@
       </div>
 
       <div class="surf-hud-stats-mini">
-        <span>⏱️ <span id="surfLiveDist">0s</span></span>
-        <span>🌊 <span id="surfLiveShells">0.0s Tubo</span></span>
+        <span>🏖️ <span id="surfLiveDist">0m</span></span>
+        <span>⚡ <span id="surfLiveShells">x0</span></span>
       </div>
 
       <div class="surf-hud-buttons">
-        <button type="button" class="btn-surf-hud-icon" id="btnSurfMute" onclick="window.SalentoSurf.toggleAudioMute()">
-          🔊 Audio On
+        <button type="button" class="btn-surf-hud-icon" id="btnSurfMute" onclick="window.SalentoSurf.audio.toggleMute()">
+          🔊 Audio
         </button>
         <button type="button" class="btn-surf-hud-icon btn-surf-close-x" onclick="closeSurfGameModal()" title="Chiudi Gioco">
           ✕
@@ -3676,22 +3630,51 @@
 
     <!-- Canvas Wrapper -->
     <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
-      <canvas id="surfGameCanvas" class="surf-active-canvas" width="520" height="300"></canvas>
+      <canvas id="surfGameCanvas" class="surf-active-canvas" width="480" height="640"></canvas>
 
       <!-- Floating In-Game Action Bar for Mobile Touch -->
-      <div class="surf-in-game-actions">
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileStall(event)" title="Frena ed entra nel Tubo">
-          <span>🛑 Frena</span>
+      <div class="surf-in-game-actions" style="justify-content: center; gap: 10px;">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra" style="padding: 12px 18px; font-size: 13.5px;">
+          <span>◄ Sinistra</span>
         </button>
-        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobilePopUp" onclick="handleMobilePopUp(event)" title="Pop-Up o Snap">
-          <span>⚡ POP-UP</span>
+        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine" style="background: #F59E0B; border-color: #FBBF24; padding: 12px 22px; font-size: 13.5px;">
+          <span>⚡ BOOST</span>
         </button>
-        <button type="button" class="btn-mobile-game-action" id="btnToggleSculptModal" onclick="handleToggleSculpt(event)" title="Scolpisci / Alza Fondale">
-          <span>🖌️ Scolpisci</span>
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerRight(event)" title="Vira a Destra" style="padding: 12px 18px; font-size: 13.5px;">
+          <span>Destra ►</span>
         </button>
-        <button type="button" class="btn-mobile-game-action" onclick="window.SalentoSurf.triggerBigSetWave()" title="Lancia serie di onde giganti">
-          <span>🌊 Big Set</span>
-        </button>
+      </div>
+
+      <!-- Game Over Card Overlay inside game -->
+      <div class="surf-gameover-overlay" id="surfGameOverModal">
+        <div class="surf-gameover-card">
+          <div class="surf-gameover-badge" id="surfNewRecordBadge" style="display:none;">🏆 NUOVO RECORD!</div>
+          <div class="surf-gameover-title">Game Over! 🏄‍♂️</div>
+          <div class="surf-gameover-score-big" id="surfFinalScore">0</div>
+          
+          <div class="surf-gameover-grid">
+            <div class="surf-go-stat">
+              <div class="surf-go-val" id="surfFinalDist">0m</div>
+              <div class="surf-go-lbl">Distanza</div>
+            </div>
+            <div class="surf-go-stat">
+              <div class="surf-go-val" id="surfFinalBarrel">🪙 x0 · ⚡ x0</div>
+              <div class="surf-go-lbl">Oggetti Raccolti</div>
+            </div>
+          </div>
+
+          <div class="surf-gameover-btns">
+            <button type="button" class="btn-surf-main" onclick="restartEdgeSurf()" style="min-height: 44px;">
+              <span>🔄 Gioca Ancora</span>
+            </button>
+            <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()" style="min-height: 42px;">
+              <span>💬 Condividi Record in Bacheca</span>
+            </button>
+            <button type="button" class="btn-action btn-subtle" onclick="closeSurfGameModal()" style="min-height: 38px; justify-content: center; margin-top: 4px;">
+              <span>Chiudi Schermata</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -5008,7 +4991,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // 7. Salento Pixel Surf Integration & Bacheca Connector
+    // 7. Microsoft Edge Surf Integration & Bacheca Connector
     // --------------------------------------------------------------------------
     function openSurfGameModal() {
       const modal = document.getElementById('surfGameModalOverlay');
@@ -5029,126 +5012,69 @@
       modal.classList.remove('active');
       document.body.style.overflow = '';
 
+      const goModal = document.getElementById('surfGameOverModal');
+      if (goModal) goModal.classList.remove('active');
+
       if (window.SalentoSurf) {
-        window.SalentoSurf.updateRecordsUI();
         window.SalentoSurf.init('surfPreviewCanvas');
+        window.SalentoSurf.updateCardUI();
       }
-
-      updateSurfCardStats();
     }
 
-    function selectSpotPreset(presetId) {
+    function restartEdgeSurf() {
+      const goModal = document.getElementById('surfGameOverModal');
+      if (goModal) goModal.classList.remove('active');
+
       if (window.SalentoSurf) {
-        window.SalentoSurf.setSpotPreset(presetId);
-        const p = window.SalentoSurf.waterSim.preset;
-        const hEl = document.getElementById('rangeSwellHeight');
-        const sEl = document.getElementById('rangeWaveSpeed');
-        const wEl = document.getElementById('rangeWind');
-        if (hEl) { hEl.value = p.swellHeight; document.getElementById('labelSwellHeight').textContent = p.swellHeight + 'px'; }
-        if (sEl) { sEl.value = p.waveSpeed; document.getElementById('labelWaveSpeed').textContent = p.waveSpeed; }
-        if (wEl) { wEl.value = p.windChop; document.getElementById('labelWind').textContent = p.windChop; }
+        window.SalentoSurf.resetGame();
+        window.SalentoSurf.startSurfing();
       }
-      document.querySelectorAll('.spot-preset-pill').forEach(p => p.classList.remove('active'));
-      const el = document.getElementById(`spotPill_${presetId}`);
-      if (el) el.classList.add('active');
     }
 
-    function selectBoardType(boardId) {
+    function selectEdgeSurfer(idx) {
       if (window.SalentoSurf) {
-        window.SalentoSurf.setBoardType(boardId);
+        window.SalentoSurf.setSurferCharacter(idx);
       }
-      document.querySelectorAll('.board-type-pill').forEach(p => p.classList.remove('active'));
-      const el = document.getElementById(`boardPill_${boardId}`);
-      if (el) el.classList.add('active');
-    }
-
-    function handleWaveHeightChange(val) {
-      if (window.SalentoSurf) window.SalentoSurf.setCustomWaveHeight(val);
-      const l = document.getElementById('labelSwellHeight');
-      if (l) l.textContent = `${val}px`;
-    }
-
-    function handleWaveSpeedChange(val) {
-      if (window.SalentoSurf) window.SalentoSurf.setCustomWaveSpeed(val);
-      const l = document.getElementById('labelWaveSpeed');
-      if (l) l.textContent = val;
-    }
-
-    function handleWindChange(val) {
-      if (window.SalentoSurf) window.SalentoSurf.setCustomWind(val);
-      const l = document.getElementById('labelWind');
-      if (l) l.textContent = val;
-    }
-
-    function handleMobilePopUp(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (window.SalentoSurf && window.SalentoSurf.surfer) {
-        if (!window.SalentoSurf.surfer.popUp()) {
-          window.SalentoSurf.surfer.snap();
-        }
-      }
-    }
-
-    function handleMobileStall(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (window.SalentoSurf && window.SalentoSurf.surfer) {
-        window.SalentoSurf.surfer.isStallActive = true;
-        setTimeout(() => {
-          if (window.SalentoSurf && window.SalentoSurf.surfer) {
-            window.SalentoSurf.surfer.isStallActive = false;
-          }
-        }, 1200);
-      }
-    }
-
-    function handleToggleSculpt(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (window.SalentoSurf) {
-        const isSculpt = window.SalentoSurf.toggleSculptMode();
-        const btn1 = document.getElementById('btnDeskSculpt');
-        const btn2 = document.getElementById('btnToggleSculptModal');
-        const text = isSculpt ? '🖌️ Sculpt ON' : '🖌️ Pennello Fondale';
-        const bg = isSculpt ? '#10B981' : '';
-        if (btn1) { btn1.textContent = text; btn1.style.background = bg; }
-        if (btn2) { btn2.innerHTML = `<span>${isSculpt ? '🖌️ ON' : '🖌️ Scolpisci'}</span>`; btn2.style.background = isSculpt ? '#10B981' : 'rgba(0,0,0,0.7)'; }
-      }
-    }
-
-    function selectSurfSkin(skinId) {
-      if (window.SalentoSurf) {
-        window.SalentoSurf.setSurferSkin(skinId);
-      }
-      document.querySelectorAll('.surf-skin-pill').forEach(pill => {
+      document.querySelectorAll('#edgeSurferPillRow .surf-skin-pill').forEach(pill => {
         pill.classList.remove('active');
       });
-      const selectedPill = document.getElementById(`skinPill_${skinId}`);
+      const selectedPill = document.getElementById(`edgeSurferPill_${idx}`);
       if (selectedPill) {
         selectedPill.classList.add('active');
       }
     }
 
-    function updateSurfCardStats() {
-      if (!window.SalentoSurf) return;
-      const scoreEl = document.getElementById('surfRecordScore');
-      const barrelEl = document.getElementById('surfRecordBarrel');
-      const distEl = document.getElementById('surfRecordDist');
+    function handleMobileSteerLeft(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf) {
+        window.SalentoSurf.steerLeft();
+      }
+    }
 
-      if (scoreEl) scoreEl.textContent = window.SalentoSurf.highScore.toLocaleString();
-      if (barrelEl) barrelEl.textContent = `${window.SalentoSurf.bestBarrelTime}s`;
-      if (distEl) distEl.textContent = `${window.SalentoSurf.bestRideTime}s`;
+    function handleMobileSteerRight(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf) {
+        window.SalentoSurf.steerRight();
+      }
+    }
+
+    function handleMobileBoost(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf) {
+        window.SalentoSurf.triggerBoost();
+      }
     }
 
     function postSurfScoreToBoard() {
       if (!window.SalentoSurf) return;
-      const score = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.score : window.SalentoSurf.highScore;
-      const ride = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.rideTime.toFixed(0) : window.SalentoSurf.bestRideTime;
-      const barrel = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.totalBarrelTime.toFixed(1) : window.SalentoSurf.bestBarrelTime;
-      const skinName = window.SalentoSurf.surfer && window.SalentoSurf.surfer.skin ? window.SalentoSurf.surfer.skin.name : 'Pietro';
+      const score = window.SalentoSurf.getScore ? window.SalentoSurf.getScore() : window.SalentoSurf.highScore;
+      const dist = Math.floor(window.SalentoSurf.distance / 10.0) || window.SalentoSurf.bestDistance;
+      const surferIdx = window.SalentoSurf.surfer + 1;
 
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      const scoreMsgText = `🏄‍♂️ SALENTO SURF RECORD! 🏆\nHo totalizzato ${score.toLocaleString()} punti cavalcando l'onda per ${ride}s con ${barrel}s nel Tubo (Surfer: ${skinName}) 🌊\nChi riesce a fare una cavalcata migliore? 😎🤙`;
+      const scoreMsgText = `🏄‍♂️ RECORD MICROSOFT EDGE SURF! 🏆\nHo totalizzato ${score.toLocaleString()} punti surfando per ${dist} metri in mare aperto (Surfer #${surferIdx}) 🌊⚡\nChi riesce a battermi senza farsi prendere dal Kraken? 😎🤙`;
 
       const newMsg = {
         id: 'msg_surf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
