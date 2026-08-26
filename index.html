@@ -3819,17 +3819,17 @@
       <canvas id="surfGameCanvas" class="surf-active-canvas"></canvas>
 
       <!-- Minimal Pop In-Game Floating Action Controls -->
-      <div class="surf-in-game-actions">
-        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra">
+      <div class="surf-in-game-actions" id="surfInGameActions">
+        <button type="button" class="btn-surf-pop-steer" id="btnMobileSteerLeft" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra o cambia Surfer">
           <span>◄</span>
         </button>
-        <button type="button" class="btn-surf-pop-brake" onclick="handleMobileBrake(event)" title="Frena / Ferma">
+        <button type="button" class="btn-surf-pop-brake" id="btnMobileBrake" onclick="handleMobileBrake(event)" title="Frena / Ferma">
           <span>🛑 Frena</span>
         </button>
-        <button type="button" class="btn-surf-pop-boost" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine">
+        <button type="button" class="btn-surf-pop-boost" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Inizia o Super Boost Fulmine">
           <span>⚡ BOOST</span>
         </button>
-        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerRight(event)" title="Vira a Destra">
+        <button type="button" class="btn-surf-pop-steer" id="btnMobileSteerRight" onclick="handleMobileSteerRight(event)" title="Vira a Destra o cambia Surfer">
           <span>►</span>
         </button>
       </div>
@@ -3897,7 +3897,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_vFinal"></script>
+  <script src="./surf-game.js?v=20260826_vSolid"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -5235,28 +5235,46 @@
     function handleMobileSteerLeft(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf) {
-        window.SalentoSurf.steerLeft();
+        if (!window.SalentoSurf.started || window.SalentoSurf.finished) {
+          if (window.SalentoSurf.audio) window.SalentoSurf.audio.playSelect();
+          window.SalentoSurf.setSurferCharacter(window.SalentoSurf.surfer - 1);
+        } else {
+          window.SalentoSurf.steerLeft();
+        }
       }
     }
 
     function handleMobileSteerRight(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf) {
-        window.SalentoSurf.steerRight();
+        if (!window.SalentoSurf.started || window.SalentoSurf.finished) {
+          if (window.SalentoSurf.audio) window.SalentoSurf.audio.playSelect();
+          window.SalentoSurf.setSurferCharacter(window.SalentoSurf.surfer + 1);
+        } else {
+          window.SalentoSurf.steerRight();
+        }
       }
     }
 
     function handleMobileBrake(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf) {
-        window.SalentoSurf.stopPlayer();
+        if (!window.SalentoSurf.started || window.SalentoSurf.finished) {
+          window.SalentoSurf.startSurfing();
+        } else {
+          window.SalentoSurf.stopPlayer();
+        }
       }
     }
 
     function handleMobileBoost(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf) {
-        window.SalentoSurf.triggerBoost();
+        if (!window.SalentoSurf.started || window.SalentoSurf.finished) {
+          window.SalentoSurf.startSurfing();
+        } else {
+          window.SalentoSurf.triggerBoost();
+        }
       }
     }
 

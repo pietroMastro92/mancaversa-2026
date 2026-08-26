@@ -60,10 +60,6 @@
       this.ctx = null;
       this.bgm = null;
       this.isMuted = false;
-      try {
-        const saved = localStorage.getItem('salento_surf_muted_v1');
-        if (saved !== null) this.isMuted = saved === 'true';
-      } catch (e) {}
     }
 
     init() {
@@ -88,8 +84,13 @@
         this.ctx.resume().catch(() => {});
       }
       if (this.bgm && !this.isMuted) {
-        this.bgm.play().catch(() => {});
+        const p = this.bgm.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => {});
+        }
       }
+      const btn = document.getElementById('btnSurfMute');
+      if (btn) btn.innerHTML = `<span>${this.isMuted ? '🔇 Muto' : '🔊 Audio'}</span>`;
     }
 
     playMusic() {
@@ -104,12 +105,11 @@
 
     toggleMute() {
       this.isMuted = !this.isMuted;
-      try { localStorage.setItem('salento_surf_muted_v1', this.isMuted); } catch (e) {}
       if (this.bgm) {
         if (this.isMuted) {
           try { this.bgm.pause(); } catch (e) {}
         } else {
-          this.bgm.play().catch(() => {});
+          this.unlockAudio();
         }
       }
       const btn = document.getElementById('btnSurfMute');
@@ -425,6 +425,7 @@
       this.audio.pauseMusic();
       this.updateHUD();
       this.updateCardUI();
+      this.updateControlButtonsUI();
     }
 
     startSurfing() {
@@ -439,12 +440,33 @@
       this.speed = this.initialSpeed;
       this.surferAction = 3;
       this.makeStarterObjects();
+      this.updateControlButtonsUI();
     }
 
     setSurferCharacter(idx) {
       this.surfer = (idx + 8) % 8;
       this.saveScores();
       this.updateCardUI();
+      this.updateControlButtonsUI();
+    }
+
+    updateControlButtonsUI() {
+      const leftBtn = document.getElementById('btnMobileSteerLeft');
+      const rightBtn = document.getElementById('btnMobileSteerRight');
+      const boostBtn = document.getElementById('btnMobileBoost');
+      const brakeBtn = document.getElementById('btnMobileBrake');
+
+      if (!this.started || this.finished) {
+        if (leftBtn) leftBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">◄ Surfer</span>';
+        if (rightBtn) rightBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">Surfer ►</span>';
+        if (boostBtn) boostBtn.innerHTML = '<span style="font-size: 14px; font-weight: 900;">▶ INIZIA</span>';
+        if (brakeBtn) brakeBtn.style.display = 'none';
+      } else {
+        if (leftBtn) leftBtn.innerHTML = '<span>◄</span>';
+        if (rightBtn) rightBtn.innerHTML = '<span>►</span>';
+        if (boostBtn) boostBtn.innerHTML = '<span>⚡ BOOST</span>';
+        if (brakeBtn) brakeBtn.style.display = 'flex';
+      }
     }
 
     triggerBoost() {
@@ -1277,23 +1299,34 @@
     // INPUT LISTENERS MOBILE & DESKTOP
     // --------------------------------------------------------------------------
     bindInputs() {
-      if (!this.canvas) return;
+      if (this.inputsBound) return;
+      this.inputsBound = true;
 
       let lastTapTime = 0;
+      let startTouchX = 0;
+      let startTouchY = 0;
+      let hasSwipedInStart = false;
 
       const getCanvasPos = (e) => {
         const touch = e.touches && e.touches.length > 0 ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : e);
-        const rect = this.canvas.getBoundingClientRect();
-        const x = ((touch.clientX - rect.left) / rect.width) * this.width;
-        const y = ((touch.clientY - rect.top) / rect.height) * this.height;
+        const rect = this.canvas ? this.canvas.getBoundingClientRect() : { left: 0, top: 0, width: this.width, height: this.height };
+        const w = rect.width || this.width || 1;
+        const h = rect.height || this.height || 1;
+        const x = ((touch.clientX - rect.left) / w) * this.width;
+        const y = ((touch.clientY - rect.top) / h) * this.height;
         return { x, y };
       };
 
       const handlePointerDown = (e) => {
-        e.preventDefault();
-        this.audio.init();
+        if (e.cancelable && e.type.startsWith('touch')) {
+          e.preventDefault();
+        }
+        this.audio.unlockAudio();
 
         const { x, y } = getCanvasPos(e);
+        startTouchX = x;
+        startTouchY = y;
+        hasSwipedInStart = false;
 
         // Se siamo nella schermata iniziale o finale
         if (!this.started || this.finished) {
@@ -1307,7 +1340,7 @@
           const oLeft = (this.width - 64) / 2.0;
 
           // 1. Tocco preciso su Freccia Sinistra
-          const isLeftArrow = Math.hypot(x - (oLeft - 26), y - (top + 32)) <= 36 || (x >= oLeft - 68 && x <= oLeft - 6 && y >= top && y <= top + 64);
+          const isLeftArrow = Math.hypot(x - (oLeft - 26), y - (top + 32)) <= 38 || (x >= oLeft - 72 && x <= oLeft - 6 && y >= top - 10 && y <= top + 74);
           if (isLeftArrow) {
             this.audio.playSelect();
             this.setSurferCharacter(this.surfer - 1);
@@ -1315,7 +1348,7 @@
           }
 
           // 2. Tocco preciso su Freccia Destra
-          const isRightArrow = Math.hypot(x - (oLeft + 90), y - (top + 32)) <= 36 || (x >= oLeft + 70 && x <= oLeft + 132 && y >= top && y <= top + 64);
+          const isRightArrow = Math.hypot(x - (oLeft + 90), y - (top + 32)) <= 38 || (x >= oLeft + 70 && x <= oLeft + 136 && y >= top - 10 && y <= top + 74);
           if (isRightArrow) {
             this.audio.playSelect();
             this.setSurferCharacter(this.surfer + 1);
@@ -1323,7 +1356,7 @@
           }
 
           // 3. Tocco sulle anteprime laterali dei surfer nella fascia orizzontale
-          if (y >= top - 20 && y <= top + 75) {
+          if (y >= top - 30 && y <= top + 90) {
             if (x < oLeft - 10) {
               this.audio.playSelect();
               this.setSurferCharacter(this.surfer - 1);
@@ -1336,7 +1369,7 @@
             }
           }
 
-          // 4. In qualsiasi altro punto (pulsante Play arancione, centro, tocco libero): AVVIA SUBITO IL GIOCO!
+          // 4. In qualsiasi altro punto (pulsante Play, centro o tocco schermo): AVVIA SUBITO IL GIOCO!
           this.startSurfing();
           return;
         }
@@ -1362,22 +1395,55 @@
       };
 
       const handlePointerMove = (e) => {
+        const { x, y } = getCanvasPos(e);
+
+        // Se siamo in start screen, consentiamo anche lo swipe orizzontale per sfogliare i surfer
+        if (!this.started || this.finished) {
+          if (!hasSwipedInStart) {
+            const dx = x - startTouchX;
+            if (dx > 45) {
+              hasSwipedInStart = true;
+              this.audio.playSelect();
+              this.setSurferCharacter(this.surfer - 1);
+            } else if (dx < -45) {
+              hasSwipedInStart = true;
+              this.audio.playSelect();
+              this.setSurferCharacter(this.surfer + 1);
+            }
+          }
+          return;
+        }
+
         if (!this.isTouchSteering || !this.started || this.finished) return;
-        e.preventDefault();
-        const { x } = getCanvasPos(e);
+        if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
         this.touchX = x;
       };
 
       const handlePointerUp = (e) => {
         this.isTouchSteering = false;
+        hasSwipedInStart = false;
       };
 
-      this.canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-      this.canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-      this.canvas.addEventListener('touchend', handlePointerUp, { passive: false });
-      this.canvas.addEventListener('touchcancel', handlePointerUp, { passive: false });
+      window.addEventListener('touchstart', (e) => {
+        if (e.target && (e.target.id === 'surfGameCanvas' || e.target.id === 'surfPreviewCanvas')) {
+          handlePointerDown(e);
+        }
+      }, { passive: false });
 
-      this.canvas.addEventListener('mousedown', handlePointerDown);
+      window.addEventListener('touchmove', (e) => {
+        if (this.isTouchSteering || !this.started) {
+          handlePointerMove(e);
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', handlePointerUp, { passive: false });
+      window.addEventListener('touchcancel', handlePointerUp, { passive: false });
+
+      window.addEventListener('mousedown', (e) => {
+        if (e.target && (e.target.id === 'surfGameCanvas' || e.target.id === 'surfPreviewCanvas')) {
+          handlePointerDown(e);
+        }
+      });
       window.addEventListener('mousemove', handlePointerMove);
       window.addEventListener('mouseup', handlePointerUp);
 
