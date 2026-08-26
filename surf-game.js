@@ -627,9 +627,12 @@
       if (finalScore) finalScore.textContent = this.getScore().toLocaleString();
       if (finalDist) finalDist.textContent = `${Math.floor(this.distance / 10.0)}m`;
       if (finalBarrel) finalBarrel.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
-      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
-
       if (modal) modal.classList.add('active');
+
+      // Salva automaticamente il punteggio nella Classifica Top 10 sotto il gioco
+      if (window.recordSurfScoreToLeaderboard) {
+        window.recordSurfScoreToLeaderboard(this.getScore(), Math.floor(this.distance / 10.0));
+      }
     }
 
     calcOffset() {
