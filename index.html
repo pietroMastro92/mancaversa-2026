@@ -5079,6 +5079,10 @@
 
     function postSurfScoreToBoard() {
       if (!window.SalentoSurf) return;
+      if (!currentUser || !currentUser.name) {
+        initUserIdentity();
+      }
+
       const score = window.SalentoSurf.getScore ? window.SalentoSurf.getScore() : window.SalentoSurf.highScore;
       const dist = Math.floor(window.SalentoSurf.distance / 10.0) || window.SalentoSurf.bestDistance;
       const surferIdx = window.SalentoSurf.surfer + 1;
@@ -5086,14 +5090,19 @@
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
+      const authorName = currentUser && currentUser.name ? currentUser.name : 'Surfer Anonimo';
+      const authorAvatar = currentUser && currentUser.avatar ? currentUser.avatar : '🏄‍♂️';
+      const authorBg = currentUser && currentUser.bg ? currentUser.bg : '#E0F2FE';
+      const authorId = currentUser && currentUser.id ? currentUser.id : 'usr_' + Date.now();
+
       const scoreMsgText = `🏄‍♂️ RECORD MICROSOFT EDGE SURF! 🏆\nHo totalizzato ${score.toLocaleString()} punti surfando per ${dist} metri in mare aperto (Surfer #${surferIdx}) 🌊⚡\nChi riesce a battermi senza farsi prendere dal Kraken? 😎🤙`;
 
       const newMsg = {
         id: 'msg_surf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-        userId: currentUser ? currentUser.id : 'anon',
-        author: currentUser ? currentUser.name : 'Surfer Salentino',
-        avatar: '🏄‍♂️',
-        bg: '#E0F2FE',
+        userId: authorId,
+        author: authorName,
+        avatar: authorAvatar,
+        bg: authorBg,
         text: scoreMsgText,
         time: timeStr,
         timestamp: Date.now(),
@@ -5109,7 +5118,9 @@
         body: JSON.stringify(newMsg)
       }).catch(err => console.warn('Sync post error', err));
 
-      showToast('Record inviato nella Bacheca Live! 💬🏆');
+      closeSurfGameModal();
+      openBoardDrawer();
+      showToast(`Record di ${authorName} pubblicato in Bacheca! 💬🏆`);
     }
 
     window.addEventListener('scroll', () => {
