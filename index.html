@@ -3086,16 +3086,16 @@
 
         <!-- Instructions Box -->
         <div class="surf-instructions-box">
-          <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Giocare a Salento Surf (Smartphone & Computer):</span>
+          <div style="font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+            <span>🏄‍♂️</span> <span>Regole & Potenziamenti di Salento Surf:</span>
           </div>
-          <div style="line-height: 1.5;">
-            • <b>Guida & Vira (Frecce Sinistra/Destra o Tocca / Trascina sullo schermo)</b>: Vira per evitare scogli, boe e pontili in legno!<br>
-            • <b>Accelera / Frena (Freccia Giù / Tasto 🛑 Frena)</b>: Prendi velocità o rallenta per scegliere la traiettoria migliore.<br>
-            • <b>Super Boost (Barra Spaziatrice, Doppio Tocco o tasto ⚡ BOOST)</b>: Usa i fulmini raccolti per scattare a velocità supersonica e seminare il mostro!<br>
-            • <b>Rampe di Salto (🦘)</b>: Salta in aria con piroette a 360° e vola sopra ogni ostacolo!<br>
-            • <b>Cuori (💖) & Cane Salvataggio (🐕)</b>: Raccogli cuori extra e salva il cane che nuoterà con te sulla tavola parandoti da uno scontro!<br>
-            • <b>Attento al Kraken (🐙)</b>: Dopo un po' di metri, il leggendario mostro marino gigante emergerà dalle profondità per darti la caccia!
+          <div style="line-height: 1.55; font-size: 13px;">
+            • 🕹️ <b>Guida & Schivata</b>: Trascina il dito sullo schermo (o usa le frecce) per virare e superare scogli e pontili.<br>
+            • 🐕 <b>Cagnolino da Salvataggio</b>: Surfa con te sulla coda della tavola, <b>ti salva da 1 schianto assorbendo l'urto al posto tuo</b> e abbaia quando arriva il mostro!<br>
+            • 🪙 <b>Monete d'Oro</b>: Regalano <b>+2.000 Punti Extra</b> ciascuna, la chiave per conquistare il 1° posto nella Classifica Top 10!<br>
+            • ⚡ <b>Super Boost Giallo</b>: Scatto supersonico a turbo velocità per seminare gli ostacoli e il Kraken!<br>
+            • 🦘 <b>Rampe di Salto</b>: Piroette aeree per volare sopra ogni pericolo e stordire il mostro marino!<br>
+            • 🐙 <b>Attento al Kraken</b>: Se rallenti troppo o procedi a lungo, sbucherà dal fondo per divorare la tavola!
           </div>
         </div>
       </div>
@@ -3853,7 +3853,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_vDogCoinBoostFix"></script>
+  <script src="./surf-game.js?v=20260826_vCleanLeaderboard"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -5237,7 +5237,7 @@
     /* ==========================================================================
        SURF LEADERBOARD (100% REAL SCORES · RECORD SINGOLI AGGIORNATI PER PLAYER)
        ========================================================================== */
-    const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v5';
+    const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v6';
 
     function normalizeLeaderboard(rawList) {
       if (!Array.isArray(rawList)) return [];

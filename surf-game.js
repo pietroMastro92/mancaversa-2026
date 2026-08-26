@@ -326,7 +326,7 @@
 
     loadSavedScores() {
       try {
-        const saved = localStorage.getItem('salento_surf_best_score_v5');
+        const saved = localStorage.getItem('salento_surf_best_score_v6');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
@@ -343,7 +343,7 @@
         const curDist = Math.floor(this.distance / 10.0);
         if (curDist > this.bestDistance) this.bestDistance = curDist;
 
-        localStorage.setItem('salento_surf_best_score_v5', JSON.stringify({
+        localStorage.setItem('salento_surf_best_score_v6', JSON.stringify({
           highScore: this.highScore,
           bestDistance: this.bestDistance,
           surfer: this.surfer
@@ -1295,7 +1295,28 @@
       // Hint tastiera sotto
       ctx.fillStyle = '#475569';
       ctx.font = '500 12px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText("Oppure premi Spazio o Invio", center, btnY + btnH + 20);
+      ctx.fillText("Oppure premi Spazio o Invio", center, btnY + btnH + 18);
+
+      // Pill Guida Bonus & Potenziamenti
+      const infoW = Math.min(360, this.width - 24);
+      const infoH = 50;
+      const infoX = center - infoW / 2;
+      const infoY = btnY + btnH + 28;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+      this.drawRoundedRect(ctx, infoX, infoY, infoW, infoH, 14);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(2, 132, 199, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('🐕 Cane: Ti salva da 1 schianto · 🪙 Moneta: +2000 pt', center, infoY + 20);
+      ctx.fillStyle = '#0284C7';
+      ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('⚡ Boost: Super turbo · 🦘 Rampe: Salti a 360°', center, infoY + 38);
 
       ctx.restore();
     }
