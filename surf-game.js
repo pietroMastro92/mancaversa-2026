@@ -1432,7 +1432,7 @@
       const isFullscreen = this.activeCanvasId === 'surfGameCanvas';
       const topY = isFullscreen ? 12 : 6;
       const barHeight = 46;
-      const barWidth = isFullscreen ? Math.min(this.width - 116, 380) : 340;
+      const barWidth = isFullscreen ? Math.min(this.width - 116, 330) : 300;
       const barX = center - barWidth / 2;
 
       ctx.save();
@@ -1449,7 +1449,7 @@
       const spriteY = topY + Math.round((barHeight - 24) / 2);
 
       // 1. Vite / Cuori a sinistra (sprite 24x24 da interface24.png)
-      let hLeft = barX + 14;
+      let hLeft = barX + 16;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
         if (iface && iface.complete && iface.naturalWidth > 0) {
@@ -1462,30 +1462,13 @@
         hLeft += 26;
       }
 
-      // 2. Cane e Monete (posizionati a sinistra tra i cuori e la distanza centrale)
-      let extraX = hLeft + 6;
-      if (this.hasDog && iface && iface.complete && iface.naturalWidth > 0) {
-        ctx.drawImage(iface, 24, 48, 24, 24, extraX, spriteY, 24, 24);
-        extraX += 26;
-      }
-      if (this.coinCount > 0) {
-        if (iface && iface.complete && iface.naturalWidth > 0) {
-          ctx.drawImage(iface, 24, 72, 24, 24, extraX, spriteY, 24, 24);
-          extraX += 24;
-        }
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
-        ctx.fillStyle = '#B45309';
-        ctx.fillText(`x${this.coinCount}`, extraX, topY + 29);
-      }
-
-      // 3. Distanza al Centro
+      // 2. Distanza (Centro)
       ctx.textAlign = 'center';
-      ctx.font = 'bold 16px "FiraCode", monospace, sans-serif';
+      ctx.font = 'bold 17px "FiraCode", monospace, sans-serif';
       ctx.fillStyle = '#0F172A';
-      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 29);
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 30);
 
-      // 4. Fulmini Boost originali a destra (sprite 24x24 da interface24.png)
+      // 3. Fulmini Boost originali a destra (sprite 24x24 da interface24.png)
       let pRight = barX + barWidth - 36;
       for (let i = 2; i >= 0; i--) {
         const isFull = i < this.power;
@@ -1497,6 +1480,49 @@
           ctx.fillText(isFull ? '⚡' : '⚪', pRight + 12, topY + 30);
         }
         pRight -= 26;
+      }
+
+      // 4. Badge Accessorio Sottostante per Cane e Monete (se presenti)
+      if (this.hasDog || this.coinCount > 0) {
+        const badgeH = 26;
+        const badgeY = topY + barHeight + 6;
+        const badgeW = (this.hasDog ? 36 : 0) + (this.coinCount > 0 ? 56 : 0) + 16;
+        const badgeX = center - badgeW / 2;
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+        this.drawRoundedRect(ctx, badgeX, badgeY, badgeW, badgeH, 13);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(2, 132, 199, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        let curBadgeX = badgeX + 8;
+        if (this.hasDog) {
+          if (iface && iface.complete && iface.naturalWidth > 0) {
+            ctx.drawImage(iface, 24, 48, 24, 24, curBadgeX, badgeY + 1, 24, 24);
+          } else {
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('🐕', curBadgeX, badgeY + 18);
+          }
+          curBadgeX += 30;
+        }
+        if (this.coinCount > 0) {
+          if (iface && iface.complete && iface.naturalWidth > 0) {
+            ctx.drawImage(iface, 24, 72, 24, 24, curBadgeX, badgeY + 1, 24, 24);
+            curBadgeX += 24;
+          } else {
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('🪙', curBadgeX, badgeY + 18);
+            curBadgeX += 20;
+          }
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
+          ctx.fillStyle = '#B45309';
+          ctx.fillText(`x${this.coinCount}`, curBadgeX, badgeY + 18);
+        }
       }
 
       ctx.restore();
