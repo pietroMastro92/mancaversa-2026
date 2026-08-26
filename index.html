@@ -2138,16 +2138,18 @@
       background: #F0F9FF;
     }
 
-    /* Section Block Surf */
+    /* Section Block Surf - Single Prominent Spotlight */
     .surf-arcade-card {
       background: #FFFFFF;
-      border: 1px solid var(--border-subtle);
+      border: 2px solid #38C2EE;
       border-radius: var(--radius-lg);
       padding: 18px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 10px 30px rgba(56, 194, 238, 0.2), var(--shadow-sm);
       display: flex;
       flex-direction: column;
       gap: 16px;
+      position: relative;
+      overflow: hidden;
     }
     @media (min-width: 768px) {
       .surf-arcade-card {
@@ -2798,19 +2800,6 @@
       </div>
 
       <h1 class="listing-title">Tre giorni di mare nel Salento,<br>senza complicazioni.</h1>
-
-      <!-- Post-Vacation Banner & Mini-Game Callout -->
-      <div class="post-vacation-banner">
-        <div class="post-vacation-content">
-          <div class="post-vacation-tag">🎮 Dopovacanza Sandbox · Novità</div>
-          <div class="post-vacation-title">La vacanza è finita, ma il mare resta con noi! 🏄‍♂️</div>
-          <div class="post-vacation-sub">Divertiti con <b>Salento Surf Sandbox</b>: crea la tua onda perfetta, nuota per prenderla, entra nei tubi o rilassati a guardare il mare dello Ionio!</div>
-        </div>
-        <button class="btn-play-banner" onclick="openSurfGameModal()">
-          <span>🌊 Entra in Acqua</span>
-          <span>→</span>
-        </button>
-      </div>
 
       <!-- Gallery Grid -->
       <div class="hero-gallery">
