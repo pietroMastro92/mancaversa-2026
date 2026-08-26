@@ -1,34 +1,47 @@
 /**
  * ==============================================================================
- * SALENTO PIXEL SURF - RETRO MOBILE SURFING ENGINE
+ * SALENTO PIXEL SURF - AUTHENTIC RETRO SURFING ENGINE
  * ==============================================================================
- * Un mini-gioco pixel-art a tema surf sulle onde del Salento per PietroBnB.
- * Supporta controlli touch one-finger & arcade, fisica delle onde procedurali,
- * rotazioni/trick aerei, tubi/barrel, particelle, audio sintetizzato 8-bit
- * e salvataggio record in localStorage & Bacheca Live.
+ * Un vero simulatore di surf arcade in pixel art per PietroBnB.
+ * Fisica realistica di surfing su onda dinamica:
+ * - Trimming e Pumping su e giù lungo la parete dell'onda
+ * - Bottom Turn dal fondo per risalire a tutta velocità
+ * - Snap & Off-the-Lip sulla cresta con spruzzi d'acqua
+ * - Cutback per ritornare nella tasca (pocket)
+ * - Hand Drag & Stall per farsi inglobare nel Tubo / Barrel
+ * - Floater sulla cresta che frange
+ * - Aerial sopra il lip con atterraggio sulla parete
+ * - Sistema audio 8-bit Web Audio con eco del tubo
+ * - Controlli touch per smartphone (gesti drag/swipe fluidi + D-Pad virtuale)
  */
 
 (function (window) {
   'use strict';
 
   // ----------------------------------------------------------------------------
-  // 1. COSTANTI E CONFIGURAZIONE DI GIOCO
+  // 1. COSTANTI E CONFIGURAZIONE DEL MONDO D'ONDA
   // ----------------------------------------------------------------------------
-  const GAME_CONFIG = {
+  const SURF_CONFIG = {
     CANVAS_WIDTH: 420,
     CANVAS_HEIGHT: 240,
-    GRAVITY: 0.28,
-    PUMP_ACCEL: 0.35,
-    AIR_ROTATION_SPEED: 0.13,
-    MAX_SPEED_X: 12.0,
-    MIN_SPEED_X: 3.2,
-    DEFAULT_SPEED_X: 4.8,
-    WAVE_BASE_Y: 155,
-    SEABED_BASE_Y: 215,
-    BARREL_THRESHOLD_DIST: 55,
+    
+    // Geometria dell'onda
+    LIP_TOP_Y: 72,         // Altezza cresta / lip
+    TROUGH_BOTTOM_Y: 195,  // Altezza fondo / base dell'onda
+    BARREL_X_BASE: 80,     // Posizione orizzontale del tubo
+    SHOULDER_X_MAX: 380,   // Fine della spalla dell'onda
+    
+    // Fisica di surf
+    GRAVITY: 0.32,
+    BOTTOM_TURN_BOOST: 1.45,
+    PUMP_ACCEL: 0.22,
+    STALL_DRAG: 0.35,
+    SURFACE_FRICTION: 0.985,
+    MAX_SURF_SPEED: 11.5,
+    MIN_SURF_SPEED: 2.2,
   };
 
-  // Skin sbloccabili / selezionabili
+  // Skin Surfer
   const SURFER_SKINS = {
     pietro: {
       id: 'pietro',
@@ -68,7 +81,7 @@
     },
     scirocco: {
       id: 'scirocco',
-      name: 'Scirocco Rider',
+      name: 'Scirocco Gold',
       emoji: '🌪️',
       hairColor: '#EA580C',
       skinColor: '#FED7AA',
@@ -81,9 +94,9 @@
   };
 
   // ----------------------------------------------------------------------------
-  // 2. SINTETIZZATORE AUDIO WEB AUDIO 8-BIT (ZERO ASSET ESTERNI)
+  // 2. SINTETIZZATORE AUDIO WEB AUDIO 8-BIT & TUBO
   // ----------------------------------------------------------------------------
-  class RetroAudioSynth {
+  class RetroSurfAudio {
     constructor() {
       this.ctx = null;
       this.isMuted = false;
@@ -104,7 +117,7 @@
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         this.ctx = new AudioCtx();
-        this.initWaveAmbience();
+        this.initOceanAmbience();
         this.isInitialized = true;
       } catch (e) {
         console.warn('Web Audio non supportato o bloccato:', e);
@@ -126,10 +139,9 @@
       return this.isMuted;
     }
 
-    initWaveAmbience() {
+    initOceanAmbience() {
       if (!this.ctx) return;
       try {
-        // Generatore rumore bianco per il suono continuo dell'oceano
         const bufferSize = this.ctx.sampleRate * 2;
         const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -143,7 +155,7 @@
 
         this.waveFilterNode = this.ctx.createBiquadFilter();
         this.waveFilterNode.type = 'lowpass';
-        this.waveFilterNode.frequency.value = 420;
+        this.waveFilterNode.frequency.value = 450;
 
         this.waveGainNode = this.ctx.createGain();
         this.waveGainNode.gain.value = this.isMuted ? 0 : 0.035;
@@ -153,61 +165,44 @@
         this.waveGainNode.connect(this.ctx.destination);
         whiteNoise.start(0);
         this.waveNoiseNode = whiteNoise;
-      } catch (e) {
-        // Silenzia errori se autoplay è limitato
+      } catch (e) {}
+    }
+
+    setOceanMood(inBarrel, speed) {
+      if (!this.ctx || !this.waveFilterNode || !this.waveGainNode || this.isMuted) return;
+      const t = this.ctx.currentTime;
+      if (inBarrel) {
+        // Eco sordo e risonante dentro il tubo
+        this.waveFilterNode.frequency.setTargetAtTime(950, t, 0.08);
+        this.waveGainNode.gain.setTargetAtTime(0.08, t, 0.08);
+      } else {
+        const freq = 380 + speed * 45;
+        this.waveFilterNode.frequency.setTargetAtTime(freq, t, 0.1);
+        this.waveGainNode.gain.setTargetAtTime(0.038, t, 0.1);
       }
     }
 
-    setWaveFilter(freq, volume = 0.04) {
-      if (!this.ctx || !this.waveFilterNode || !this.waveGainNode || this.isMuted) return;
-      const t = this.ctx.currentTime;
-      this.waveFilterNode.frequency.setTargetAtTime(freq, t, 0.1);
-      this.waveGainNode.gain.setTargetAtTime(this.isMuted ? 0 : volume, t, 0.1);
-    }
-
-    playJump() {
+    playSnapSpray() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
       const t = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(220, t);
-      osc.frequency.exponentialRampToValueAtTime(680, t + 0.16);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(480, t);
+      osc.frequency.exponentialRampToValueAtTime(140, t + 0.14);
 
-      gain.gain.setValueAtTime(0.12, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(t);
-      osc.stop(t + 0.18);
+      osc.stop(t + 0.16);
     }
 
-    playTrick() {
-      if (!this.ctx || this.isMuted) return;
-      this.resume();
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 arpeggio
-      notes.forEach((freq, i) => {
-        const t = this.ctx.currentTime + i * 0.05;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, t);
-
-        gain.gain.setValueAtTime(0.15, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(t);
-        osc.stop(t + 0.11);
-      });
-    }
-
-    playCleanLanding() {
+    playCutbackCarve() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
       const t = this.ctx.currentTime;
@@ -215,10 +210,10 @@
       const gain = this.ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(320, t);
-      osc.frequency.exponentialRampToValueAtTime(580, t + 0.12);
+      osc.frequency.setValueAtTime(260, t);
+      osc.frequency.exponentialRampToValueAtTime(420, t + 0.12);
 
-      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.setValueAtTime(0.15, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
 
       osc.connect(gain);
@@ -227,30 +222,46 @@
       osc.stop(t + 0.14);
     }
 
-    playShellCollect() {
+    playTubeSpit() {
+      if (!this.ctx || this.isMuted) return;
+      this.resume();
+      const notes = [440, 554.37, 659.25, 880];
+      notes.forEach((freq, i) => {
+        const t = this.ctx.currentTime + i * 0.04;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+
+        gain.gain.setValueAtTime(0.16, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.13);
+      });
+    }
+
+    playAirLaunch() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
       const t = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, t);
-      osc.frequency.setValueAtTime(1320, t + 0.06);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(280, t);
+      osc.frequency.exponentialRampToValueAtTime(740, t + 0.18);
 
       gain.gain.setValueAtTime(0.14, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(t);
-      osc.stop(t + 0.16);
-    }
-
-    playBarrelSound() {
-      if (!this.ctx || this.isMuted) return;
-      this.resume();
-      this.setWaveFilter(850, 0.09);
+      osc.stop(t + 0.2);
     }
 
     playWipeout() {
@@ -261,24 +272,44 @@
       const gain = this.ctx.createGain();
 
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(260, t);
-      osc.frequency.linearRampToValueAtTime(60, t + 0.35);
+      osc.frequency.setValueAtTime(320, t);
+      osc.frequency.linearRampToValueAtTime(50, t + 0.4);
 
-      gain.gain.setValueAtTime(0.2, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start(t);
-      osc.stop(t + 0.38);
+      osc.stop(t + 0.42);
+    }
+
+    playScoreChime() {
+      if (!this.ctx || this.isMuted) return;
+      this.resume();
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(987.77, t); // B5
+      osc.frequency.setValueAtTime(1318.51, t + 0.07); // E6
+
+      gain.gain.setValueAtTime(0.14, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.17);
     }
 
     playNewRecord() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
-      const notes = [440, 554.37, 659.25, 880, 1108.73];
+      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
       notes.forEach((freq, i) => {
-        const t = this.ctx.currentTime + i * 0.09;
+        const t = this.ctx.currentTime + i * 0.08;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -286,72 +317,103 @@
         osc.frequency.setValueAtTime(freq, t);
 
         gain.gain.setValueAtTime(0.18, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(t);
-        osc.stop(t + 0.24);
+        osc.stop(t + 0.22);
       });
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 3. MOTORE PARTICELLE RETRO PIXEL
+  // 3. MOTORE PARTICELLE & SPRUZZI D'ACQUA (CARVING SPRAY & FOAM)
   // ----------------------------------------------------------------------------
-  class PixelParticleSystem {
+  class SurfParticleEngine {
     constructor() {
       this.particles = [];
-      this.maxParticles = 140;
+      this.maxParticles = 160;
     }
 
-    add(x, y, vx, vy, color, size = 2, life = 30, type = 'foam') {
+    add(x, y, vx, vy, color, size = 2, life = 24, type = 'spray') {
       if (this.particles.length >= this.maxParticles) {
         this.particles.shift();
       }
       this.particles.push({
-        x,
-        y,
-        vx,
-        vy,
-        color,
-        size,
-        life,
-        maxLife: life,
-        type
+        x, y, vx, vy, color, size, life, maxLife: life, type
       });
     }
 
-    createSplash(x, y, count = 12, color = '#FFFFFF') {
-      for (let i = 0; i < count; i++) {
-        const angle = -Math.PI * 0.8 + Math.random() * Math.PI * 0.6;
-        const speed = 1.5 + Math.random() * 3.8;
+    createCarveSpray(x, y, angle, speed) {
+      const sprayCount = 4 + Math.floor(speed * 0.6);
+      for (let i = 0; i < sprayCount; i++) {
+        // Spruzzo scagliato all'indietro rispetto all'angolo di carving
+        const sprayAngle = angle + Math.PI + (Math.random() * 0.8 - 0.4);
+        const spraySpeed = 2.0 + Math.random() * (speed * 0.6);
+        const colors = ['#FFFFFF', '#E0F7FA', '#B2EBF2'];
+        const col = colors[Math.floor(Math.random() * colors.length)];
+
+        this.add(
+          x - Math.cos(angle) * 8,
+          y - Math.sin(angle) * 8,
+          Math.cos(sprayAngle) * spraySpeed,
+          Math.sin(sprayAngle) * spraySpeed - 1.2,
+          col,
+          Math.random() > 0.4 ? 2 : 3,
+          18 + Math.floor(Math.random() * 12),
+          'carve'
+        );
+      }
+    }
+
+    createSnapBurst(x, y) {
+      for (let i = 0; i < 18; i++) {
+        const sprayAngle = -Math.PI * 0.7 + (Math.random() * 0.9 - 0.45);
+        const spraySpeed = 3.5 + Math.random() * 4.5;
+        this.add(
+          x,
+          y,
+          Math.cos(sprayAngle) * spraySpeed,
+          Math.sin(sprayAngle) * spraySpeed,
+          '#FFFFFF',
+          Math.random() > 0.5 ? 3 : 4,
+          26 + Math.floor(Math.random() * 12),
+          'snap'
+        );
+      }
+    }
+
+    createTubeMist(barrelX, barrelY) {
+      for (let i = 0; i < 3; i++) {
+        const colors = ['#FFFFFF', '#E0F7FA', '#80DEEA', '#FFE082'];
+        const col = colors[Math.floor(Math.random() * colors.length)];
+        this.add(
+          barrelX + (Math.random() * 30 - 15),
+          barrelY + (Math.random() * 40 - 20),
+          1.2 + Math.random() * 2.2,
+          -0.5 + (Math.random() * 1.5 - 0.75),
+          col,
+          2,
+          16 + Math.floor(Math.random() * 10),
+          'mist'
+        );
+      }
+    }
+
+    createWipeoutSplash(x, y) {
+      for (let i = 0; i < 28; i++) {
+        const angle = -Math.PI * 0.5 + (Math.random() * Math.PI - Math.PI * 0.5);
+        const speed = 2.0 + Math.random() * 5.0;
         this.add(
           x,
           y,
           Math.cos(angle) * speed,
           Math.sin(angle) * speed,
-          color,
-          Math.random() > 0.5 ? 2 : 3,
-          20 + Math.floor(Math.random() * 15),
+          '#FFFFFF',
+          Math.random() > 0.5 ? 3 : 4,
+          30 + Math.floor(Math.random() * 15),
           'splash'
-        );
-      }
-    }
-
-    createBarrelSpray(x, y) {
-      for (let i = 0; i < 3; i++) {
-        const colors = ['#FFFFFF', '#E0F7FA', '#80DEEA', '#FFE082'];
-        const col = colors[Math.floor(Math.random() * colors.length)];
-        this.add(
-          x + (Math.random() * 20 - 10),
-          y + (Math.random() * 20 - 10),
-          -1.5 - Math.random() * 2,
-          -0.5 + (Math.random() * 1.5 - 0.75),
-          col,
-          2,
-          16 + Math.floor(Math.random() * 10),
-          'spray'
         );
       }
     }
@@ -363,9 +425,8 @@
         p.y += p.vy;
         p.life--;
 
-        if (p.type === 'splash' || p.type === 'spray') {
-          p.vy += 0.15; // gravità gocce
-        }
+        // Gravità sulle gocce d'acqua
+        p.vy += 0.16;
 
         if (p.life <= 0) {
           this.particles.splice(i, 1);
@@ -373,14 +434,11 @@
       }
     }
 
-    draw(ctx, cameraX) {
+    draw(ctx) {
       for (let i = 0; i < this.particles.length; i++) {
         const p = this.particles[i];
-        const screenX = Math.round(p.x - cameraX);
-        const screenY = Math.round(p.y);
-
         ctx.fillStyle = p.color;
-        ctx.fillRect(screenX, screenY, p.size, p.size);
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
       }
     }
 
@@ -390,139 +448,123 @@
   }
 
   // ----------------------------------------------------------------------------
-  // 4. GENERATORE ONDE PROCEDURALI E FONDALE
+  // 4. GENERATORE DELL'ONDA SALENTINA & BARREL DINAMICO
   // ----------------------------------------------------------------------------
-  class SalentoWaveWorld {
+  class SalentoWave {
     constructor() {
-      this.shells = [];
-      this.boosts = [];
-      this.fishes = [];
-      this.decorations = [];
-      this.initWorldElements();
+      this.barrelX = SURF_CONFIG.BARREL_X_BASE;
+      this.lipPitchSpeed = 1.0;
+      this.waveHeight = 110;
+      this.curlPhase = 0;
+      this.foamPuffs = [];
+      this.initFoamPuffs();
     }
 
-    initWorldElements() {
-      this.shells = [];
-      this.boosts = [];
-      this.fishes = [];
-
-      // Genera conchiglie e pesciolini per i primi 25,000 pixel
-      for (let x = 300; x < 25000; x += 180 + Math.random() * 220) {
-        const waveH = this.getWaveHeight(x, 0);
-        this.shells.push({
-          x: x,
-          y: waveH - 30 - Math.random() * 50,
-          collected: false,
-          animOffset: Math.random() * Math.PI * 2
-        });
-
-        // Speed boost orbs
-        if (Math.random() < 0.25) {
-          this.boosts.push({
-            x: x + 80,
-            y: waveH - 20,
-            collected: false
-          });
-        }
-      }
-
-      // Pesciolini sottomarini
-      for (let x = 100; x < 25000; x += 120 + Math.random() * 150) {
-        this.fishes.push({
-          x: x,
-          y: GAME_CONFIG.WAVE_BASE_Y + 25 + Math.random() * 40,
-          vx: -(0.5 + Math.random() * 0.8),
-          color: Math.random() > 0.5 ? '#FFD54F' : '#FF7043',
-          size: Math.random() > 0.5 ? 3 : 4
+    initFoamPuffs() {
+      this.foamPuffs = [];
+      for (let i = 0; i < 16; i++) {
+        this.foamPuffs.push({
+          x: Math.random() * 120,
+          y: SURF_CONFIG.TROUGH_BOTTOM_Y + Math.random() * 20,
+          size: 4 + Math.random() * 8,
+          speed: 1.2 + Math.random() * 1.5
         });
       }
-    }
-
-    // Calcola l'altezza dell'onda (Y) in base alla coordinata globale X e al tempo
-    getWaveHeight(worldX, timeSec = 0) {
-      const baseY = GAME_CONFIG.WAVE_BASE_Y;
-
-      // Swell principale
-      const swell1 = Math.sin(worldX * 0.008 + timeSec * 1.5) * 28;
-      // Cresta secondaria più ripida
-      const swell2 = Math.sin(worldX * 0.018 - timeSec * 0.8) * 14;
-      // Dettaglio micro-increspatura
-      const chop = Math.sin(worldX * 0.045 + timeSec * 3) * 4;
-
-      // Sezione speciale onde ripide per salti spettacolari a intervalli regolari
-      const rampCycle = Math.sin(worldX * 0.002);
-      const rampExtra = rampCycle > 0.4 ? (rampCycle - 0.4) * 40 : 0;
-
-      return baseY + swell1 + swell2 + chop - rampExtra;
-    }
-
-    // Calcola la pendenza / angolo della superficie dell'onda
-    getWaveSlope(worldX, timeSec = 0) {
-      const delta = 4;
-      const y1 = this.getWaveHeight(worldX - delta, timeSec);
-      const y2 = this.getWaveHeight(worldX + delta, timeSec);
-      return Math.atan2(y2 - y1, delta * 2);
-    }
-
-    // Calcola il fondale sabbioso con dune
-    getSeabedHeight(worldX) {
-      const baseY = GAME_CONFIG.SEABED_BASE_Y;
-      const dune = Math.sin(worldX * 0.006) * 16 + Math.sin(worldX * 0.02) * 6;
-      return baseY + dune;
-    }
-
-    // Determina se il punto si trova all'interno del barile / tubo dell'onda
-    isInBarrelPocket(worldX, worldY, timeSec = 0) {
-      const waveY = this.getWaveHeight(worldX, timeSec);
-      const slope = this.getWaveSlope(worldX, timeSec);
-
-      // Una pendenza negativa ripida (salita dell'onda) con il surfer vicino alla parete
-      const isSteepWave = slope < -0.35;
-      const isPocketDepth = worldY >= waveY - 35 && worldY <= waveY + 12;
-
-      return isSteepWave && isPocketDepth;
     }
 
     update(timeSec) {
-      // Aggiorna nuoto dei pesciolini
-      for (let i = 0; i < this.fishes.length; i++) {
-        const f = this.fishes[i];
-        f.x += f.vx;
+      this.curlPhase = (timeSec * 2.2) % (Math.PI * 2);
+      
+      // Il tubo avanza e retrocede leggermente come un'onda vera che pulsa
+      this.barrelX = SURF_CONFIG.BARREL_X_BASE + Math.sin(timeSec * 0.8) * 18;
+
+      // Aggiorna schiuma della spuma in basso a sinistra
+      for (let i = 0; i < this.foamPuffs.length; i++) {
+        const p = this.foamPuffs[i];
+        p.x -= p.speed;
+        if (p.x < -20) {
+          p.x = this.barrelX + Math.random() * 60;
+          p.y = SURF_CONFIG.TROUGH_BOTTOM_Y + Math.random() * 20;
+        }
       }
+    }
+
+    // Calcola l'altezza Y della superficie dell'onda in base alla posizione X
+    getSurfaceY(x) {
+      // Profilo della parete dell'onda: dal fondo a destra risale fino alla cresta
+      const normX = Math.max(0, Math.min(1, (x - this.barrelX) / (SURF_CONFIG.SHOULDER_X_MAX - this.barrelX)));
+      
+      // Curva di transizione naturale dell'onda (Sigmoide / Curva d'acqua concava)
+      const heightFactor = Math.pow(1 - normX, 1.35);
+      return SURF_CONFIG.TROUGH_BOTTOM_Y - (heightFactor * this.waveHeight);
+    }
+
+    // Calcola l'inclinazione dell'onda a una data X
+    getSurfaceSlope(x) {
+      const delta = 4;
+      const y1 = this.getSurfaceY(x - delta);
+      const y2 = this.getSurfaceY(x + delta);
+      return Math.atan2(y2 - y1, delta * 2);
+    }
+
+    // Calcola se la coordinata X/Y è all'interno del barile / tubo dell'onda
+    isInBarrel(x, y) {
+      const lipY = SURF_CONFIG.LIP_TOP_Y;
+      const isBehindLip = x <= this.barrelX + 45;
+      const isUnderLip = y >= lipY + 8 && y <= SURF_CONFIG.TROUGH_BOTTOM_Y - 10;
+      return isBehindLip && isUnderLip;
+    }
+
+    // Calcola se l'onda si sta chiudendo addosso al surfer (Wipeout da tubo troppo profondo)
+    isCrushedByLip(x, y) {
+      return x < this.barrelX - 25;
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 5. FISICA E STATO DEL SURFER
+  // 5. FISICA DEL VERO SURFISTA (CARVE, BOTTOM TURN, SNAP, CUTBACK, TUBE)
   // ----------------------------------------------------------------------------
-  class SalentoSurfer {
+  class TrueSurfer {
     constructor(skinId = 'pietro') {
       this.skin = SURFER_SKINS[skinId] || SURFER_SKINS.pietro;
       this.reset();
     }
 
     reset() {
-      this.x = 120;
-      this.y = GAME_CONFIG.WAVE_BASE_Y - 20;
-      this.vx = GAME_CONFIG.DEFAULT_SPEED_X;
+      // Posizione iniziale sulla parete dell'onda
+      this.x = 180;
+      this.y = 140;
+      this.vx = 4.5;
       this.vy = 0;
       this.angle = 0;
-      this.angularVelocity = 0;
-      this.state = 'SURFING'; // 'SURFING', 'AIRBORNE', 'IN_BARREL', 'WIPEOUT'
+      this.targetAngle = 0;
+      this.speed = 4.8;
+      
+      // Stati reali del surf:
+      // 'TRIMMING', 'BOTTOM_TURN', 'TOP_TURN_SNAP', 'CUTBACK', 'IN_BARREL', 'FLOATER', 'AIR', 'WIPEOUT'
+      this.state = 'TRIMMING';
+      
+      // Comandi attivi
+      this.inputSteerY = 0; // -1 (up toward lip), +1 (down to trough)
+      this.inputSteerX = 0; // -1 (stall / hand drag back), +1 (pump forward)
+      this.isStalling = false;
       this.isPumping = false;
-      this.airTime = 0;
-      this.airRotations = 0;
-      this.totalAngleTurned = 0;
-      this.barrelTimer = 0;
-      this.maxAirHeight = 0;
-      this.wipeoutTimer = 0;
-      this.comboCount = 0;
+      this.isSnapRequested = false;
+
+      // Metriche e combo
       this.score = 0;
-      this.distance = 0;
-      this.shellsCollected = 0;
-      this.currentTrickText = '';
-      this.trickTextTimer = 0;
-      this.boardTailTrail = [];
+      this.rideTime = 0;
+      this.barrelTimer = 0;
+      this.totalBarrelTime = 0;
+      this.carveStreak = 0;
+      this.comboMultiplier = 1;
+      this.wipeoutTimer = 0;
+      this.lastManeuver = '';
+      this.maneuverTimer = 0;
+      this.maneuverColor = '#FFFFFF';
+      
+      // Scia della tavola
+      this.wakeTrail = [];
     }
 
     setSkin(skinId) {
@@ -531,351 +573,347 @@
       }
     }
 
-    startPump() {
-      if (this.state === 'WIPEOUT') return;
-      this.isPumping = true;
+    setInput(steerX, steerY, isStall = false, isPump = false) {
+      this.inputSteerX = steerX;
+      this.inputSteerY = steerY;
+      this.isStalling = isStall;
+      this.isPumping = isPump;
     }
 
-    releasePump() {
-      this.isPumping = false;
+    triggerSnapAction() {
+      if (this.state !== 'WIPEOUT') {
+        this.isSnapRequested = true;
+      }
     }
 
-    update(world, particleSys, audioSynth, timeSec) {
+    update(wave, particles, audio, timeSec) {
       if (this.state === 'WIPEOUT') {
-        this.updateWipeout(world, particleSys);
+        this.updateWipeout(wave, particles);
         return;
       }
 
-      const waveY = world.getWaveHeight(this.x, timeSec);
-      const waveSlope = world.getWaveSlope(this.x, timeSec);
+      this.rideTime += 1 / 60;
 
-      // Aggiorna distanza percorsa
-      this.distance = Math.floor(this.x / 10);
-
-      // Salva scia della tavola
-      this.boardTailTrail.push({ x: this.x, y: this.y, life: 12 });
-      if (this.boardTailTrail.length > 18) this.boardTailTrail.shift();
-      for (let i = this.boardTailTrail.length - 1; i >= 0; i--) {
-        this.boardTailTrail[i].life--;
-        if (this.boardTailTrail[i].life <= 0) {
-          this.boardTailTrail.splice(i, 1);
-        }
+      // Scia della tavola d'acqua
+      this.wakeTrail.push({ x: this.x, y: this.y, life: 14, angle: this.angle });
+      if (this.wakeTrail.length > 20) this.wakeTrail.shift();
+      for (let i = this.wakeTrail.length - 1; i >= 0; i--) {
+        this.wakeTrail[i].life--;
+        if (this.wakeTrail[i].life <= 0) this.wakeTrail.splice(i, 1);
       }
 
-      // Check In-Barrel
-      const inBarrel = world.isInBarrelPocket(this.x, this.y, timeSec);
-      if (inBarrel && this.state !== 'AIRBORNE') {
+      // Altezza dell'onda nel punto attuale
+      const waveSurfaceY = wave.getSurfaceY(this.x);
+      const waveSlope = wave.getSurfaceSlope(this.x);
+
+      // CONTROLLO TUBING (IN THE BARREL)
+      const inBarrel = wave.isInBarrel(this.x, this.y);
+      if (inBarrel && this.state !== 'AIR') {
         this.state = 'IN_BARREL';
         this.barrelTimer += 1 / 60;
-        this.score += 8; // Punti continui nel tubo!
-        particleSys.createBarrelSpray(this.x, this.y);
-        audioSynth.playBarrelSound();
+        this.totalBarrelTime += 1 / 60;
+        
+        // Punti continui a raffica nel tubo!
+        const pts = Math.floor(15 * this.comboMultiplier);
+        this.score += pts;
+        
+        particles.createTubeMist(wave.barrelX + 15, this.y);
+        audio.setOceanMood(true, this.speed);
 
-        if (Math.random() < 0.2) {
-          this.showTrickText('🌊 BARREL RIDER! +100', '#38BDF8');
-          this.score += 100;
+        if (Math.random() < 0.15) {
+          this.showManeuver(`🌊 DEEP IN THE BARREL! +${pts}`, '#38BDF8');
         }
-      } else if (this.state === 'IN_BARREL' && !inBarrel) {
-        this.state = 'SURFING';
-        audioSynth.setWaveFilter(450, 0.04);
+
+        // Se sei stato nel tubo e poi esci a destra -> SPIT OUT BONUS!
+        if (this.x > wave.barrelX + 50 && this.barrelTimer > 1.2) {
+          const spitPts = Math.floor(1200 * this.barrelTimer * this.comboMultiplier);
+          this.score += spitPts;
+          this.showManeuver(`💥 SPIT OUT EXIT! +${spitPts}`, '#F59E0B');
+          audio.playTubeSpit();
+          this.barrelTimer = 0;
+          this.comboMultiplier++;
+        }
+
+        // Controllo schiacciamento se troppo profondo
+        if (wave.isCrushedByLip(this.x, this.y)) {
+          this.triggerWipeout('💥 CRUSHED BY THE LIP!', particles, audio);
+          return;
+        }
+
+      } else {
+        if (this.state === 'IN_BARREL') {
+          this.state = 'TRIMMING';
+          this.barrelTimer = 0;
+          audio.setOceanMood(false, this.speed);
+        }
       }
 
-      // FISICA IN ARIA
-      if (this.state === 'AIRBORNE') {
-        this.airTime += 1 / 60;
-        this.vy += GAME_CONFIG.GRAVITY;
-
-        // Se l'utente tiene premuto in aria -> esegui acrobazie / flip!
-        if (this.isPumping) {
-          this.angle += GAME_CONFIG.AIR_ROTATION_SPEED;
-          this.totalAngleTurned += GAME_CONFIG.AIR_ROTATION_SPEED;
-        } else {
-          // Lieve stabilizzazione aerodinamica
-          this.angle += this.angularVelocity;
-          this.angularVelocity *= 0.94;
-        }
-
+      // FISICA IN ARIA (AERIAL)
+      if (this.state === 'AIR') {
+        this.vy += SURF_CONFIG.GRAVITY;
         this.x += this.vx;
         this.y += this.vy;
 
-        const currentAirH = Math.max(0, waveY - this.y);
-        if (currentAirH > this.maxAirHeight) {
-          this.maxAirHeight = Math.floor(currentAirH);
+        // Rotazione aria
+        this.angle += 0.08;
+
+        // Atterraggio sull'onda
+        if (this.y >= waveSurfaceY - 4) {
+          this.y = waveSurfaceY;
+          this.state = 'TRIMMING';
+          this.vy = 0;
+          this.speed = Math.min(SURF_CONFIG.MAX_SURF_SPEED, this.speed + 2.0);
+          this.comboMultiplier++;
+          const airPts = 850 * this.comboMultiplier;
+          this.score += airPts;
+          this.showManeuver(`🚀 AIR REVERSE LANDED! +${airPts}`, '#10B981');
+          particles.createSnapBurst(this.x, this.y);
+          audio.playSnapSpray();
         }
+        return;
+      }
 
-        // Controllo atterraggio sull'onda
-        if (this.y >= waveY - 2) {
-          this.handleLanding(waveSlope, particleSys, audioSynth);
-        }
+      // FISICA REALE SULL'ONDA (SURFING SULLA PARETE)
 
-      } else {
-        // FISICA SULL'ONDA (SURFING O PUMPING)
-        this.airTime = 0;
-
-        if (this.isPumping) {
-          // Tucking / Pumping: aumenta velocità scendendo lungo la pendenza
-          const accel = Math.sin(waveSlope) * GAME_CONFIG.PUMP_ACCEL * 1.8;
-          this.vx += accel;
-          this.vx = Math.min(GAME_CONFIG.MAX_SPEED_X, Math.max(GAME_CONFIG.MIN_SPEED_X, this.vx));
-
-          // Emetti schiuma mentre si fa carving
+      // 1. DINAMICA VERTICALE (UP / DOWN SULLA PARETE)
+      if (this.inputSteerY > 0.2) {
+        // Scendendo verso il fondo dell'onda (Bottom Turn Drop)
+        // La gravità fa accelerare il surfer verso il basso
+        this.vy += 0.45;
+        this.speed = Math.min(SURF_CONFIG.MAX_SURF_SPEED, this.speed + 0.16);
+        this.targetAngle = 0.45; // Prua inclinata verso il basso
+        
+        if (this.y > SURF_CONFIG.TROUGH_BOTTOM_Y - 20) {
+          this.state = 'BOTTOM_TURN';
+          // Bottom Turn energico: pronto per risalire
           if (Math.random() < 0.4) {
-            particleSys.add(this.x - 6, this.y + 4, -this.vx * 0.4, -1, '#FFFFFF', 2, 14, 'spray');
+            particles.createCarveSpray(this.x, this.y, this.angle, this.speed);
           }
-        } else {
-          // Attrito naturale se non si pompa
-          this.vx += (GAME_CONFIG.DEFAULT_SPEED_X - this.vx) * 0.02;
         }
+      } else if (this.inputSteerY < -0.2) {
+        // Risalendo la parete verso la cresta (Drive to the Lip)
+        this.vy -= 0.55;
+        this.targetAngle = -0.55; // Prua inclinata verso l'alto
 
-        // Segui il profilo dell'onda
-        this.x += this.vx;
-        this.y = waveY;
-        this.angle = waveSlope;
-
-        // CHECK LANCIO DALLA CRESTA DELL'ONDA (AIR LAUNCH)
-        // Se la pendenza è verso l'alto e la velocità è sufficiente -> decollo!
-        if (waveSlope < -0.38 && this.vx > 5.2 && !this.isPumping) {
-          this.launchAirborne(waveSlope, audioSynth, particleSys);
-        }
-
-        // Punti per scorrimento e carving
-        this.score += Math.floor(this.vx * 0.15);
-      }
-
-      // Check raccolta conchiglie e power-up
-      this.checkCollectibles(world, audioSynth, particleSys);
-
-      // Aggiorna timer testo trick
-      if (this.trickTextTimer > 0) {
-        this.trickTextTimer--;
-      }
-    }
-
-    launchAirborne(waveSlope, audioSynth, particleSys) {
-      this.state = 'AIRBORNE';
-      // Converti la velocità orizzontale in slancio verticale basato sull'inclinazione
-      this.vy = -Math.abs(this.vx * Math.sin(waveSlope) * 1.6) - 4.5;
-      this.vx = this.vx * 0.95;
-      this.angularVelocity = -0.04;
-      this.totalAngleTurned = 0;
-
-      particleSys.createSplash(this.x, this.y, 8, '#E0F7FA');
-      audioSynth.playJump();
-
-      if (navigator.vibrate) {
-        try { navigator.vibrate(20); } catch (e) {}
-      }
-    }
-
-    handleLanding(waveSlope, particleSys, audioSynth) {
-      // Normalizza gli angoli tra -PI e PI
-      let angleDiff = Math.abs(this.normalizeAngle(this.angle) - this.normalizeAngle(waveSlope));
-      if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
-
-      // Calcola rotazioni complete
-      const fullRotations = Math.floor(Math.abs(this.totalAngleTurned) / (Math.PI * 2));
-
-      // Atterraggio corretto (angolo allineato entro ~45 gradi)
-      if (angleDiff < 0.8) {
-        this.state = 'SURFING';
-        this.y = this.y;
-        this.angle = waveSlope;
-        this.vy = 0;
-
-        // Boost di velocità per atterraggio pulito
-        this.vx = Math.min(GAME_CONFIG.MAX_SPEED_X, this.vx + 2.4);
-        this.comboCount++;
-
-        particleSys.createSplash(this.x, this.y, 14, '#FFFFFF');
-        audioSynth.playCleanLanding();
-
-        // Assegna punti per trick completati
-        if (fullRotations >= 2) {
-          const pts = 1200 * this.comboCount;
-          this.score += pts;
-          this.showTrickText(`🔥 720 MEGA SPIN! +${pts}`, '#F59E0B');
-          audioSynth.playTrick();
-        } else if (fullRotations === 1) {
-          const pts = 500 * this.comboCount;
-          this.score += pts;
-          this.showTrickText(`✨ 360 AIR FLIP! +${pts}`, '#10B981');
-          audioSynth.playTrick();
-        } else if (this.maxAirHeight > 55) {
-          const pts = 300 * this.comboCount;
-          this.score += pts;
-          this.showTrickText(`🚀 BIG AIR SALENTO! +${pts}`, '#6366F1');
-        } else {
-          this.showTrickText(`👌 CLEAN LANDING! x${this.comboCount}`, '#38BDF8');
-        }
-
-        if (navigator.vibrate) {
-          try { navigator.vibrate([25, 40, 25]); } catch (e) {}
+        // Se si raggiunge la cresta con velocità -> Manovra radicale!
+        if (this.y <= SURF_CONFIG.LIP_TOP_Y + 12) {
+          if (this.speed > 7.5 && this.isSnapRequested) {
+            // SNAP / OFF THE LIP!
+            this.state = 'TOP_TURN_SNAP';
+            this.speed = this.speed * 0.75;
+            this.vy = 2.5; // Rimbalzo verso il basso
+            this.targetAngle = 0.8;
+            this.comboMultiplier++;
+            const snapPts = 600 * this.comboMultiplier;
+            this.score += snapPts;
+            this.showManeuver(`⚡ RADICAL SNAP! +${snapPts}`, '#EC4899');
+            particles.createSnapBurst(this.x, this.y);
+            audio.playSnapSpray();
+            this.isSnapRequested = false;
+          } else if (this.speed > 8.5 && this.inputSteerY < -0.6) {
+            // AERIAL LAUNCH FUORI DALL'ONDA!
+            this.state = 'AIR';
+            this.vy = -5.8;
+            this.vx = 2.5;
+            audio.playAirLaunch();
+            this.showManeuver(`🌊 AIR LAUNCH!`, '#6366F1');
+            return;
+          } else {
+            // FLOATER SULLA CRESTA
+            this.state = 'FLOATER';
+            this.y = SURF_CONFIG.LIP_TOP_Y + 5;
+            this.targetAngle = 0.05;
+            this.score += 12;
+            if (Math.random() < 0.3) {
+              particles.createCarveSpray(this.x, this.y, 0, this.speed);
+            }
+          }
         }
       } else {
-        // WIPEOUT! Atterraggio di punta o schienata
-        this.triggerWipeout(particleSys, audioSynth);
+        // Nessun input verticale: trim naturale lungo la pendenza
+        this.vy *= 0.88;
+        this.targetAngle = waveSlope;
+        this.state = inBarrel ? 'IN_BARREL' : 'TRIMMING';
+      }
+
+      // 2. DINAMICA ORIZZONTALE (PUMP / STALL / CUTBACK)
+      if (this.isStalling || this.inputSteerX < -0.2) {
+        // HAND DRAG / STALL: Rallenta per farsi risucchiare nel tubo
+        this.speed = Math.max(SURF_CONFIG.MIN_SURF_SPEED, this.speed - SURF_CONFIG.STALL_DRAG);
+        this.x -= 2.2;
+        particles.add(this.x - 4, this.y + 4, -1.8, -0.6, '#FFFFFF', 2, 10, 'spray');
+
+        // Se eravamo lontani a destra e torniamo indietro -> CUTBACK!
+        if (this.x > 240 && this.state !== 'CUTBACK') {
+          this.state = 'CUTBACK';
+          const cutPts = 450 * this.comboMultiplier;
+          this.score += cutPts;
+          this.showManeuver(`🔄 ROUNDHOUSE CUTBACK! +${cutPts}`, '#14B8A6');
+          particles.createSnapBurst(this.x, this.y);
+          audio.playCutbackCarve();
+        }
+      } else if (this.isPumping || this.inputSteerX > 0.2) {
+        // PUMP DOWN THE LINE: Spinta in avanti per superare la sezione
+        this.speed = Math.min(SURF_CONFIG.MAX_SURF_SPEED, this.speed + SURF_CONFIG.PUMP_ACCEL);
+        this.x += 1.8;
+      } else {
+        // Velocità naturale di navigazione
+        this.x += (190 - this.x) * 0.02;
+        this.speed += (5.0 - this.speed) * 0.015;
+      }
+
+      // Aggiorna posizione Y
+      this.y += this.vy;
+      
+      // Limiti di altezza sull'onda
+      if (this.y > SURF_CONFIG.TROUGH_BOTTOM_Y) {
+        this.y = SURF_CONFIG.TROUGH_BOTTOM_Y;
+        this.vy = -this.vy * 0.4;
+      }
+      if (this.y < SURF_CONFIG.LIP_TOP_Y) {
+        this.y = SURF_CONFIG.LIP_TOP_Y;
+      }
+
+      // Morbidezza rotazione tavola
+      this.angle += (this.targetAngle - this.angle) * 0.2;
+
+      // Punti continui di surf
+      this.score += Math.floor(this.speed * 0.2);
+
+      // Aggiorna audio continuo
+      audio.setOceanMood(this.state === 'IN_BARREL', this.speed);
+
+      // Timer testo manovra
+      if (this.maneuverTimer > 0) {
+        this.maneuverTimer--;
       }
     }
 
-    triggerWipeout(particleSys, audioSynth) {
+    triggerWipeout(reason, particles, audio) {
       this.state = 'WIPEOUT';
-      this.wipeoutTimer = 75; // frames
-      this.comboCount = 0;
-      this.vy = -3;
-      this.vx = this.vx * 0.3;
+      this.wipeoutTimer = 80;
+      this.comboMultiplier = 1;
+      this.barrelTimer = 0;
+      this.vy = -3.5;
+      this.vx = -1.5;
 
-      particleSys.createSplash(this.x, this.y, 22, '#FFFFFF');
-      audioSynth.playWipeout();
-      this.showTrickText('💥 WIPEOUT!', '#EF4444');
+      particles.createWipeoutSplash(this.x, this.y);
+      audio.playWipeout();
+      this.showManeuver(reason || '💥 WIPEOUT!', '#EF4444');
 
       if (navigator.vibrate) {
         try { navigator.vibrate([60, 50, 100]); } catch (e) {}
       }
     }
 
-    updateWipeout(world, particleSys) {
+    updateWipeout(wave, particles) {
       this.wipeoutTimer--;
       this.x += this.vx;
       this.y += this.vy;
-      this.vy += GAME_CONFIG.GRAVITY * 0.8;
-      this.angle += 0.15;
+      this.vy += SURF_CONFIG.GRAVITY * 0.7;
+      this.angle += 0.18;
 
-      const waveY = world.getWaveHeight(this.x, 0);
-      if (this.y > waveY + 8) {
-        this.y = waveY + 8;
-        this.vx *= 0.9;
+      if (this.y > SURF_CONFIG.TROUGH_BOTTOM_Y + 10) {
+        this.y = SURF_CONFIG.TROUGH_BOTTOM_Y + 10;
+        this.vx *= 0.85;
         this.vy = 0;
       }
 
       if (this.wipeoutTimer <= 0) {
-        // Respawn morbido
-        this.state = 'SURFING';
-        this.y = waveY;
-        this.angle = world.getWaveSlope(this.x, 0);
-        this.vx = GAME_CONFIG.DEFAULT_SPEED_X;
+        // Respawn sulla parete dell'onda
+        this.state = 'TRIMMING';
+        this.x = 180;
+        this.y = 140;
+        this.speed = 4.8;
         this.vy = 0;
+        this.angle = 0;
       }
     }
 
-    checkCollectibles(world, audioSynth, particleSys) {
-      // Conchiglie
-      for (let i = 0; i < world.shells.length; i++) {
-        const s = world.shells[i];
-        if (!s.collected && Math.abs(this.x - s.x) < 22 && Math.abs(this.y - s.y) < 26) {
-          s.collected = true;
-          this.shellsCollected++;
-          this.score += 150;
-          this.showTrickText('🐚 +150', '#FBBF24');
-          particleSys.createSplash(s.x, s.y, 6, '#FBBF24');
-          audioSynth.playShellCollect();
-        }
-      }
-
-      // Boost orbs
-      for (let i = 0; i < world.boosts.length; i++) {
-        const b = world.boosts[i];
-        if (!b.collected && Math.abs(this.x - b.x) < 24 && Math.abs(this.y - b.y) < 26) {
-          b.collected = true;
-          this.vx = Math.min(GAME_CONFIG.MAX_SPEED_X, this.vx + 4);
-          this.score += 250;
-          this.showTrickText('⚡ SPEED BOOST! +250', '#EC4899');
-          particleSys.createSplash(b.x, b.y, 10, '#EC4899');
-          audioSynth.playTrick();
-        }
-      }
+    showManeuver(text, color = '#FFFFFF') {
+      this.lastManeuver = text;
+      this.maneuverColor = color;
+      this.maneuverTimer = 55;
     }
 
-    normalizeAngle(ang) {
-      ang = ang % (2 * Math.PI);
-      if (ang > Math.PI) ang -= 2 * Math.PI;
-      if (ang < -Math.PI) ang += 2 * Math.PI;
-      return ang;
-    }
-
-    showTrickText(text, color = '#FFFFFF') {
-      this.currentTrickText = text;
-      this.trickTextColor = color;
-      this.trickTextTimer = 48;
-    }
-
-    draw(ctx, cameraX) {
-      const screenX = Math.round(this.x - cameraX);
-      const screenY = Math.round(this.y);
-
+    draw(ctx) {
       ctx.save();
-      ctx.translate(screenX, screenY);
+      ctx.translate(Math.round(this.x), Math.round(this.y));
       ctx.rotate(this.angle);
 
-      // Disegna Tavola da Surf in Pixel Art
-      this.drawSurfboard(ctx);
-
-      // Disegna Personaggio Surfer in Pixel Art
-      this.drawSurferCharacter(ctx);
+      // Disegna Tavola da Surf e Surfer autentico
+      this.drawAuthenticSurfboard(ctx);
+      this.drawAuthenticSurfer(ctx);
 
       ctx.restore();
 
-      // Disegna Testo Trick Aereo Flottante
-      if (this.trickTextTimer > 0) {
+      // Disegna Testo Manovra Eseguita
+      if (this.maneuverTimer > 0) {
         ctx.save();
         ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillStyle = this.trickTextColor || '#FFFFFF';
-        ctx.shadowColor = 'rgba(0,0,0,0.6)';
-        ctx.shadowBlur = 4;
-        const textY = screenY - 28 - (48 - this.trickTextTimer) * 0.4;
-        ctx.fillText(this.currentTrickText, screenX, textY);
+        ctx.fillStyle = this.maneuverColor || '#FFFFFF';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 5;
+        const textY = Math.round(this.y) - 26 - (55 - this.maneuverTimer) * 0.35;
+        ctx.fillText(this.lastManeuver, Math.round(this.x), textY);
         ctx.restore();
       }
     }
 
-    drawSurfboard(ctx) {
+    drawAuthenticSurfboard(ctx) {
       const s = this.skin;
-      // Tavola da surf affusolata pixel-art
+      // Tavola da surf in prospettiva laterale / 3/4
       ctx.fillStyle = s.boardColor || '#FFFFFF';
-      ctx.fillRect(-18, 4, 36, 4);
-      ctx.fillRect(-15, 3, 30, 6);
-      ctx.fillRect(-20, 5, 4, 2); // Punta
-      ctx.fillRect(17, 5, 2, 2);  // Coda
+      ctx.fillRect(-16, 4, 32, 4);
+      ctx.fillRect(-14, 3, 28, 6);
+      ctx.fillRect(-18, 5, 3, 2); // Nose rocker
+      ctx.fillRect(15, 5, 2, 2);  // Tail
 
-      // Pinna posteriore (Fin)
-      ctx.fillStyle = '#1E293B';
-      ctx.fillRect(10, 8, 4, 3);
+      // Pinna posteriore immersa nell'acqua
+      ctx.fillStyle = '#0F172A';
+      ctx.fillRect(8, 7, 4, 3);
 
-      // Riga centrale colorata della tavola
+      // Riga / Stringer decorativo della tavola
       ctx.fillStyle = s.boardStripe || '#FF385C';
-      ctx.fillRect(-14, 5, 28, 2);
+      ctx.fillRect(-13, 5, 26, 2);
     }
 
-    drawSurferCharacter(ctx) {
+    drawAuthenticSurfer(ctx) {
       const s = this.skin;
-      const isCrouched = this.isPumping || this.state === 'IN_BARREL';
+      const isLowStance = this.state === 'IN_BARREL' || this.state === 'BOTTOM_TURN' || this.isStalling;
 
-      // Posizione verticale busto/gambe
-      const hipY = isCrouched ? 0 : -4;
-      const headY = isCrouched ? -8 : -15;
+      const hipY = isLowStance ? 0 : -4;
+      const headY = isLowStance ? -8 : -16;
 
-      // Gambe & Costume da bagno
+      // Gambe flesse in stance da surf
       ctx.fillStyle = s.skinColor;
       ctx.fillRect(-6, hipY + 4, 4, 4); // Gamba posteriore
-      ctx.fillRect(2, hipY + 4, 4, 4);  // Gamba anteriore
+      ctx.fillRect(3, hipY + 4, 4, 4);  // Gamba anteriore
 
-      // Costume (Rausch Red per Pietro, ecc.)
+      // Costume da bagno
       ctx.fillStyle = s.trunksColor;
       ctx.fillRect(-7, hipY, 14, 5);
 
-      // Busto / Torace
+      // Busto
       ctx.fillStyle = s.skinColor;
       ctx.fillRect(-5, headY + 5, 10, 6);
 
-      // Braccia per equilibrio
-      if (this.state === 'AIRBORNE') {
-        // Braccia alzate per trick aereo!
-        ctx.fillRect(-10, headY + 2, 4, 4);
-        ctx.fillRect(6, headY + 2, 4, 4);
+      // Braccia in posizione da surf reale (balance & hand drag)
+      if (this.state === 'IN_BARREL' || this.isStalling) {
+        // Braccio posteriore che tocca l'onda (Hand Drag)
+        ctx.fillRect(-10, headY + 8, 5, 3);
+        ctx.fillRect(-12, headY + 11, 3, 3); // Mano nell'acqua
+        // Braccio anteriore proteso in avanti
+        ctx.fillRect(5, headY + 4, 6, 3);
+      } else if (this.state === 'TOP_TURN_SNAP') {
+        // Torsione radicale delle braccia
+        ctx.fillRect(-8, headY + 2, 4, 4);
+        ctx.fillRect(6, headY + 7, 5, 3);
       } else {
-        // Braccia tese per surf balance
-        ctx.fillRect(-9, headY + 7, 4, 3);
-        ctx.fillRect(5, headY + 7, 4, 3);
+        // Braccia aperte in perfetto equilibrio
+        ctx.fillRect(-9, headY + 6, 4, 3);
+        ctx.fillRect(5, headY + 6, 5, 3);
       }
 
       // Testa
@@ -887,315 +925,248 @@
       ctx.fillRect(-5, headY - 6, 10, 4);
       ctx.fillRect(-5, headY - 4, 3, 3);
 
-      // Occhiali da sole da Superhost 😎
+      // Occhiali da sole 😎
       if (s.glasses) {
         ctx.fillStyle = '#0F172A';
         ctx.fillRect(-1, headY - 2, 6, 3);
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(1, headY - 2, 1, 1); // Riflesso sole
+        ctx.fillRect(1, headY - 2, 1, 1);
       }
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 6. RENDERER GRAFICO RETRO E PARALLASSE SALENTO
+  // 6. RENDERER GRAFICO RETRO DEL VERO MARE DEL SALENTO
   // ----------------------------------------------------------------------------
-  class SalentoSurfRenderer {
+  class TrueSurfRenderer {
     constructor(canvas) {
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
       this.ctx.imageSmoothingEnabled = false;
-      this.clouds = [
-        { x: 50, y: 25, speed: 0.15, size: 24 },
-        { x: 180, y: 40, speed: 0.22, size: 36 },
-        { x: 320, y: 20, speed: 0.12, size: 20 },
-        { x: 450, y: 35, speed: 0.18, size: 30 }
-      ];
     }
 
-    render(world, surfer, particleSys, cameraX, timeSec) {
+    render(wave, surfer, particles, timeSec) {
       const ctx = this.ctx;
-      const width = GAME_CONFIG.CANVAS_WIDTH;
-      const height = GAME_CONFIG.CANVAS_HEIGHT;
+      const width = SURF_CONFIG.CANVAS_WIDTH;
+      const height = SURF_CONFIG.CANVAS_HEIGHT;
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Cielo Salentino (Gradient Gradiente Soleggiato)
-      const skyGradient = ctx.createLinearGradient(0, 0, 0, GAME_CONFIG.WAVE_BASE_Y);
-      skyGradient.addColorStop(0, '#7FD1F7'); // Azzurro cielo
-      skyGradient.addColorStop(0.65, '#BAE6FD');
-      skyGradient.addColorStop(1, '#FEF08A'); // Luce calda dell'orizzonte
-      ctx.fillStyle = skyGradient;
+      // 1. Cielo Salentino Soleggiato
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, SURF_CONFIG.TROUGH_BOTTOM_Y);
+      skyGrad.addColorStop(0, '#7FD1F7');
+      skyGrad.addColorStop(0.55, '#BAE6FD');
+      skyGrad.addColorStop(1, '#FEF08A');
+      ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Sole Pixel Luminoso con Bagliore
-      this.drawPixelSun(ctx, width - 65, 35);
+      // 2. Sole e Nuvole Pixel
+      this.drawSunAndClouds(ctx, timeSec);
 
-      // 3. Nuvole Pixel in Parallasse
-      this.drawPixelClouds(ctx, cameraX);
+      // 3. Orizzonte Costa Salentina & Mare Calmo in lontananza
+      this.drawCoastline(ctx);
 
-      // 4. Silhouette Costa di Gallipoli / Faraglioni all'Orizzonte
-      this.drawCoastalHorizon(ctx, cameraX);
+      // 4. LA GRANDE ONDA CON TUBO E PARETE D'ACQUA (PIXEL WAVE ENGINE)
+      this.drawBigCurlingWave(ctx, wave, timeSec);
 
-      // 5. Onde e Corpo d'Acqua Stratificato (Pixel Water)
-      this.drawLayeredOcean(ctx, world, cameraX, timeSec);
+      // 5. Scia della tavola & Particelle d'acqua
+      this.drawWakeTrails(ctx, surfer);
+      particles.draw(ctx);
 
-      // 6. Fondale Marino con Sabbia, Dune e Pesciolini
-      this.drawSeabedAndFlora(ctx, world, cameraX);
+      // 6. Surfer
+      surfer.draw(ctx);
 
-      // 7. Scia della tavola e Particelle
-      this.drawBoardTrail(ctx, surfer, cameraX);
-      particleSys.draw(ctx, cameraX);
+      // 7. Il Lip / Ricciolo del Barile in Primo Piano (Curling Foam Lip)
+      this.drawCurlingLipForeground(ctx, wave, timeSec);
 
-      // 8. Collezionabili (Conchiglie & Boost)
-      this.drawCollectibles(ctx, world, cameraX, timeSec);
-
-      // 9. Surfer Personaggio
-      surfer.draw(ctx, cameraX);
-
-      // 10. Schiuma Cresta e Barile in primo piano
-      this.drawWaveFoamLip(ctx, world, cameraX, timeSec);
+      // 8. Schiuma del Fondale e Spuma
+      this.drawBottomFoam(ctx, wave);
     }
 
-    drawPixelSun(ctx, sunX, sunY) {
-      // Glow esterno
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.35)';
+    drawSunAndClouds(ctx, timeSec) {
+      // Sole
+      const sunX = SURF_CONFIG.CANVAS_WIDTH - 60;
+      const sunY = 32;
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
       ctx.beginPath();
-      ctx.arc(sunX, sunY, 34, 0, Math.PI * 2);
+      ctx.arc(sunX, sunY, 32, 0, Math.PI * 2);
       ctx.fill();
 
-      // Disco solare pixelato
       ctx.fillStyle = '#FDE047';
-      ctx.fillRect(sunX - 12, sunY - 12, 24, 24);
-      ctx.fillRect(sunX - 14, sunY - 8, 28, 16);
-      ctx.fillRect(sunX - 8, sunY - 14, 16, 28);
-
-      // Centro bianco luminoso
+      ctx.fillRect(sunX - 10, sunY - 10, 20, 20);
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(sunX - 6, sunY - 6, 12, 12);
+      ctx.fillRect(sunX - 4, sunY - 4, 8, 8);
+
+      // Nuvole lente
+      ctx.fillStyle = '#FFFFFF';
+      const cx1 = (30 + timeSec * 4) % (SURF_CONFIG.CANVAS_WIDTH + 60) - 30;
+      ctx.fillRect(cx1, 24, 28, 7);
+      ctx.fillRect(cx1 + 4, 20, 20, 11);
+
+      const cx2 = (220 + timeSec * 3) % (SURF_CONFIG.CANVAS_WIDTH + 60) - 30;
+      ctx.fillRect(cx2, 38, 36, 8);
+      ctx.fillRect(cx2 + 6, 33, 24, 14);
     }
 
-    drawPixelClouds(ctx, cameraX) {
-      ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < this.clouds.length; i++) {
-        const c = this.clouds[i];
-        const cx = ((c.x - cameraX * c.speed) % (GAME_CONFIG.CANVAS_WIDTH + 80) + GAME_CONFIG.CANVAS_WIDTH + 80) % (GAME_CONFIG.CANVAS_WIDTH + 80) - 40;
+    drawCoastline(ctx) {
+      const baseY = SURF_CONFIG.LIP_TOP_Y + 18;
+      
+      // Faraglioni / Costa verde di Gallipoli
+      ctx.fillStyle = '#64748B';
+      ctx.fillRect(160, baseY - 16, 45, 16);
+      ctx.fillRect(170, baseY - 22, 25, 6);
+      ctx.fillRect(260, baseY - 12, 60, 12);
 
-        ctx.fillRect(cx, c.y, c.size, 8);
-        ctx.fillRect(cx + 4, c.y - 4, c.size - 8, 14);
-        ctx.fillRect(cx + 8, c.y - 7, c.size - 16, 18);
-      }
-    }
-
-    drawCoastalHorizon(ctx, cameraX) {
-      const baseY = GAME_CONFIG.WAVE_BASE_Y - 14;
-      ctx.fillStyle = '#6B7280'; // Montagnetta / Costa lontana
-
-      // Promontorio Gallipoli & Torre del Pizzo in parallasse lenta
-      for (let x = 0; x < GAME_CONFIG.CANVAS_WIDTH; x += 4) {
-        const worldX = x + cameraX * 0.12;
-        const hillH = Math.sin(worldX * 0.005) * 14 + Math.sin(worldX * 0.015) * 6;
-        if (hillH > 4) {
-          ctx.fillRect(x, baseY - hillH, 4, hillH);
-        }
-      }
-
-      // Mare calmo all'orizzonte (linea turchese tenue)
+      // Linea di mare calmo all'orizzonte
       ctx.fillStyle = '#38BDF8';
-      ctx.fillRect(0, baseY, GAME_CONFIG.CANVAS_WIDTH, 14);
+      ctx.fillRect(0, baseY, SURF_CONFIG.CANVAS_WIDTH, 12);
     }
 
-    drawLayeredOcean(ctx, world, cameraX, timeSec) {
-      const width = GAME_CONFIG.CANVAS_WIDTH;
-      const height = GAME_CONFIG.CANVAS_HEIGHT;
+    drawBigCurlingWave(ctx, wave, timeSec) {
+      const width = SURF_CONFIG.CANVAS_WIDTH;
+      const height = SURF_CONFIG.CANVAS_HEIGHT;
+      const step = 2;
 
-      // Disegna colonne verticali pixelate per creare la stratificazione dell'acqua come nello screenshot
-      const step = 2; // Risoluzione orizzontale colonne d'acqua
+      // Disegna la parete dell'onda colonna per colonna con strati d'acqua
+      for (let x = 0; x < width; x += step) {
+        const surfaceY = Math.round(wave.getSurfaceY(x));
+        const seabedY = SURF_CONFIG.TROUGH_BOTTOM_Y + 22;
 
-      for (let sx = 0; sx < width; sx += step) {
-        const worldX = sx + cameraX;
-        const waveY = Math.round(world.getWaveHeight(worldX, timeSec));
-        const seabedY = Math.round(world.getSeabedHeight(worldX));
-
-        // 1. Strato Cresta / Superficie Turchese Chiaro (#22D3EE)
+        // Strato 1: Cresta / Superficie Turchese Chiaro (#22D3EE)
         ctx.fillStyle = '#22D3EE';
-        ctx.fillRect(sx, waveY, step, 10);
+        ctx.fillRect(x, surfaceY, step, 12);
 
-        // 2. Strato Intermedio Salento Cyan (#0284C7)
+        // Strato 2: Corpo d'Acqua Salento Cyan (#0284C7)
         ctx.fillStyle = '#0284C7';
-        ctx.fillRect(sx, waveY + 10, step, 22);
+        ctx.fillRect(x, surfaceY + 12, step, 26);
 
-        // 3. Strato Ionio Profondo Blu Marino (#0369A1 / #0C4A6E)
+        // Strato 3: Ionio Profondo Blu Marino (#0369A1 / #075985)
         ctx.fillStyle = '#0369A1';
-        ctx.fillRect(sx, waveY + 32, step, Math.max(0, seabedY - (waveY + 32)));
+        ctx.fillRect(x, surfaceY + 38, step, Math.max(0, seabedY - (surfaceY + 38)));
 
-        // 4. Schiuma superficiale bianca pixelata sulla cresta
-        if (Math.sin(worldX * 0.08 + timeSec * 4) > 0.3) {
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(sx, waveY - 1, step, 3);
-        }
-      }
-    }
-
-    drawSeabedAndFlora(ctx, world, cameraX) {
-      const width = GAME_CONFIG.CANVAS_WIDTH;
-      const height = GAME_CONFIG.CANVAS_HEIGHT;
-      const step = 3;
-
-      for (let sx = 0; sx < width; sx += step) {
-        const worldX = sx + cameraX;
-        const seabedY = Math.round(world.getSeabedHeight(worldX));
-
-        // Sabbia dorata del Salento (#D97706 / #B45309)
+        // Fondale Sabbioso Dorato
         ctx.fillStyle = '#F59E0B';
-        ctx.fillRect(sx, seabedY, step, 6);
-
-        // Rocce e scogli sottostanti (#78350F)
+        ctx.fillRect(x, seabedY, step, 6);
         ctx.fillStyle = '#92400E';
-        ctx.fillRect(sx, seabedY + 6, step, height - (seabedY + 6));
+        ctx.fillRect(x, seabedY + 6, step, height - (seabedY + 6));
       }
 
-      // Pesciolini sottomarini
-      for (let i = 0; i < world.fishes.length; i++) {
-        const f = world.fishes[i];
-        const sx = Math.round(f.x - cameraX);
-        if (sx > -20 && sx < width + 20) {
-          ctx.fillStyle = f.color;
-          ctx.fillRect(sx, Math.round(f.y), f.size + 2, f.size);
-          ctx.fillRect(sx + f.size + 2, Math.round(f.y) - 1, 2, f.size + 2); // Coda
-        }
+      // Profondità del Tubo / Cave del Barile (Oscurità translucida interna)
+      const barrelX = Math.round(wave.barrelX);
+      const tubeGrad = ctx.createRadialGradient(barrelX + 15, SURF_CONFIG.LIP_TOP_Y + 45, 10, barrelX + 15, SURF_CONFIG.LIP_TOP_Y + 45, 65);
+      tubeGrad.addColorStop(0, 'rgba(3, 105, 161, 0.85)');
+      tubeGrad.addColorStop(0.7, 'rgba(2, 132, 199, 0.45)');
+      tubeGrad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+
+      ctx.fillStyle = tubeGrad;
+      ctx.beginPath();
+      ctx.ellipse(barrelX + 15, SURF_CONFIG.LIP_TOP_Y + 45, 55, 42, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    drawCurlingLipForeground(ctx, wave, timeSec) {
+      const barrelX = Math.round(wave.barrelX);
+      const lipY = SURF_CONFIG.LIP_TOP_Y;
+
+      // Il ricciolo che scavalca e si tuffa in avanti (Curling Lip in Pixel Art)
+      ctx.fillStyle = '#22D3EE';
+      ctx.fillRect(barrelX - 20, lipY - 6, 60, 14);
+      ctx.fillRect(barrelX - 10, lipY + 8, 45, 12);
+      ctx.fillRect(barrelX + 5, lipY + 20, 25, 14);
+
+      // Schiuma bianca spumeggiante sul bordo del lip
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(barrelX - 24, lipY - 8, 68, 6);
+      ctx.fillRect(barrelX - 6, lipY + 4, 38, 6);
+      ctx.fillRect(barrelX + 10, lipY + 16, 22, 6);
+      ctx.fillRect(barrelX + 18, lipY + 28, 14, 10); // Goccia che cade
+
+      // Spruzzi d'aria dal barile
+      if (Math.sin(timeSec * 6) > 0.2) {
+        ctx.fillStyle = '#E0F2FE';
+        ctx.fillRect(barrelX + 34, lipY + 24, 4, 4);
+        ctx.fillRect(barrelX + 42, lipY + 18, 3, 3);
       }
     }
 
-    drawBoardTrail(ctx, surfer, cameraX) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-      for (let i = 0; i < surfer.boardTailTrail.length; i++) {
-        const pt = surfer.boardTailTrail[i];
-        const sx = Math.round(pt.x - cameraX);
-        const sy = Math.round(pt.y);
-        const size = Math.max(1, Math.floor(pt.life / 3));
-        ctx.fillRect(sx, sy, size, size);
+    drawWakeTrails(ctx, surfer) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      for (let i = 0; i < surfer.wakeTrail.length; i++) {
+        const pt = surfer.wakeTrail[i];
+        const sz = Math.max(1, Math.floor(pt.life / 3.5));
+        ctx.fillRect(Math.round(pt.x), Math.round(pt.y), sz, sz);
       }
     }
 
-    drawCollectibles(ctx, world, cameraX, timeSec) {
-      const width = GAME_CONFIG.CANVAS_WIDTH;
-
-      // Conchiglie 🐚
-      for (let i = 0; i < world.shells.length; i++) {
-        const s = world.shells[i];
-        if (s.collected) continue;
-        const sx = Math.round(s.x - cameraX);
-        if (sx > -20 && sx < width + 20) {
-          const floatY = s.y + Math.sin(timeSec * 4 + s.animOffset) * 3;
-          ctx.fillStyle = '#FDE68A';
-          ctx.fillRect(sx - 4, Math.round(floatY) - 4, 8, 8);
-          ctx.fillStyle = '#F59E0B';
-          ctx.fillRect(sx - 2, Math.round(floatY) - 2, 4, 4);
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(sx - 3, Math.round(floatY) - 3, 2, 2);
-        }
-      }
-
-      // Boost Orbs ⚡
-      for (let i = 0; i < world.boosts.length; i++) {
-        const b = world.boosts[i];
-        if (b.collected) continue;
-        const sx = Math.round(b.x - cameraX);
-        if (sx > -20 && sx < width + 20) {
-          const floatY = b.y + Math.sin(timeSec * 6) * 4;
-          ctx.fillStyle = '#F43F5E';
-          ctx.fillRect(sx - 5, Math.round(floatY) - 5, 10, 10);
-          ctx.fillStyle = '#FDE047';
-          ctx.fillRect(sx - 2, Math.round(floatY) - 4, 4, 8);
-        }
-      }
-    }
-
-    drawWaveFoamLip(ctx, world, cameraX, timeSec) {
-      // Effetto ricciolo schiuma sulla cresta anteriore
-      const width = GAME_CONFIG.CANVAS_WIDTH;
-      for (let sx = 0; sx < width; sx += 12) {
-        const worldX = sx + cameraX;
-        const slope = world.getWaveSlope(worldX, timeSec);
-        if (slope < -0.42) {
-          const waveY = Math.round(world.getWaveHeight(worldX, timeSec));
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(sx - 3, waveY - 4, 7, 5);
-          ctx.fillStyle = '#E0F2FE';
-          ctx.fillRect(sx, waveY - 2, 4, 4);
-        }
+    drawBottomFoam(ctx, wave) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      for (let i = 0; i < wave.foamPuffs.length; i++) {
+        const p = wave.foamPuffs[i];
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), Math.round(p.size), 3);
       }
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 7. GESTORE PRINCIPALE DI GIOCO (GAME ENGINE & CONTROLLI)
+  // 7. GESTORE DI GIOCO & CONTROLLI TOUCH PER SMARTPHONE (DRAG & D-PAD)
   // ----------------------------------------------------------------------------
   class SalentoSurfEngine {
     constructor() {
       this.canvas = null;
       this.renderer = null;
-      this.world = null;
+      this.wave = null;
       this.surfer = null;
-      this.particleSys = null;
+      this.particles = null;
       this.audio = null;
 
-      this.gameState = 'READY'; // 'READY', 'PLAYING', 'GAMEOVER', 'PAUSED'
-      this.cameraX = 0;
+      this.gameState = 'READY'; // 'READY', 'PLAYING', 'GAMEOVER'
       this.timeSec = 0;
       this.highScore = 0;
       this.bestBarrelTime = 0;
-      this.bestAirHeight = 0;
-      this.bestDistance = 0;
+      this.bestRideTime = 0;
       this.animationFrameId = null;
       this.lastTimestamp = 0;
 
       this.selectedSkinId = 'pietro';
+      this.touchStartX = 0;
+      this.touchStartY = 0;
+      this.isTouchActive = false;
+
       this.loadSavedRecords();
     }
 
     loadSavedRecords() {
       try {
-        const saved = localStorage.getItem('salento_surf_records_v1');
+        const saved = localStorage.getItem('salento_surf_records_v2');
         if (saved) {
           const data = JSON.parse(saved);
           this.highScore = data.highScore || 0;
           this.bestBarrelTime = data.bestBarrelTime || 0;
-          this.bestAirHeight = data.bestAirHeight || 0;
-          this.bestDistance = data.bestDistance || 0;
+          this.bestRideTime = data.bestRideTime || 0;
           this.selectedSkinId = data.selectedSkinId || 'pietro';
         }
-      } catch (e) {
-        console.warn('Impossibile caricare record:', e);
-      }
+      } catch (e) {}
     }
 
     saveRecords() {
       try {
-        const isNewRecord = this.surfer.score > this.highScore;
-        if (isNewRecord) {
-          this.highScore = this.surfer.score;
+        const isNew = this.surfer.score > this.highScore;
+        if (isNew) this.highScore = this.surfer.score;
+        if (this.surfer.totalBarrelTime > this.bestBarrelTime) {
+          this.bestBarrelTime = Number(this.surfer.totalBarrelTime.toFixed(1));
         }
-        if (this.surfer.barrelTimer > this.bestBarrelTime) {
-          this.bestBarrelTime = Number(this.surfer.barrelTimer.toFixed(1));
-        }
-        if (this.surfer.maxAirHeight > this.bestAirHeight) {
-          this.bestAirHeight = this.surfer.maxAirHeight;
-        }
-        if (this.surfer.distance > this.bestDistance) {
-          this.bestDistance = this.surfer.distance;
+        if (this.surfer.rideTime > this.bestRideTime) {
+          this.bestRideTime = Number(this.surfer.rideTime.toFixed(1));
         }
 
         const data = {
           highScore: this.highScore,
           bestBarrelTime: this.bestBarrelTime,
-          bestAirHeight: this.bestAirHeight,
-          bestDistance: this.bestDistance,
+          bestRideTime: this.bestRideTime,
           selectedSkinId: this.selectedSkinId
         };
-        localStorage.setItem('salento_surf_records_v1', JSON.stringify(data));
-        return isNewRecord;
+        localStorage.setItem('salento_surf_records_v2', JSON.stringify(data));
+        return isNew;
       } catch (e) {
         return false;
       }
@@ -1205,20 +1176,20 @@
       this.canvas = document.getElementById(canvasId);
       if (!this.canvas) return;
 
-      this.canvas.width = GAME_CONFIG.CANVAS_WIDTH;
-      this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT;
+      this.canvas.width = SURF_CONFIG.CANVAS_WIDTH;
+      this.canvas.height = SURF_CONFIG.CANVAS_HEIGHT;
 
-      this.renderer = new SalentoSurfRenderer(this.canvas);
-      this.world = new SalentoWaveWorld();
-      this.surfer = new SalentoSurfer(this.selectedSkinId);
-      this.particleSys = new PixelParticleSystem();
-      this.audio = new RetroAudioSynth();
+      this.renderer = new TrueSurfRenderer(this.canvas);
+      this.wave = new SalentoWave();
+      this.surfer = new TrueSurfer(this.selectedSkinId);
+      this.particles = new SurfParticleEngine();
+      this.audio = new RetroSurfAudio();
 
       this.bindControls();
       this.updateRecordsUI();
 
-      // Render iniziale preview
-      this.renderer.render(this.world, this.surfer, this.particleSys, 0, 0);
+      // Render iniziale
+      this.renderer.render(this.wave, this.surfer, this.particles, 0);
     }
 
     setSurferSkin(skinId) {
@@ -1232,7 +1203,16 @@
     bindControls() {
       if (!this.canvas) return;
 
-      // Touch Controls per Smartphone
+      // TOUCH GESTURES FLUIDI PER SMARTPHONE
+      // Trascinamento / Pressione direzionale:
+      // - Swipe SU: sali verso la cresta (Off-the-lip / Floater)
+      // - Swipe GIÙ: scendi verso la base (Bottom Turn / Carving)
+      // - Swipe SINISTRA (o tieni premuto lato sinistro): STALL / TUBE DRAG nel barile!
+      // - Swipe DESTRA (o tieni premuto lato destro): PUMP / SPEED in avanti!
+      // - Doppio Tap: SNAP RADICALE!
+
+      let lastTapTime = 0;
+
       const handleTouchStart = (e) => {
         e.preventDefault();
         this.audio.init();
@@ -1246,26 +1226,96 @@
           this.restartGame();
           return;
         }
-        if (this.gameState === 'PLAYING') {
-          this.surfer.startPump();
+
+        const touch = e.touches ? e.touches[0] : e;
+        const rect = this.canvas.getBoundingClientRect();
+        this.touchStartX = touch.clientX - rect.left;
+        this.touchStartY = touch.clientY - rect.top;
+        this.isTouchActive = true;
+
+        // Check Double Tap per Snap
+        const now = Date.now();
+        if (now - lastTapTime < 280) {
+          this.surfer.triggerSnapAction();
         }
+        lastTapTime = now;
+
+        this.processTouchPosition(this.touchStartX, this.touchStartY, rect);
+      };
+
+      const handleTouchMove = (e) => {
+        if (!this.isTouchActive || this.gameState !== 'PLAYING') return;
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        const rect = this.canvas.getBoundingClientRect();
+        const currentX = touch.clientX - rect.left;
+        const currentY = touch.clientY - rect.top;
+
+        const deltaX = currentX - this.touchStartX;
+        const deltaY = currentY - this.touchStartY;
+
+        let steerX = 0;
+        let steerY = 0;
+
+        if (Math.abs(deltaY) > 8) {
+          steerY = deltaY > 0 ? 1 : -1;
+        }
+        if (Math.abs(deltaX) > 8) {
+          steerX = deltaX > 0 ? 1 : -1;
+        }
+
+        const isStall = deltaX < -15;
+        const isPump = deltaX > 15;
+
+        this.surfer.setInput(steerX, steerY, isStall, isPump);
       };
 
       const handleTouchEnd = (e) => {
         e.preventDefault();
-        if (this.gameState === 'PLAYING') {
-          this.surfer.releasePump();
+        this.isTouchActive = false;
+        if (this.surfer) {
+          this.surfer.setInput(0, 0, false, false);
         }
       };
 
+      this.processTouchPosition = (x, y, rect) => {
+        // Se tocca a sinistra dello schermo -> Stall nel tubo
+        // Se tocca a destra -> Pump in avanti
+        // Se tocca in alto -> Sali alla cresta
+        // Se tocca in basso -> Scendi per bottom turn
+        const normX = x / rect.width;
+        const normY = y / rect.height;
+
+        let steerX = 0;
+        let steerY = 0;
+        let isStall = false;
+        let isPump = false;
+
+        if (normY < 0.38) steerY = -1; // Up
+        else if (normY > 0.62) steerY = 1; // Down
+
+        if (normX < 0.35) {
+          steerX = -1;
+          isStall = true;
+        } else if (normX > 0.65) {
+          steerX = 1;
+          isPump = true;
+        }
+
+        this.surfer.setInput(steerX, steerY, isStall, isPump);
+      };
+
       this.canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      this.canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
       this.canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
       this.canvas.addEventListener('mousedown', handleTouchStart);
-      this.canvas.addEventListener('mouseup', handleTouchEnd);
+      window.addEventListener('mouseup', handleTouchEnd);
 
-      // Keyboard Controls (Barra spaziatrice / Frecce)
+      // CONTROLLI TASTIERA DESKTOP
+      const activeKeys = {};
       window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'KeyW') {
+        activeKeys[e.code] = true;
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyS', 'KeyA', 'KeyD'].includes(e.code)) {
           if (this.isModalActive()) {
             e.preventDefault();
             this.audio.init();
@@ -1273,22 +1323,45 @@
 
             if (this.gameState === 'READY') {
               this.startGame();
-            } else if (this.gameState === 'GAMEOVER') {
-              this.restartGame();
-            } else if (this.gameState === 'PLAYING') {
-              this.surfer.startPump();
+              return;
             }
+            if (this.gameState === 'GAMEOVER') {
+              this.restartGame();
+              return;
+            }
+
+            if (e.code === 'Space') {
+              this.surfer.triggerSnapAction();
+            }
+
+            this.updateKeyboardInput(activeKeys);
           }
         }
       });
 
       window.addEventListener('keyup', (e) => {
-        if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'KeyW') {
-          if (this.gameState === 'PLAYING') {
-            this.surfer.releasePump();
-          }
+        activeKeys[e.code] = false;
+        if (this.isModalActive()) {
+          this.updateKeyboardInput(activeKeys);
         }
       });
+
+      this.updateKeyboardInput = (keys) => {
+        let steerX = 0;
+        let steerY = 0;
+
+        if (keys['ArrowUp'] || keys['KeyW']) steerY = -1;
+        if (keys['ArrowDown'] || keys['KeyS']) steerY = 1;
+        if (keys['ArrowLeft'] || keys['KeyA']) steerX = -1;
+        if (keys['ArrowRight'] || keys['KeyD']) steerX = 1;
+
+        const isStall = steerX < 0;
+        const isPump = steerX > 0;
+
+        if (this.surfer) {
+          this.surfer.setInput(steerX, steerY, isStall, isPump);
+        }
+      };
     }
 
     isModalActive() {
@@ -1299,9 +1372,8 @@
     startGame() {
       this.gameState = 'PLAYING';
       this.timeSec = 0;
-      this.world.initWorldElements();
       this.surfer.reset();
-      this.particleSys.clear();
+      this.particles.clear();
       this.audio.init();
       this.audio.resume();
 
@@ -1326,19 +1398,15 @@
       this.lastTimestamp = timestamp;
       this.timeSec += dt;
 
-      // Aggiorna Mondo e Fisica
-      this.world.update(this.timeSec);
-      this.surfer.update(this.world, this.particleSys, this.audio, this.timeSec);
-      this.particleSys.update();
-
-      // Camera morbida che segue il surfer
-      const targetCamX = this.surfer.x - 110;
-      this.cameraX += (targetCamX - this.cameraX) * 0.15;
+      // Aggiorna Mondo & Fisica di Surf
+      this.wave.update(this.timeSec);
+      this.surfer.update(this.wave, this.particles, this.audio, this.timeSec);
+      this.particles.update();
 
       // Render scena
-      this.renderer.render(this.world, this.surfer, this.particleSys, this.cameraX, this.timeSec);
+      this.renderer.render(this.wave, this.surfer, this.particles, this.timeSec);
 
-      // Aggiorna HUD in tempo reale
+      // Aggiorna HUD
       this.updateHUD();
 
       this.animationFrameId = requestAnimationFrame((t) => this.loop(t));
@@ -1351,12 +1419,12 @@
       const shellsEl = document.getElementById('surfLiveShells');
 
       if (scoreEl) scoreEl.textContent = this.surfer.score.toLocaleString();
-      if (distEl) distEl.textContent = `${this.surfer.distance}m`;
-      if (shellsEl) shellsEl.textContent = this.surfer.shellsCollected;
+      if (distEl) distEl.textContent = `${this.surfer.rideTime.toFixed(0)}s`;
+      if (shellsEl) shellsEl.textContent = `${this.surfer.totalBarrelTime.toFixed(1)}s Tubo`;
 
       if (comboEl) {
-        if (this.surfer.comboCount > 1) {
-          comboEl.textContent = `x${this.surfer.comboCount} COMBO!`;
+        if (this.surfer.comboMultiplier > 1) {
+          comboEl.textContent = `x${this.surfer.comboMultiplier} COMBO!`;
           comboEl.style.display = 'inline-block';
         } else {
           comboEl.style.display = 'none';
@@ -1373,7 +1441,6 @@
         this.audio.playNewRecord();
       }
 
-      // Mostra GameOver Modal
       const modal = document.getElementById('surfGameOverModal');
       const finalScoreEl = document.getElementById('surfFinalScore');
       const finalDistEl = document.getElementById('surfFinalDist');
@@ -1381,8 +1448,8 @@
       const newRecordBadge = document.getElementById('surfNewRecordBadge');
 
       if (finalScoreEl) finalScoreEl.textContent = this.surfer.score.toLocaleString();
-      if (finalDistEl) finalDistEl.textContent = `${this.surfer.distance}m`;
-      if (finalBarrelEl) finalBarrelEl.textContent = `${this.surfer.barrelTimer.toFixed(1)}s`;
+      if (finalDistEl) finalDistEl.textContent = `${this.surfer.rideTime.toFixed(0)}s`;
+      if (finalBarrelEl) finalBarrelEl.textContent = `${this.surfer.totalBarrelTime.toFixed(1)}s`;
       if (newRecordBadge) newRecordBadge.style.display = isNew ? 'inline-block' : 'none';
 
       if (modal) modal.classList.add('active');
@@ -1400,7 +1467,7 @@
 
       if (highEl) highEl.textContent = this.highScore.toLocaleString();
       if (bestBarrelEl) bestBarrelEl.textContent = `${this.bestBarrelTime}s`;
-      if (bestDistEl) bestDistEl.textContent = `${this.bestDistance}m`;
+      if (bestDistEl) bestDistEl.textContent = `${this.bestRideTime}s`;
     }
 
     toggleAudioMute() {

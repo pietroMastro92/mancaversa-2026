@@ -2792,9 +2792,9 @@
             <div class="surf-stat-lbl">Max Tubo</div>
           </div>
           <div class="surf-stat-box">
-            <div class="surf-stat-icon">🏖️</div>
-            <div class="surf-stat-val" id="surfRecordDist">0m</div>
-            <div class="surf-stat-lbl">Distanza</div>
+            <div class="surf-stat-icon">⏱️</div>
+            <div class="surf-stat-val" id="surfRecordDist">0s</div>
+            <div class="surf-stat-lbl">Tempo Onda</div>
           </div>
         </div>
 
@@ -2833,13 +2833,13 @@
         <!-- Mobile & Desktop Instructions -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Giocare da Smartphone & Computer:</span>
+            <span>📱</span> <span>Come Surfare da Smartphone & Computer:</span>
           </div>
-          <div>
-            • <b>Tieni premuto sullo schermo (o Spazio / Freccia Giù)</b>: il surfer si abbassa (pump) e guadagna velocità scendendo l'onda.<br>
-            • <b>Rilascia sulla cresta</b>: salta in aria per acrobazie altissime!<br>
-            • <b>Tieni premuto in volo</b>: esegue rotazioni e flip a 360° per moltiplicare i punti.<br>
-            • <b>Nel Tubo / Barile</b>: resta coperto dall'onda per accumulare punti continui!
+          <div style="line-height: 1.5;">
+            • <b>Carving & Bottom Turn (Trascina Su/Giù o Frecce Su/Giù)</b>: Scendi verso il fondo per accumulare velocità con un Bottom Turn e risali verso la cresta per attaccare il lip!<br>
+            • <b>Stall & Tube Ride (Trascina a Sinistra o Tieni premuto lato sinistro)</b>: Frena e infila la mano nella parete per farti inglobare nel <b>Tubo / Barrel</b> e fare punti a raffica!<br>
+            • <b>Pumping (Trascina a Destra o Tieni premuto lato destro)</b>: Spingi in avanti sulla tavola per superare la sezione chiusa dell'onda.<br>
+            • <b>Snap & Cutback (Doppio Tap sullo schermo o Spazio)</b>: Esegui uno Snap radicale con spruzzi d'acqua in cima all'onda o un Cutback per tornare nella tasca!
           </div>
         </div>
       </div>
@@ -3526,8 +3526,8 @@
           
           <div class="surf-gameover-grid">
             <div class="surf-go-stat">
-              <div class="surf-go-val" id="surfFinalDist">0m</div>
-              <div class="surf-go-lbl">Distanza</div>
+              <div class="surf-go-val" id="surfFinalDist">0s</div>
+              <div class="surf-go-lbl">Tempo Onda</div>
             </div>
             <div class="surf-go-stat">
               <div class="surf-go-val" id="surfFinalBarrel">0.0s</div>
@@ -3551,7 +3551,7 @@
 
       <!-- Floating Touch Hint Bar for Mobile -->
       <div class="surf-touch-hint-pill">
-        👇 Tieni premuto per velocità · Rilascia per decollo · In aria tieni premuto per i 360° flip!
+        👇 Trascina Su/Giù per carvare la parete · Sinistra per entrare nel Tubo · Destra per pump · Doppio tap per Snap!
       </div>
     </div>
   </div>
@@ -4921,20 +4921,20 @@
 
       if (scoreEl) scoreEl.textContent = window.SalentoSurf.highScore.toLocaleString();
       if (barrelEl) barrelEl.textContent = `${window.SalentoSurf.bestBarrelTime}s`;
-      if (distEl) distEl.textContent = `${window.SalentoSurf.bestDistance}m`;
+      if (distEl) distEl.textContent = `${window.SalentoSurf.bestRideTime}s`;
     }
 
     function postSurfScoreToBoard() {
       if (!window.SalentoSurf) return;
       const score = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.score : window.SalentoSurf.highScore;
-      const dist = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.distance : window.SalentoSurf.bestDistance;
-      const barrel = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.barrelTimer.toFixed(1) : window.SalentoSurf.bestBarrelTime;
+      const ride = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.rideTime.toFixed(0) : window.SalentoSurf.bestRideTime;
+      const barrel = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.totalBarrelTime.toFixed(1) : window.SalentoSurf.bestBarrelTime;
       const skinName = window.SalentoSurf.surfer && window.SalentoSurf.surfer.skin ? window.SalentoSurf.surfer.skin.name : 'Pietro';
 
       const now = new Date();
       const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-      const scoreMsgText = `🏄‍♂️ SALENTO PIXEL SURF RECORD! 🏆\nHo totalizzato ${score.toLocaleString()} punti! (Distanza: ${dist}m, Tubo: ${barrel}s con ${skinName}) 🌊\nChi riesce a fare di meglio? 😎🤙`;
+      const scoreMsgText = `🏄‍♂️ SALENTO SURF RECORD! 🏆\nHo totalizzato ${score.toLocaleString()} punti cavalcando l'onda per ${ride}s con ${barrel}s nel Tubo (Surfer: ${skinName}) 🌊\nChi riesce a fare una cavalcata migliore? 😎🤙`;
 
       const newMsg = {
         id: 'msg_surf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
