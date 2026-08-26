@@ -18,6 +18,17 @@
   const SURFER_TOP = 0.33;
   const ANIMATION_TIMER_MAX_VALUE = 40;
 
+  const SURFER_CHARACTERS = [
+    { name: 'Elena', icon: '🏄‍♀️', tag: 'Classic' },
+    { name: 'Giulia', icon: '🌸', tag: 'Bandana' },
+    { name: 'Chiara', icon: '🌊', tag: 'Treccine' },
+    { name: 'Sara', icon: '🌿', tag: 'Muta Verde' },
+    { name: 'Marco', icon: '☀️', tag: 'Moro' },
+    { name: 'Pietro', icon: '😎', tag: 'Host Salento' },
+    { name: 'Leo', icon: '⚡', tag: 'Biondo' },
+    { name: 'Ninja Cat', icon: '🐱', tag: 'Gatto Ninja' }
+  ];
+
   // Dimensioni hitbox originali da objects.c [width, height]
   const OBJECT_HITBOXES = [
     [32, 32],    // 0: SMALL_OBJECT
@@ -77,29 +88,40 @@
         try {
           this.bgm = new Audio('./surf-assets/bgm.mp3');
           this.bgm.loop = true;
-          this.bgm.volume = 0.4;
+          this.bgm.volume = 0.45;
         } catch (e) {}
       }
     }
 
-    playMusic() {
+    unlockAudio() {
       this.init();
-      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
       if (this.bgm && !this.isMuted) {
         this.bgm.play().catch(() => {});
       }
     }
 
+    playMusic() {
+      this.unlockAudio();
+    }
+
     pauseMusic() {
-      if (this.bgm) this.bgm.pause();
+      if (this.bgm) {
+        try { this.bgm.pause(); } catch (e) {}
+      }
     }
 
     toggleMute() {
       this.isMuted = !this.isMuted;
       try { localStorage.setItem('salento_surf_muted_v1', this.isMuted); } catch (e) {}
       if (this.bgm) {
-        if (this.isMuted) this.bgm.pause();
-        else this.bgm.play().catch(() => {});
+        if (this.isMuted) {
+          try { this.bgm.pause(); } catch (e) {}
+        } else {
+          this.bgm.play().catch(() => {});
+        }
       }
       const btn = document.getElementById('btnSurfMute');
       if (btn) btn.innerHTML = `<span>${this.isMuted ? '🔇 Muto' : '🔊 Audio'}</span>`;
@@ -189,6 +211,23 @@
       g.connect(this.ctx.destination);
       osc.start(t);
       osc.stop(t + 0.65);
+    }
+
+    playSelect() {
+      if (!this.ctx || this.isMuted) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, t);
+      osc.frequency.exponentialRampToValueAtTime(783.99, t + 0.08);
+      g.gain.setValueAtTime(0.18, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.1);
     }
   }
 
@@ -318,8 +357,9 @@
 
     updateDimensions() {
       if (!this.canvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
       if (this.activeCanvasId === 'surfGameCanvas') {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const winW = window.innerWidth;
         const winH = window.innerHeight;
 
@@ -330,22 +370,23 @@
         this.canvas.height = Math.round(winH * dpr);
         this.canvas.style.width = `${winW}px`;
         this.canvas.style.height = `${winH}px`;
-
-        if (this.ctx) {
-          this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-          this.ctx.imageSmoothingEnabled = false;
-        }
       } else {
-        this.width = GAME_WIDTH;
-        this.height = GAME_HEIGHT;
-        this.canvas.width = GAME_WIDTH;
-        this.canvas.height = GAME_HEIGHT;
-        this.canvas.style.width = '';
-        this.canvas.style.height = '';
-        if (this.ctx) {
-          this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-          this.ctx.imageSmoothingEnabled = false;
-        }
+        const rect = this.canvas.getBoundingClientRect();
+        const w = rect.width > 0 ? rect.width : GAME_WIDTH;
+        const h = rect.height > 0 ? rect.height : GAME_HEIGHT;
+
+        this.width = w;
+        this.height = h;
+
+        this.canvas.width = Math.round(w * dpr);
+        this.canvas.height = Math.round(h * dpr);
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+      }
+
+      if (this.ctx) {
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.ctx.imageSmoothingEnabled = false;
       }
     }
 
@@ -400,23 +441,28 @@
     }
 
     startSurfing() {
-      if (this.finished) {
-        this.resetGame();
-        return;
-      }
       this.audio.playMusic();
 
       this.started = true;
       this.paused = false;
+      this.finished = false;
       this.speed = this.initialSpeed;
       this.surferAction = 3;
       this.makeStarterObjects();
+
+      const startOverlay = document.getElementById('surfStartScreenOverlay');
+      if (startOverlay) startOverlay.classList.add('hidden');
+      const goModal = document.getElementById('surfGameOverModal');
+      if (goModal) goModal.classList.remove('active');
     }
 
     setSurferCharacter(idx) {
-      this.surfer = (idx + 8) % 8;
+      this.surfer = ((idx % 8) + 8) % 8;
       this.saveScores();
       this.updateCardUI();
+      if (typeof window.syncSurfCharacterUI === 'function') {
+        window.syncSurfCharacterUI(this.surfer);
+      }
     }
 
     triggerBoost() {
@@ -461,7 +507,11 @@
     // --------------------------------------------------------------------------
     // CREAZIONE OSTACOLI
     // --------------------------------------------------------------------------
-    randomX() { return Math.random() * this.width + this.offset; }
+    randomX() {
+      const laneW = Math.min(this.width, 560);
+      const minX = (this.width - laneW) / 2.0 + this.offset;
+      return minX + Math.random() * laneW;
+    }
     randomY() { return this.distance + this.height * (1 + Math.random()); }
 
     makeSmallObject(x, y, idx) {
@@ -639,32 +689,38 @@
       if (this.heart < 1) {
         this.finished = true;
         this.animationTimer = 1;
+        const isNew = this.getScore() > this.highScore && this.getScore() > 0;
         this.saveScores();
-        this.showGameOverModal();
+        this.showGameOverModal(isNew);
       } else {
         this.fallTimer = 1;
       }
     }
 
-    showGameOverModal() {
+    showGameOverModal(isNewRecord = false) {
       const modal = document.getElementById('surfGameOverModal');
       const finalScore = document.getElementById('surfFinalScore');
       const finalDist = document.getElementById('surfFinalDist');
       const finalBarrel = document.getElementById('surfFinalBarrel');
       const recordBadge = document.getElementById('surfNewRecordBadge');
 
-      const isNew = this.getScore() >= this.highScore;
+      const curScore = this.getScore();
+      const curDist = Math.floor(this.distance / 10.0);
+      const isNew = isNewRecord || (curScore >= this.highScore && curScore > 0);
 
-      if (finalScore) finalScore.textContent = this.getScore().toLocaleString();
-      if (finalDist) finalDist.textContent = `${Math.floor(this.distance / 10.0)}m`;
+      if (finalScore) finalScore.textContent = curScore.toLocaleString();
+      if (finalDist) finalDist.textContent = `${curDist}m`;
       if (finalBarrel) finalBarrel.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
-      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
+      if (recordBadge) {
+        recordBadge.style.display = isNew ? 'inline-block' : 'none';
+        if (isNew) recordBadge.textContent = '🏆 NUOVO RECORD PERSONALE!';
+      }
 
       if (modal) modal.classList.add('active');
 
-      // Salva automaticamente il punteggio nella Classifica Top 10 sotto il gioco
+      // Salva automaticamente il punteggio nella Classifica Top 10 dei record singoli aggiornati
       if (window.recordSurfScoreToLeaderboard) {
-        window.recordSurfScoreToLeaderboard(this.getScore(), Math.floor(this.distance / 10.0));
+        window.recordSurfScoreToLeaderboard(curScore, curDist, this.surfer);
       }
     }
 
@@ -961,8 +1017,9 @@
           this.surferAction = 7;
           this.boardBrokenTimer = 1;
           this.audio.playKraken();
+          const isNew = this.getScore() > this.highScore && this.getScore() > 0;
           this.saveScores();
-          this.showGameOverModal();
+          this.showGameOverModal(isNew);
           return;
         }
       }
@@ -1059,101 +1116,70 @@
     }
 
     drawStarterViewer(ctx) {
-      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
-      const center = this.width / 2.0;
-      const oLeft = (this.width - 64) / 2.0;
-      const top = this.height * SURFER_TOP;
-
-      let left = oLeft - this.surfer * 84;
-      for (let i = 0; i < 8; i++, left += 84) {
-        const act = this.surfer === i ? 1 + (this.boardTimer >= 60 ? 4 - Math.floor((this.boardTimer - 60) / 12.0) : Math.floor(this.boardTimer / 12.0)) : 3;
-        this.drawSurferOrigin(ctx, i, act, alpha, left, top);
+      if (this.activeCanvasId === 'surfGameCanvas') {
+        // Nella modale a tutto schermo è attivo il popup DOM #surfStartScreenOverlay
+        // Sulla canvas disegniamo le onde e il surfer selezionato in acqua in modo fluido
+        const left = (this.width - 64) / 2.0;
+        const top = this.height * SURFER_TOP;
+        const act = 1 + (this.boardTimer >= 60 ? 4 - Math.floor((this.boardTimer - 60) / 12.0) : Math.floor(this.boardTimer / 12.0));
+        this.drawSurferOrigin(ctx, this.surfer, act, 1.0, left, top);
+        return;
       }
+
+      // Preview canvas nella scheda della Home
+      const center = this.width / 2.0;
+      const top = Math.max(60, this.height * 0.22);
 
       ctx.save();
       ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.9})`;
-      ctx.font = 'bold 40px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("LET'S SURF!", center, top - 80);
 
-      // Frecce touch eleganti per smartphone
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
-      ctx.lineWidth = 2;
+      // Titolo Retrò Pop
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 22px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("SALENTO SURF", center, top - 24);
 
-      // Freccia Sinistra
-      if (this.surfer > 0) {
-        ctx.beginPath();
-        ctx.arc(oLeft - 24, top + 32, 24, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('◄', oLeft - 24, top + 40);
-      }
+      // Surfer Selezionato al centro
+      const act = 1 + (this.boardTimer >= 60 ? 4 - Math.floor((this.boardTimer - 60) / 12.0) : Math.floor(this.boardTimer / 12.0));
+      this.drawSurferOrigin(ctx, this.surfer, act, 1.0, center - 32, top);
 
-      // Freccia Destra
-      if (this.surfer < 7) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.beginPath();
-        ctx.arc(oLeft + 88, top + 32, 24, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('►', oLeft + 88, top + 40);
-      }
-
-      // Istruzioni touch-friendly
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.85})`;
-      ctx.font = 'bold 15px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("◄ TOCCA FRECCE PER SCEGLIERE ►", center, top + 95);
-
-      // Bottone Play Centrale Pop
-      const btnW = Math.min(280, this.width - 40);
-      const btnH = 50;
+      // Pulsante Gioca
+      const btnW = Math.min(220, this.width - 40);
+      const btnH = 42;
       const btnX = center - btnW / 2;
-      const btnY = top + 125;
+      const btnY = top + 74;
 
-      // Shadow del bottone
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillStyle = '#FF385C';
       ctx.beginPath();
-      ctx.roundRect(btnX, btnY + 4, btnW, btnH, 25);
-      ctx.fill();
-
-      // Corpo bottone
-      ctx.fillStyle = '#FF9500';
-      ctx.beginPath();
-      ctx.roundRect(btnX, btnY, btnW, btnH, 25);
+      ctx.roundRect(btnX, btnY, btnW, btnH, 21);
       ctx.fill();
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 17px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("▶ TOCCA PER PARTIRE!", center, btnY + 31);
+      ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("▶ GIOCA ORA", center, btnY + 27);
 
       ctx.restore();
     }
 
     drawFinishViewer(ctx) {
-      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
       const center = this.width / 2.0;
       const centerY = this.height / 2.0 - 50;
 
       ctx.save();
-      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.88})`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
       ctx.fillRect(0, 0, this.width, this.height);
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.95})`;
-      ctx.font = 'bold 42px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("GAME OVER!", center, centerY - 40);
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 36px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("GAME OVER!", center, centerY - 30);
 
-      ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#64748B';
       ctx.fillText("Tocca ovunque per fare un'altra partita", center, centerY + 10);
 
-      ctx.font = 'bold 24px "FiraCode", monospace, sans-serif';
+      ctx.font = 'bold 22px "FiraCode", monospace, sans-serif';
       ctx.fillStyle = '#EA580C';
-      ctx.fillText(`Punti: ${this.getScore().toLocaleString()}`, center, centerY + 55);
+      ctx.fillText(`Punti: ${this.getScore().toLocaleString()}`, center, centerY + 48);
 
       ctx.restore();
     }
@@ -1229,25 +1255,42 @@
     // INPUT LISTENERS MOBILE & DESKTOP
     // --------------------------------------------------------------------------
     bindInputs() {
-      if (!this.canvas) return;
+      if (this.inputsBound) return;
+      this.inputsBound = true;
 
       let lastTapTime = 0;
 
       const getCanvasPos = (e) => {
+        if (!this.canvas) return { x: this.width / 2, y: this.height / 2 };
         const touch = e.touches && e.touches.length > 0 ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : e);
         const rect = this.canvas.getBoundingClientRect();
-        const x = ((touch.clientX - rect.left) / rect.width) * this.width;
-        const y = ((touch.clientY - rect.top) / rect.height) * this.height;
+        const rw = rect.width > 0 ? rect.width : this.width;
+        const rh = rect.height > 0 ? rect.height : this.height;
+        const x = ((touch.clientX - rect.left) / rw) * this.width;
+        const y = ((touch.clientY - rect.top) / rh) * this.height;
         return { x, y };
       };
 
       const handlePointerDown = (e) => {
-        e.preventDefault();
         this.audio.init();
 
-        const { x, y } = getCanvasPos(e);
+        if (!this.started || this.finished) {
+          if (this.activeCanvasId === 'surfPreviewCanvas') {
+            if (typeof window.openSurfGameModal === 'function') {
+              window.openSurfGameModal();
+            }
+            return;
+          }
+          if (this.finished) {
+            this.resetGame();
+            this.startSurfing();
+            return;
+          }
+          this.startSurfing();
+          return;
+        }
 
-        // Double tap detection per Boost su smartphone
+        // Double tap detection per Boost durante il gioco
         const now = Date.now();
         if (now - lastTapTime < 300 && this.started && !this.paused && !this.finished) {
           this.triggerBoost();
@@ -1256,78 +1299,74 @@
         }
         lastTapTime = now;
 
-        if (!this.started || this.finished) {
-          if (!this.started) {
-            const top = this.height * SURFER_TOP;
-            const oLeft = (this.width - 64) / 2.0;
-
-            // Tocco su freccia sinistra o area sinistra
-            if (x < oLeft || (x < this.width * 0.4 && y > top - 20 && y < top + 80)) {
-              this.setSurferCharacter(this.surfer - 1);
-              return;
-            }
-            // Tocco su freccia destra o area destra
-            if (x > oLeft + 64 || (x > this.width * 0.6 && y > top - 20 && y < top + 80)) {
-              this.setSurferCharacter(this.surfer + 1);
-              return;
-            }
-          }
-          this.startSurfing();
-          return;
-        }
-
-        // Se il surfer era fermo (idle), riparte
+        // Se il surfer era fermo, riparte
         if (this.paused && !this.fallTimer) {
           this.paused = false;
           this.speed = this.initialSpeed;
           this.surferAction = 3;
         }
 
+        const { x } = getCanvasPos(e);
         this.isTouchSteering = true;
         this.touchX = x;
       };
 
       const handlePointerMove = (e) => {
         if (!this.isTouchSteering || !this.started || this.finished) return;
-        e.preventDefault();
         const { x } = getCanvasPos(e);
         this.touchX = x;
       };
 
-      const handlePointerUp = (e) => {
+      const handlePointerUp = () => {
         this.isTouchSteering = false;
       };
 
-      this.canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-      this.canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-      this.canvas.addEventListener('touchend', handlePointerUp, { passive: false });
-      this.canvas.addEventListener('touchcancel', handlePointerUp, { passive: false });
+      window.addEventListener('touchstart', (e) => {
+        if (e.target === this.canvas) {
+          handlePointerDown(e);
+        }
+      }, { passive: true });
 
-      this.canvas.addEventListener('mousedown', handlePointerDown);
+      window.addEventListener('touchmove', (e) => {
+        if (this.isTouchSteering) {
+          handlePointerMove(e);
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', handlePointerUp, { passive: true });
+      window.addEventListener('touchcancel', handlePointerUp, { passive: true });
+
+      window.addEventListener('mousedown', (e) => {
+        if (e.target === this.canvas) {
+          handlePointerDown(e);
+        }
+      });
       window.addEventListener('mousemove', handlePointerMove);
       window.addEventListener('mouseup', handlePointerUp);
 
       window.addEventListener('resize', () => {
-        if (this.activeCanvasId === 'surfGameCanvas') {
+        if (this.activeCanvasId) {
           this.updateDimensions();
         }
       });
 
       // Tastiera Desktop
       window.addEventListener('keydown', (e) => {
-        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
           this.audio.init();
 
           if (!this.started || this.finished) {
-            if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'KeyS') {
+            if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowDown' || e.code === 'KeyS') {
               this.startSurfing();
               return;
             }
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+              this.audio.playSelect();
               this.setSurferCharacter(this.surfer - 1);
               return;
             }
             if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+              this.audio.playSelect();
               this.setSurferCharacter(this.surfer + 1);
               return;
             }
@@ -1360,9 +1399,13 @@
     updateHUD() {
       const distEl = document.getElementById('surfLiveDist');
       const shellsEl = document.getElementById('surfLiveShells');
+      const inGameActions = document.querySelector('.surf-in-game-actions');
 
       if (distEl) distEl.textContent = `${Math.floor(this.distance / 10.0)}m`;
       if (shellsEl) shellsEl.textContent = `x${this.power}`;
+      if (inGameActions) {
+        inGameActions.style.display = (this.started && !this.finished) ? 'flex' : 'none';
+      }
     }
 
     updateCardUI() {
@@ -1372,7 +1415,12 @@
 
       if (scoreEl) scoreEl.textContent = this.highScore.toLocaleString();
       if (barrelEl) barrelEl.textContent = `${this.bestDistance}m`;
-      if (distEl) distEl.textContent = `Surfer #${this.surfer + 1}`;
+      const curChar = SURFER_CHARACTERS[this.surfer] || SURFER_CHARACTERS[0];
+      if (distEl) distEl.textContent = `${curChar.icon} ${curChar.name}`;
+
+      if (typeof window.syncSurfCharacterUI === 'function') {
+        window.syncSurfCharacterUI(this.surfer);
+      }
     }
   }
 
