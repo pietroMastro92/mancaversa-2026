@@ -791,18 +791,14 @@
     }
 
     calcOffset() {
+      // Se il surfer è in caduta, non elaborare steering per garantire l'animazione di wipeout
+      if (this.fallTimer > 0) return;
+      if (this.paused) return;
+
       // Touch following analog steering
       if (this.isTouchSteering && !this.flyingTimer) {
         const baseX = this.touchStartX || (this.width / 2.0);
         const dx = this.touchX - baseX;
-
-        // Se il surfer era bloccato o in caduta, muovere l'analogico lo sblocca all'istante
-        if (Math.abs(dx) > 10 && (this.fallTimer || this.paused)) {
-          this.fallTimer = 0;
-          this.paused = false;
-          this.speed = this.initialSpeed;
-          if (!this.invincibleTimer) this.invincibleTimer = 180;
-        }
 
         if (dx < -60) {
           this.surferAction = 1; // Hard left
@@ -815,14 +811,8 @@
         } else {
           this.surferAction = 3; // Straight
         }
-
-        // Applica forza di disimpegno laterale
-        if (this.paused && Math.abs(dx) > 10) {
-          this.offset += (dx < 0 ? -3 : 3);
-        }
       }
 
-      if (this.paused) return;
       this.distance += this.speed;
 
       let ratio = 0;
@@ -858,10 +848,11 @@
         if (!this.finished) {
           this.calcOffset();
 
-          // Ripresa automatica fluida dopo la caduta
+          // Ripresa automatica fedele dopo la caduta con animazione garantita
           if (this.fallTimer) {
             this.fallTimer++;
-            if (this.fallTimer > 65) {
+            this.surferAction = 6;
+            if (this.fallTimer > 55) {
               this.fallTimer = 0;
               this.paused = false;
               this.speed = this.initialSpeed;
@@ -1197,7 +1188,7 @@
       const top = this.height * SURFER_TOP;
 
       const alpha = (this.invincibleTimer && !this.surferAction) || Math.floor(this.invincibleTimer / 15) % 2 === 0 ? 1.0 : 0.45;
-      const action = this.flyingTimer ? 9 + Math.floor((this.flyingTimer / 8) % 4) : this.surferAction;
+      const action = this.flyingTimer ? 9 + Math.floor((this.flyingTimer / 8) % 4) : (this.fallTimer > 0 ? 6 : this.surferAction);
 
       this.drawSurferOrigin(ctx, this.surfer, action, alpha, left, top);
 
