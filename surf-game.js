@@ -1411,7 +1411,7 @@
       const isFullscreen = this.activeCanvasId === 'surfGameCanvas';
       const topY = isFullscreen ? 12 : 6;
       const barHeight = 46;
-      const barWidth = isFullscreen ? Math.min(this.width - 116, 360) : 320;
+      const barWidth = isFullscreen ? Math.min(this.width - 116, 380) : 340;
       const barX = center - barWidth / 2;
 
       ctx.save();
@@ -1427,8 +1427,8 @@
 
       const spriteY = topY + Math.round((barHeight - 24) / 2);
 
-      // 1. Vite / Cuori originali a sinistra (sprite 24x24 da interface24.png)
-      let hLeft = barX + 16;
+      // 1. Vite / Cuori a sinistra (sprite 24x24 da interface24.png)
+      let hLeft = barX + 14;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
         if (iface && iface.complete && iface.naturalWidth > 0) {
@@ -1436,18 +1436,35 @@
         } else {
           ctx.font = '18px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(isFull ? '❤️' : '🖤', hLeft + 12, topY + 31);
+          ctx.fillText(isFull ? '❤️' : '🖤', hLeft + 12, topY + 30);
         }
-        hLeft += 28;
+        hLeft += 26;
       }
 
-      // 2. Distanza (Centro)
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 17px "FiraCode", monospace, sans-serif';
-      ctx.fillStyle = '#0F172A';
-      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 31);
+      // 2. Cane e Monete (posizionati a sinistra tra i cuori e la distanza centrale)
+      let extraX = hLeft + 6;
+      if (this.hasDog && iface && iface.complete && iface.naturalWidth > 0) {
+        ctx.drawImage(iface, 24, 48, 24, 24, extraX, spriteY, 24, 24);
+        extraX += 26;
+      }
+      if (this.coinCount > 0) {
+        if (iface && iface.complete && iface.naturalWidth > 0) {
+          ctx.drawImage(iface, 24, 72, 24, 24, extraX, spriteY, 24, 24);
+          extraX += 24;
+        }
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
+        ctx.fillStyle = '#B45309';
+        ctx.fillText(`x${this.coinCount}`, extraX, topY + 29);
+      }
 
-      // 3. Fulmini Boost originali a destra (sprite 24x24 da interface24.png)
+      // 3. Distanza al Centro
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 16px "FiraCode", monospace, sans-serif';
+      ctx.fillStyle = '#0F172A';
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 29);
+
+      // 4. Fulmini Boost originali a destra (sprite 24x24 da interface24.png)
       let pRight = barX + barWidth - 36;
       for (let i = 2; i >= 0; i--) {
         const isFull = i < this.power;
@@ -1456,26 +1473,9 @@
         } else {
           ctx.font = '18px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(isFull ? '⚡' : '⚪', pRight + 12, topY + 31);
+          ctx.fillText(isFull ? '⚡' : '⚪', pRight + 12, topY + 30);
         }
-        pRight -= 28;
-      }
-
-      // 4. Cane e Monete (se presenti)
-      let extraX = center + 52;
-      if (this.hasDog && iface && iface.complete && iface.naturalWidth > 0) {
-        ctx.drawImage(iface, 24, 48, 24, 24, extraX, spriteY, 24, 24);
-        extraX += 28;
-      }
-      if (this.coinCount > 0) {
-        if (iface && iface.complete && iface.naturalWidth > 0) {
-          ctx.drawImage(iface, 24, 72, 24, 24, extraX, spriteY, 24, 24);
-          extraX += 26;
-        }
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
-        ctx.fillStyle = '#B45309';
-        ctx.fillText(`x${this.coinCount}`, extraX, topY + 30);
+        pRight -= 26;
       }
 
       ctx.restore();
