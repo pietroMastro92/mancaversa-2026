@@ -2162,24 +2162,18 @@
       background: #0284C7;
       border-radius: var(--radius-md);
       overflow: hidden;
-      aspect-ratio: 16 / 9;
-      max-height: 380px;
+      aspect-ratio: 3 / 4;
+      max-height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
       cursor: pointer;
     }
-    @media (max-width: 480px) {
-      .surf-hero-preview {
-        aspect-ratio: 4 / 3;
-        max-height: 280px;
-      }
-    }
     .surf-preview-canvas {
       width: 100%;
       height: 100%;
-      display: block;
+      object-fit: cover;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
@@ -2553,90 +2547,122 @@
     /* ==========================================================================
        SURF GAME FULLSCREEN MODAL OVERLAY
        ========================================================================== */
-    /* ==========================================================================
-       SALENTO SURF GAME FULLSCREEN MODAL OVERLAY (EDGE-TO-EDGE)
-       ========================================================================== */
     .surf-game-modal-overlay {
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100dvh;
       z-index: 10000;
-      background: #38C2EE;
+      background: #000000;
       display: none;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
-      overflow: hidden;
     }
     .surf-game-modal-overlay.active {
       display: flex;
     }
-
-    /* Top Floating Controls Bar (Minimal Pop Glass) */
-    .surf-top-pill-bar {
+    .surf-modal-hud {
       position: absolute;
-      top: calc(12px + env(safe-area-inset-top));
-      right: 14px;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(12px + env(safe-area-inset-top)) 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+      color: #FFFFFF;
+      pointer-events: auto;
+    }
+    .surf-hud-score-box {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .surf-hud-score-val {
+      font-family: 'Plus Jakarta Sans', monospace, sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #FDE047;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      letter-spacing: 0.5px;
+    }
+    .surf-hud-combo-badge {
+      background: var(--rausch);
+      color: #FFFFFF;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(255, 56, 92, 0.5);
+      animation: pulseCombo 0.8s infinite alternate;
+    }
+    @keyframes pulseCombo {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+    .surf-hud-stats-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+    .surf-hud-buttons {
       display: flex;
       align-items: center;
       gap: 8px;
-      z-index: 40;
-      pointer-events: auto;
     }
-    .surf-pop-hud-btn {
-      background: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(20px) saturate(190%);
-      -webkit-backdrop-filter: blur(20px) saturate(190%);
-      border: 1.5px solid rgba(255, 255, 255, 0.9);
-      color: #0F172A;
-      font-size: 12.5px;
-      font-weight: 800;
-      padding: 7px 14px;
+    .btn-surf-hud-icon {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
       border-radius: var(--radius-pill);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
       cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
-      touch-action: manipulation;
+      transition: var(--transition);
     }
-    .surf-pop-hud-btn:active {
-      transform: scale(0.92);
-      background: rgba(255, 255, 255, 0.65);
+    .btn-surf-hud-icon:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.35);
     }
-    .surf-pop-close-btn {
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      border-radius: 50%;
-      font-size: 15px;
-    }
-
-    /* Modal Canvas Container - 100% Edge to Edge */
-    .surf-modal-canvas-container {
-      position: absolute;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
+    .btn-surf-close-x {
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      background: #38C2EE;
+      font-size: 15px;
+      padding: 0;
+    }
+
+    /* Modal Canvas Container */
+    .surf-modal-canvas-container {
+      width: 100vw;
+      height: 100vh;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
     .surf-active-canvas {
-      width: 100vw;
-      height: 100dvh;
-      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 480px;
+      max-height: 92vh;
+      aspect-ratio: 3 / 4;
+      object-fit: contain;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
-      touch-action: none;
     }
 
     /* Floating Touch Hint */
@@ -2657,170 +2683,31 @@
       max-width: calc(100% - 32px);
     }
 
-    /* Start Screen Overlay Inside Game */
-    .surf-start-screen-overlay {
+    /* Prompt Inizio */
+    .surf-start-prompt {
       position: absolute;
       inset: 0;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 25;
-      background: radial-gradient(circle at center, rgba(56, 194, 238, 0.4) 0%, rgba(2, 132, 199, 0.75) 100%);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: opacity 0.22s ease, visibility 0.22s ease;
-    }
-    .surf-start-screen-overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .surf-start-screen-card {
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: var(--radius-lg);
-      padding: 22px 18px;
-      width: 100%;
-      max-width: 350px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.8);
-      display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .surf-start-title {
-      font-family: 'FiraCode', monospace, sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: #0F172A;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
-    }
-    .surf-start-subtitle {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--gray-muted);
-      margin-top: -4px;
-    }
-    .surf-char-carousel {
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: 12px;
-      width: 100%;
-      margin: 4px 0;
-    }
-    .surf-char-nav-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #FFFFFF;
-      border: 1.5px solid var(--border-strong);
-      color: #0F172A;
-      font-size: 18px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      transition: var(--transition);
-      touch-action: manipulation;
-    }
-    .surf-char-nav-btn:active {
-      transform: scale(0.9);
-      background: var(--surface-subtle);
-    }
-    .surf-char-preview-box {
-      flex: 1;
-      max-width: 155px;
-      background: linear-gradient(180deg, #E0F2FE 0%, #BAE6FD 100%);
-      border: 2px solid #38BDF8;
-      border-radius: var(--radius-md);
-      padding: 10px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(2, 132, 199, 0.15);
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.15s ease;
-    }
-    .surf-char-preview-box:active {
-      transform: scale(0.96);
-    }
-    .surf-char-sprite-wrap {
-      width: 52px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
-    }
-    .surf-char-name-badge {
-      font-size: 13px;
-      font-weight: 800;
-      color: #0369A1;
-      white-space: nowrap;
-    }
-    .surf-char-selector-dots {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      max-width: 290px;
-      margin: 2px 0 4px;
-    }
-    .surf-char-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--surface-subtle);
-      border: 1.5px solid var(--border-subtle);
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-      touch-action: manipulation;
-    }
-    .surf-char-dot.active {
-      background: #E0F2FE;
-      border-color: #0284C7;
-      transform: scale(1.15);
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
-    }
-    .btn-surf-play-start {
-      width: 100%;
-      background: linear-gradient(135deg, #FF385C 0%, #E00B41 100%);
+      background: rgba(0, 0, 0, 0.4);
       color: #FFFFFF;
-      font-size: 15.5px;
-      font-weight: 800;
-      padding: 13px 20px;
-      border-radius: var(--radius-pill);
-      box-shadow: 0 6px 20px rgba(255, 56, 92, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      text-align: center;
+      padding: 20px;
+      z-index: 5;
       cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
-      touch-action: manipulation;
     }
-    .btn-surf-play-start:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 8px rgba(255, 56, 92, 0.3);
+    .surf-start-prompt h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #FDE047;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
     }
-    .surf-start-keyboard-hint {
-      font-size: 11.5px;
-      font-weight: 500;
-      color: var(--gray-muted);
+    .surf-start-prompt p {
+      font-size: 13.5px;
+      opacity: 0.95;
     }
 
     /* Game Over Modal Inside Game */
@@ -2966,98 +2853,45 @@
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     }
 
-    /* Minimal & Pop Floating In-Game Action Controls */
+    /* In-Game Action Bar on Canvas */
     .surf-in-game-actions {
       position: absolute;
-      bottom: calc(18px + env(safe-area-inset-bottom));
-      left: 0;
-      right: 0;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      left: 12px;
+      right: 12px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 0 14px;
-      z-index: 30;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 15;
       pointer-events: auto;
     }
-    .btn-surf-pop-steer {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.38);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      border: 2px solid rgba(255, 255, 255, 0.95);
-      color: #0F172A;
-      font-size: 22px;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
-      cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, box-shadow 0.15s ease;
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .btn-surf-pop-steer:active {
-      transform: scale(0.88);
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .btn-surf-pop-brake {
-      height: 60px;
-      padding: 0 18px;
-      border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.34);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      border: 2px solid rgba(255, 255, 255, 0.9);
-      color: #0F172A;
-      font-size: 13.5px;
+    .btn-mobile-game-action {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      color: #FFFFFF;
+      font-size: 12px;
       font-weight: 800;
+      padding: 10px 14px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
-      cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, color 0.15s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      transition: var(--transition);
       touch-action: manipulation;
     }
-    .btn-surf-pop-brake:active {
-      transform: scale(0.9);
-      background: rgba(239, 68, 68, 0.85);
-      border-color: #EF4444;
-      color: #FFFFFF;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    .btn-mobile-game-action:active {
+      transform: scale(0.94);
+      background: rgba(2, 132, 199, 0.85);
     }
-    .btn-surf-pop-boost {
-      height: 60px;
-      padding: 0 22px;
-      border-radius: 9999px;
-      background: linear-gradient(135deg, #FF6B00 0%, #FFA800 100%);
-      border: 2px solid #FFFFFF;
-      color: #FFFFFF;
-      font-size: 14.5px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48), 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 2px 3px rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
-      touch-action: manipulation;
-      animation: popPulse 2.2s infinite ease-in-out;
-    }
-    @keyframes popPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48); }
-      50% { transform: scale(1.03); box-shadow: 0 12px 34px rgba(255, 107, 0, 0.68); }
-    }
-    .btn-surf-pop-boost:active {
-      transform: scale(0.92);
-      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.6);
+    .btn-mobile-popup-action {
+      background: #10B981;
+      border-color: #34D399;
+      font-size: 13px;
+      padding: 11px 18px;
     }
   </style>
 </head>
@@ -3220,24 +3054,57 @@
     </section>
 
     <!-- ==========================================================================
-         SALENTO SURF (DOPOVACANZA GAME)
+         MICROSOFT EDGE SURF (SALENTO EDITION)
          ========================================================================== -->
     <section class="section-block" id="surf">
       <div class="section-head">
-        <div class="section-eyebrow">Dopovacanza Game · Novità 🏄‍♂️</div>
-        <h2 class="section-title">Salento Surf</h2>
-        <p class="section-sub">Il gioco di surf a 8-bit nel mare dello Ionio: schiva gli scogli, salta sui trampolini e sfuggi al Kraken gigante!</p>
+        <div class="section-eyebrow">Dopovacanza Retro Game · Novità 🏄‍♂️</div>
+        <h2 class="section-title">Microsoft Edge Surf</h2>
+        <p class="section-sub">Il leggendario gioco di surf infinito: schiva gli scogli, salta sui trampolini e sfuggi al Kraken gigante!</p>
       </div>
 
       <div class="surf-arcade-card">
         <!-- Live Pixel Art Preview Screen -->
-        <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero">
-          <canvas id="surfPreviewCanvas" class="surf-preview-canvas"></canvas>
+        <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero" style="aspect-ratio: 4/3; max-height: 380px;">
+          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="480" height="640"></canvas>
           <div class="surf-preview-overlay">
             <div class="surf-big-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
-            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE A SALENTO SURF</div>
+            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE A EDGE SURF</div>
+          </div>
+        </div>
+
+        <!-- Surfer Character Selector -->
+        <div class="surf-skin-section">
+          <div class="surf-skin-label">
+            <span>🏄‍♂️ Scegli il tuo Surfer (8 Personaggi):</span>
+          </div>
+          <div class="surf-skin-pills-row" id="edgeSurferPillRow">
+            <button type="button" class="surf-skin-pill active" onclick="selectEdgeSurfer(0)" id="edgeSurferPill_0">
+              <span>🏄‍♂️ Surfer #1</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(1)" id="edgeSurferPill_1">
+              <span>🏄‍♀️ Surfer #2</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(2)" id="edgeSurferPill_2">
+              <span>😎 Surfer #3</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(3)" id="edgeSurferPill_3">
+              <span>🟢 Surfer #4</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(4)" id="edgeSurferPill_4">
+              <span>🤿 Surfer #5</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(5)" id="edgeSurferPill_5">
+              <span>⚡ Surfer #6</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(6)" id="edgeSurferPill_6">
+              <span>🥷 Surfer #7</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectEdgeSurfer(7)" id="edgeSurferPill_7">
+              <span>🐱 Surfer #8</span>
+            </button>
           </div>
         </div>
 
@@ -3255,41 +3122,8 @@
           </div>
           <div class="surf-stat-box">
             <div class="surf-stat-icon">🏄‍♂️</div>
-            <div class="surf-stat-val" id="surfRecordDist">Elena 🏄‍♀️</div>
+            <div class="surf-stat-val" id="surfRecordDist">Surfer #1</div>
             <div class="surf-stat-lbl">Personaggio</div>
-          </div>
-        </div>
-
-        <!-- Character Selector Pills -->
-        <div class="surf-skin-section">
-          <div class="surf-skin-label">
-            <span>🏄 Scegli il tuo Surfer:</span>
-          </div>
-          <div class="surf-skin-pills-row" id="surfSkinPillsRow">
-            <button type="button" class="surf-skin-pill active" onclick="selectSurfCharacter(0)">
-              <span>🏄‍♀️ Elena</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(1)">
-              <span>🌸 Giulia</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(2)">
-              <span>🌊 Chiara</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(3)">
-              <span>🌿 Sara</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(4)">
-              <span>☀️ Marco</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(5)">
-              <span>😎 Pietro</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(6)">
-              <span>⚡ Leo</span>
-            </button>
-            <button type="button" class="surf-skin-pill" onclick="selectSurfCharacter(7)">
-              <span>🐱 Ninja Cat</span>
-            </button>
           </div>
         </div>
 
@@ -3307,7 +3141,7 @@
         <!-- Instructions Box -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Giocare a Salento Surf (Smartphone & Computer):</span>
+            <span>📱</span> <span>Come Giocare a Edge Surf (Smartphone & Computer):</span>
           </div>
           <div style="line-height: 1.5;">
             • <b>Guida & Vira (Frecce Sinistra/Destra o Tocca / Trascina sullo schermo)</b>: Vira per evitare scogli, boe e pontili in legno!<br>
@@ -3978,86 +3812,51 @@
   </div>
 
   <!-- ==========================================================================
-       SALENTO SURF - FULLSCREEN 100% EDGE-TO-EDGE MODAL
+       SALENTO SURF SANDBOX - FULLSCREEN MODAL
        ========================================================================== -->
   <div class="surf-game-modal-overlay" id="surfGameModalOverlay">
     
-    <!-- Top Right Floating Pop HUD Controls -->
-    <div class="surf-top-pill-bar">
-      <button type="button" class="surf-pop-hud-btn" id="btnSurfMute" onclick="window.SalentoSurf.audio.toggleMute()">
-        <span>🔊 Audio</span>
-      </button>
-      <button type="button" class="surf-pop-hud-btn surf-pop-close-btn" onclick="closeSurfGameModal()" title="Chiudi Gioco">
-        <span>✕</span>
-      </button>
+    <!-- Top Floating HUD Bar -->
+    <!-- Top Floating Modal Controls -->
+    <div class="surf-modal-hud" style="justify-content: space-between; background: transparent;">
+      <div style="font-weight: 800; font-size: 14px; color: #FFFFFF; text-shadow: 0 2px 6px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px;">
+        <span>🏄‍♂️ Edge Surf</span>
+      </div>
+
+      <div class="surf-hud-buttons">
+        <button type="button" class="btn-surf-hud-icon" id="btnSurfMute" onclick="window.SalentoSurf.audio.toggleMute()">
+          🔊 Audio
+        </button>
+        <button type="button" class="btn-surf-hud-icon btn-surf-close-x" onclick="closeSurfGameModal()" title="Chiudi Gioco">
+          ✕
+        </button>
+      </div>
     </div>
 
     <!-- Canvas Wrapper -->
     <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
-      <canvas id="surfGameCanvas" class="surf-active-canvas"></canvas>
+      <canvas id="surfGameCanvas" class="surf-active-canvas" width="480" height="640"></canvas>
 
-      <!-- Interactive Start & Character Selection Screen Overlay -->
-      <div class="surf-start-screen-overlay" id="surfStartScreenOverlay">
-        <div class="surf-start-screen-card">
-          <div class="surf-start-title">SALENTO SURF</div>
-          <div class="surf-start-subtitle">Scegli il tuo surfer e scendi in acqua!</div>
-
-          <!-- Character Showcase Carousel -->
-          <div class="surf-char-carousel">
-            <button type="button" class="surf-char-nav-btn" onclick="prevSurfCharacter(event)" title="Surfer Precedente">
-              <span>◄</span>
-            </button>
-            <div class="surf-char-preview-box" id="surfCharPreviewBox" onclick="nextSurfCharacter(event)" title="Tocca per cambiare surfer">
-              <div class="surf-char-sprite-wrap" id="surfCharSpriteWrap">
-                <span class="surf-char-big-icon" id="surfCharBigIcon">🏄‍♀️</span>
-              </div>
-              <div class="surf-char-name-badge" id="surfCharNameBadge">Elena · Classic</div>
-            </div>
-            <button type="button" class="surf-char-nav-btn" onclick="nextSurfCharacter(event)" title="Surfer Successivo">
-              <span>►</span>
-            </button>
-          </div>
-
-          <!-- Quick Selector Mini Pills (Direct click on any of the 8 characters) -->
-          <div class="surf-char-selector-dots" id="surfCharSelectorDots">
-            <button type="button" class="surf-char-dot active" onclick="selectSurfCharacter(0)" title="Elena">🏄‍♀️</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(1)" title="Giulia">🌸</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(2)" title="Chiara">🌊</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(3)" title="Sara">🌿</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(4)" title="Marco">☀️</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(5)" title="Pietro">😎</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(6)" title="Leo">⚡</button>
-            <button type="button" class="surf-char-dot" onclick="selectSurfCharacter(7)" title="Ninja Cat">🐱</button>
-          </div>
-
-          <!-- Big Glowing Start Button -->
-          <button type="button" class="btn-surf-play-start" id="btnSurfPlayStart" onclick="handleStartGameClick(event)">
-            <span>▶ INIZIA A SURFARE</span>
-          </button>
-          <div class="surf-start-keyboard-hint">Tocca per iniziare o premi Spazio / Invio</div>
-        </div>
-      </div>
-
-      <!-- Minimal Pop In-Game Floating Action Controls -->
-      <div class="surf-in-game-actions" style="display: none;">
-        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra">
-          <span>◄</span>
+      <!-- Floating In-Game Action Bar for Mobile Touch -->
+      <div class="surf-in-game-actions" style="justify-content: center; gap: 8px;">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra" style="padding: 12px 16px; font-size: 13.5px;">
+          <span>◄ Sinistra</span>
         </button>
-        <button type="button" class="btn-surf-pop-brake" onclick="handleMobileBrake(event)" title="Frena / Ferma">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileBrake(event)" title="Frena / Ferma" style="padding: 12px 14px; font-size: 13.5px;">
           <span>🛑 Frena</span>
         </button>
-        <button type="button" class="btn-surf-pop-boost" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine">
+        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine" style="background: #F59E0B; border-color: #FBBF24; padding: 12px 20px; font-size: 13.5px;">
           <span>⚡ BOOST</span>
         </button>
-        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerRight(event)" title="Vira a Destra">
-          <span>►</span>
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerRight(event)" title="Vira a Destra" style="padding: 12px 16px; font-size: 13.5px;">
+          <span>Destra ►</span>
         </button>
       </div>
 
       <!-- Game Over Card Overlay inside game -->
       <div class="surf-gameover-overlay" id="surfGameOverModal">
         <div class="surf-gameover-card">
-          <div class="surf-gameover-badge" id="surfNewRecordBadge" style="display:none;">🏆 NUOVO RECORD PERSONALE!</div>
+          <div class="surf-gameover-badge" id="surfNewRecordBadge" style="display:none;">🏆 NUOVO RECORD!</div>
           <div class="surf-gameover-title">Game Over! 🏄‍♂️</div>
           <div class="surf-gameover-score-big" id="surfFinalScore">0</div>
           
@@ -4076,8 +3875,8 @@
             <button type="button" class="btn-surf-main" onclick="restartEdgeSurf()" style="min-height: 44px;">
               <span>🔄 Gioca Ancora</span>
             </button>
-            <button type="button" class="btn-surf-share-board" onclick="showSurfStartScreen()" style="min-height: 42px;">
-              <span>🏄‍♂️ Cambia Personaggio</span>
+            <button type="button" class="btn-surf-share-board" onclick="closeSurfGameModal(); scrollToId('surfLeaderboard');" style="min-height: 42px;">
+              <span>🏆 Guarda la Classifica Top 10</span>
             </button>
             <button type="button" class="btn-action btn-subtle" onclick="closeSurfGameModal()" style="min-height: 38px; justify-content: center; margin-top: 4px;">
               <span>Chiudi Schermata</span>
@@ -4117,7 +3916,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_v4"></script>
+  <script src="./surf-game.js"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -5408,92 +5207,6 @@
     // --------------------------------------------------------------------------
     // 7. Microsoft Edge Surf Integration & Bacheca Connector
     // --------------------------------------------------------------------------
-    const SURFER_METADATA = [
-      { name: 'Elena', icon: '🏄‍♀️', tag: 'Classic' },
-      { name: 'Giulia', icon: '🌸', tag: 'Bandana' },
-      { name: 'Chiara', icon: '🌊', tag: 'Treccine' },
-      { name: 'Sara', icon: '🌿', tag: 'Muta Verde' },
-      { name: 'Marco', icon: '☀️', tag: 'Moro' },
-      { name: 'Pietro', icon: '😎', tag: 'Host Pro' },
-      { name: 'Leo', icon: '⚡', tag: 'Biondo' },
-      { name: 'Ninja Cat', icon: '🐱', tag: 'Gatto Ninja' }
-    ];
-
-    function updateStartScreenUI(surferIdx) {
-      const idx = ((surferIdx % 8) + 8) % 8;
-      const char = SURFER_METADATA[idx] || SURFER_METADATA[0];
-
-      const iconEl = document.getElementById('surfCharBigIcon');
-      const nameEl = document.getElementById('surfCharNameBadge');
-      if (iconEl) iconEl.textContent = char.icon;
-      if (nameEl) nameEl.textContent = `${char.name} · ${char.tag}`;
-
-      // Aggiorna i pallini/bottoni di selezione rapida
-      const dots = document.querySelectorAll('.surf-char-dot');
-      dots.forEach((dot, i) => {
-        if (i === idx) dot.classList.add('active');
-        else dot.classList.remove('active');
-      });
-
-      // Aggiorna le pillole nella scheda principale
-      const pills = document.querySelectorAll('.surf-skin-pill');
-      pills.forEach((p, i) => {
-        if (i === idx) p.classList.add('active');
-        else p.classList.remove('active');
-      });
-
-      const distEl = document.getElementById('surfRecordDist');
-      if (distEl) distEl.textContent = `${char.icon} ${char.name}`;
-    }
-
-    function selectSurfCharacter(idx) {
-      if (window.SalentoSurf) {
-        window.SalentoSurf.setSurferCharacter(idx);
-        if (window.SalentoSurf.audio) window.SalentoSurf.audio.playSelect();
-      }
-      updateStartScreenUI(idx);
-    }
-
-    function prevSurfCharacter(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      const cur = window.SalentoSurf ? window.SalentoSurf.surfer : 0;
-      selectSurfCharacter(cur - 1);
-    }
-
-    function nextSurfCharacter(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      const cur = window.SalentoSurf ? window.SalentoSurf.surfer : 0;
-      selectSurfCharacter(cur + 1);
-    }
-
-    function handleStartGameClick(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      const overlay = document.getElementById('surfStartScreenOverlay');
-      if (overlay) overlay.classList.add('hidden');
-
-      if (window.SalentoSurf) {
-        if (window.SalentoSurf.audio) {
-          window.SalentoSurf.audio.unlockAudio();
-        }
-        window.SalentoSurf.startSurfing();
-      }
-    }
-
-    function showSurfStartScreen() {
-      const overlay = document.getElementById('surfStartScreenOverlay');
-      if (overlay) overlay.classList.remove('hidden');
-      const goModal = document.getElementById('surfGameOverModal');
-      if (goModal) goModal.classList.remove('active');
-
-      const curSurfer = window.SalentoSurf ? window.SalentoSurf.surfer : 0;
-      updateStartScreenUI(curSurfer);
-    }
-
-    function syncSurfCharacterUI(idx) {
-      updateStartScreenUI(idx);
-    }
-    window.syncSurfCharacterUI = syncSurfCharacterUI;
-
     function openSurfGameModal() {
       const modal = document.getElementById('surfGameModalOverlay');
       if (!modal) return;
@@ -5501,12 +5214,7 @@
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      showSurfStartScreen();
-
       if (window.SalentoSurf) {
-        if (window.SalentoSurf.audio) {
-          window.SalentoSurf.audio.unlockAudio();
-        }
         window.SalentoSurf.init('surfGameCanvas');
       }
     }
@@ -5530,12 +5238,23 @@
     function restartEdgeSurf() {
       const goModal = document.getElementById('surfGameOverModal');
       if (goModal) goModal.classList.remove('active');
-      const startOverlay = document.getElementById('surfStartScreenOverlay');
-      if (startOverlay) startOverlay.classList.add('hidden');
 
       if (window.SalentoSurf) {
         window.SalentoSurf.resetGame();
         window.SalentoSurf.startSurfing();
+      }
+    }
+
+    function selectEdgeSurfer(idx) {
+      if (window.SalentoSurf) {
+        window.SalentoSurf.setSurferCharacter(idx);
+      }
+      document.querySelectorAll('#edgeSurferPillRow .surf-skin-pill').forEach(pill => {
+        pill.classList.remove('active');
+      });
+      const selectedPill = document.getElementById(`edgeSurferPill_${idx}`);
+      if (selectedPill) {
+        selectedPill.classList.add('active');
       }
     }
 
@@ -5568,66 +5287,16 @@
     }
 
     /* ==========================================================================
-       SURF LEADERBOARD (100% REAL SCORES · RECORD SINGOLI AGGIORNATI PER PLAYER)
+       SURF LEADERBOARD (100% REAL SCORES ONLY)
        ========================================================================== */
     const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v5';
-
-    function normalizeLeaderboard(rawList) {
-      if (!Array.isArray(rawList)) return [];
-
-      const map = new Map();
-
-      rawList.forEach(item => {
-        if (!item || typeof item.score !== 'number' || item.score <= 0) return;
-        const name = (item.name || 'Surfer').trim();
-        if (!name) return;
-
-        // Identificatore univoco del player: normalizzato per raggruppare i record dello stesso player
-        const key = (item.userId || name).toLowerCase().trim();
-        const existing = map.get(key);
-
-        if (!existing) {
-          map.set(key, {
-            id: item.id || ('lb_' + Math.random().toString(36).substring(2, 8)),
-            userId: item.userId || key,
-            name: name,
-            avatar: item.avatar || '🏄‍♂️',
-            bg: item.bg || '#E0F2FE',
-            score: Number(item.score) || 0,
-            dist: Number(item.dist) || 0,
-            surfer: item.surfer !== undefined ? item.surfer : null,
-            date: item.date || 'Oggi',
-            timestamp: item.timestamp || Date.now()
-          });
-        } else {
-          // Se lo stesso player ha realizzato un nuovo record più alto, aggiorna il punteggio e i dettagli
-          if (item.score > existing.score) {
-            existing.score = item.score;
-            existing.dist = Math.max(existing.dist || 0, item.dist || 0);
-            existing.avatar = item.avatar || existing.avatar;
-            existing.bg = item.bg || existing.bg;
-            if (item.surfer !== undefined) existing.surfer = item.surfer;
-            existing.date = item.date || existing.date;
-            existing.timestamp = Math.max(existing.timestamp || 0, item.timestamp || 0);
-          } else if (item.score === existing.score) {
-            if ((item.dist || 0) > (existing.dist || 0)) {
-              existing.dist = item.dist;
-            }
-          }
-        }
-      });
-
-      const list = Array.from(map.values());
-      list.sort((a, b) => b.score - a.score || (b.dist || 0) - (a.dist || 0));
-      return list.slice(0, 10);
-    }
 
     function getSurfLeaderboard() {
       try {
         const saved = localStorage.getItem(SURF_LEADERBOARD_KEY);
         if (saved) {
           const list = JSON.parse(saved);
-          return normalizeLeaderboard(list);
+          if (Array.isArray(list)) return list;
         }
       } catch (e) {}
       return [];
@@ -5635,8 +5304,7 @@
 
     function saveSurfLeaderboard(list) {
       try {
-        const cleanList = normalizeLeaderboard(list);
-        localStorage.setItem(SURF_LEADERBOARD_KEY, JSON.stringify(cleanList));
+        localStorage.setItem(SURF_LEADERBOARD_KEY, JSON.stringify(list));
       } catch (e) {}
     }
 
@@ -5655,7 +5323,7 @@
           <div style="grid-column: 1 / -1; text-align: center; padding: 26px 14px; background: var(--surface-subtle); border-radius: var(--radius-md); color: var(--charcoal); border: 1.5px dashed var(--border-strong);">
             <div style="font-size: 32px; margin-bottom: 6px;">🏄‍♂️🌊</div>
             <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Nessun record ancora registrato!</div>
-            <div style="font-size: 12.5px; color: var(--gray-muted);">Fai una partita a Salento Surf e conquista il <b>1° Posto</b> sulla Classifica Live!</div>
+            <div style="font-size: 12.5px; color: var(--gray-muted);">Fai una partita a Edge Surf e conquista il <b>1° Posto</b> sulla Classifica Live!</div>
           </div>
         `;
         listContainer.innerHTML = '';
@@ -5664,7 +5332,7 @@
 
       const renderPodiumItem = (entry, rank, placeClass, medal) => {
         if (!entry) return `<div></div>`;
-        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name.toLowerCase() === currentUserName.toLowerCase());
+        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name === currentUserName);
         return `
           <div class="podium-card ${placeClass} ${isMe ? 'is-me' : ''}">
             <div class="podium-rank-badge">${medal}</div>
@@ -5698,7 +5366,7 @@
       const rest = leaderboard.slice(3, 10);
       listContainer.innerHTML = rest.map((entry, idx) => {
         const rank = idx + 4;
-        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name.toLowerCase() === currentUserName.toLowerCase());
+        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name === currentUserName);
         return `
           <div class="leaderboard-row ${isMe ? 'is-me' : ''}">
             <div class="leaderboard-left">
@@ -5719,17 +5387,41 @@
     }
 
     function handleIncomingSurfScore(payload, isBulk = false) {
-      if (!payload || typeof payload.score !== 'number' || payload.score <= 0 || !payload.name) return;
+      if (!payload || !payload.score || !payload.name) return;
 
       let leaderboard = getSurfLeaderboard();
-      leaderboard.push(payload);
-      leaderboard = normalizeLeaderboard(leaderboard);
+      const uId = payload.userId || payload.name;
+      const existingIdx = leaderboard.findIndex(e => (e.userId && e.userId === uId) || (e.name === payload.name));
+
+      if (existingIdx !== -1) {
+        if (payload.score > leaderboard[existingIdx].score) {
+          leaderboard[existingIdx].score = payload.score;
+          leaderboard[existingIdx].dist = payload.dist || 0;
+          leaderboard[existingIdx].avatar = payload.avatar || '🏄‍♂️';
+          leaderboard[existingIdx].bg = payload.bg || '#E0F2FE';
+          leaderboard[existingIdx].date = payload.date || 'Oggi';
+        }
+      } else {
+        leaderboard.push({
+          id: payload.id || ('lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)),
+          userId: uId,
+          name: payload.name,
+          avatar: payload.avatar || '🏄‍♂️',
+          bg: payload.bg || '#E0F2FE',
+          score: payload.score,
+          dist: payload.dist || 0,
+          date: payload.date || 'Oggi'
+        });
+      }
+
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 10);
 
       saveSurfLeaderboard(leaderboard);
       renderSurfLeaderboard();
     }
 
-    function recordSurfScoreToLeaderboard(score, dist, surferIdx) {
+    function recordSurfScoreToLeaderboard(score, dist) {
       if (!score || score <= 0) return;
       if (!currentUser || !currentUser.name) initUserIdentity();
 
@@ -5738,21 +5430,15 @@
       const myAvatar = currentUser ? currentUser.avatar : '🏄‍♂️';
       const myBg = currentUser ? currentUser.bg : '#E0F2FE';
 
-      const prevLeaderboard = getSurfLeaderboard();
-      const myPrevEntry = prevLeaderboard.find(e => (e.userId && e.userId === myId) || (e.name && e.name.toLowerCase() === myName.toLowerCase()));
-      const prevBestScore = myPrevEntry ? myPrevEntry.score : 0;
-      const isNewPersonalBest = score > prevBestScore;
-
       const payload = {
         type: 'surf_score',
-        id: 'lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        id: 'lb_' + Date.now(),
         userId: myId,
         name: myName,
         avatar: myAvatar,
         bg: myBg,
         score: score,
         dist: dist,
-        surfer: surferIdx !== undefined ? surferIdx : null,
         date: 'Oggi',
         timestamp: Date.now()
       };
@@ -5761,23 +5447,18 @@
 
       fetch(NTFY_URL, {
         method: 'POST',
-        headers: { 'Title': 'Salento Surf Record' },
+        headers: { 'Title': 'Salento Surf Real Score' },
         body: JSON.stringify(payload)
       }).catch(() => {});
 
-      const updatedLeaderboard = getSurfLeaderboard();
-      const myRank = updatedLeaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name && e.name.toLowerCase() === myName.toLowerCase()));
-
-      if (isNewPersonalBest) {
-        if (myRank === 0) {
-          showToast(`🏆 NUOVO RECORD! Sei 1° nella Top 10 con ${score.toLocaleString()} pt!`);
-        } else if (myRank > 0 && myRank < 3) {
-          showToast(`🥈 Nuovo Record Personale! Sei al ${myRank + 1}° posto (${score.toLocaleString()} pt)!`);
-        } else if (myRank >= 3 && myRank < 10) {
-          showToast(`🎉 Nuovo Record Personale! Sei nella Top 10 al ${myRank + 1}° posto!`);
-        } else {
-          showToast(`✨ Nuovo Record Personale: ${score.toLocaleString()} pt!`);
-        }
+      const leaderboard = getSurfLeaderboard();
+      const myRank = leaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name === myName));
+      if (myRank === 0) {
+        showToast('🏆 INCREDIBILE! Sei 1° nella Classifica Top 10!');
+      } else if (myRank > 0 && myRank < 3) {
+        showToast(`🥈 Grande! Sei al ${myRank + 1}° posto nella Top 10!`);
+      } else if (myRank >= 3 && myRank < 10) {
+        showToast(`🎉 Sei entrato nella Top 10 al ${myRank + 1}° posto!`);
       }
     }
 
