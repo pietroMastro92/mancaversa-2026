@@ -3635,14 +3635,17 @@
       <canvas id="surfGameCanvas" class="surf-active-canvas" width="480" height="640"></canvas>
 
       <!-- Floating In-Game Action Bar for Mobile Touch -->
-      <div class="surf-in-game-actions" style="justify-content: center; gap: 10px;">
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra" style="padding: 12px 18px; font-size: 13.5px;">
+      <div class="surf-in-game-actions" style="justify-content: center; gap: 8px;">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra" style="padding: 12px 16px; font-size: 13.5px;">
           <span>◄ Sinistra</span>
         </button>
-        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine" style="background: #F59E0B; border-color: #FBBF24; padding: 12px 22px; font-size: 13.5px;">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileBrake(event)" title="Frena / Ferma" style="padding: 12px 14px; font-size: 13.5px;">
+          <span>🛑 Frena</span>
+        </button>
+        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine" style="background: #F59E0B; border-color: #FBBF24; padding: 12px 20px; font-size: 13.5px;">
           <span>⚡ BOOST</span>
         </button>
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerRight(event)" title="Vira a Destra" style="padding: 12px 18px; font-size: 13.5px;">
+        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerRight(event)" title="Vira a Destra" style="padding: 12px 16px; font-size: 13.5px;">
           <span>Destra ►</span>
         </button>
       </div>
@@ -5057,6 +5060,13 @@
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf) {
         window.SalentoSurf.steerRight();
+      }
+    }
+
+    function handleMobileBrake(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf) {
+        window.SalentoSurf.stopPlayer();
       }
     }
 

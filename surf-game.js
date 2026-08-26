@@ -1,9 +1,15 @@
 /**
  * ==============================================================================
- * MICROSOFT EDGE SURF - 100% EXACT REIMPLEMENTATION
+ * MICROSOFT EDGE SURF (edge://surf) - EXACT 1:1 REIMPLEMENTATION
  * ==============================================================================
- * Porting fedele e completo in JavaScript / HTML5 Canvas del repository:
- * https://github.com/ShirasawaSama/edge-surf-game (Microsoft Edge "edge://surf")
+ * Porting fedele e ottimizzato in JavaScript / HTML5 Canvas del repository:
+ * https://github.com/ShirasawaSama/edge-surf-game
+ *
+ * Controlli Mobile First:
+ * - Touch e drag continuo sullo schermo per sterzare con precisione assoluta
+ * - Pulsanti a schermo dedicati (Sinistra, Boost, Destra, Frena)
+ * - Selezione del surfer con frecce touch e tocco diretto sui personaggi (senza tasti A/D su mobile)
+ * - BGM originale e SFX Web Audio sincronizzati
  */
 
 (function (window) {
@@ -14,7 +20,7 @@
   const SURFER_TOP = 0.33;
   const ANIMATION_TIMER_MAX_VALUE = 40;
 
-  // Object hitboxes: [width, height]
+  // Dimensioni hitbox originali da objects.c [width, height]
   const OBJECT_HITBOXES = [
     [32, 32],    // 0: SMALL_OBJECT
     [64, 64],    // 1: BIG_OBJECT
@@ -73,7 +79,7 @@
         try {
           this.bgm = new Audio('./surf-assets/bgm.mp3');
           this.bgm.loop = true;
-          this.bgm.volume = 0.45;
+          this.bgm.volume = 0.4;
         } catch (e) {}
       }
     }
@@ -110,7 +116,7 @@
       const g = this.ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(320, t);
-      osc.frequency.exponentialRampToValueAtTime(760, t + 0.22);
+      osc.frequency.exponentialRampToValueAtTime(780, t + 0.22);
       g.gain.setValueAtTime(0.25, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
       osc.connect(g);
@@ -145,7 +151,7 @@
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(587.33, t);
       osc.frequency.setValueAtTime(880, t + 0.08);
-      g.gain.setValueAtTime(0.18, t);
+      g.gain.setValueAtTime(0.2, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
       osc.connect(g);
       g.connect(this.ctx.destination);
@@ -189,7 +195,7 @@
   }
 
   // ----------------------------------------------------------------------------
-  // MAIN ENGINE (FAITHFUL TO game.c)
+  // EDGE SURF ENGINE CLASS
   // ----------------------------------------------------------------------------
   class EdgeSurfEngine {
     constructor() {
@@ -202,7 +208,7 @@
       this.imagesLoaded = false;
       this.audio = new EdgeSurfAudio();
 
-      // Variabili esatte da game.c
+      // Stato gioco da game.c
       this.paused = true;
       this.started = false;
       this.finished = false;
@@ -238,13 +244,17 @@
       this.bestDistance = 0;
       this.animId = null;
 
+      // Touch tracking
+      this.isTouchSteering = false;
+      this.touchX = this.width / 2.0;
+
       this.loadSavedScores();
       this.loadImages();
     }
 
     loadSavedScores() {
       try {
-        const saved = localStorage.getItem('salento_edge_surf_score_v3');
+        const saved = localStorage.getItem('salento_edge_surf_score_v4');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
@@ -261,7 +271,7 @@
         const curDist = Math.floor(this.distance / 10.0);
         if (curDist > this.bestDistance) this.bestDistance = curDist;
 
-        localStorage.setItem('salento_edge_surf_score_v3', JSON.stringify({
+        localStorage.setItem('salento_edge_surf_score_v4', JSON.stringify({
           highScore: this.highScore,
           bestDistance: this.bestDistance,
           surfer: this.surfer
@@ -316,7 +326,7 @@
       this.ctx = this.canvas.getContext('2d');
       this.ctx.imageSmoothingEnabled = false;
 
-      this.bindControls();
+      this.bindInputs();
       this.resetGame();
 
       if (this.animId) cancelAnimationFrame(this.animId);
@@ -351,6 +361,7 @@
       this.boardBrokenTimer = 0;
       this.animationTimer = 1;
       this.naughtySurfer.visible = false;
+      this.isTouchSteering = false;
 
       this.audio.pauseMusic();
       this.updateHUD();
@@ -367,7 +378,7 @@
       this.started = true;
       this.paused = false;
       this.speed = this.initialSpeed;
-      this.surferAction = 3; // dritto
+      this.surferAction = 3;
       this.makeStarterObjects();
     }
 
@@ -417,7 +428,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // GENERAZIONE OGGETTI (objects.c)
+    // CREAZIONE OSTACOLI (objects.c)
     // --------------------------------------------------------------------------
     randomX() { return Math.random() * this.width + this.offset; }
     randomY() { return this.distance + this.height * (1 + Math.random()); }
@@ -556,8 +567,8 @@
         if (Math.random() > 0.7) this.makeDocksObject(x + Math.random() * 198, y + 128, true);
       }
 
-      // KRAKEN SPAWN
-      if (dis > 2500 && this.enemyTimer === 0 && Math.random() < 0.003) {
+      // KRAKEN SPAWN: dopo 200 metri (2000px)
+      if (dis > 2000 && this.enemyTimer === 0 && Math.random() < 0.003) {
         this.enemyTimer = 1;
         this.enemyX = this.offset + (this.width / 2.0) - 64;
         this.enemyY = this.distance - 100;
@@ -566,7 +577,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // FISICA & COLLISIONI (game.c)
+    // FISICA & COLLISIONI
     // --------------------------------------------------------------------------
     kickDog() {
       if (!this.hasDog) return;
@@ -625,6 +636,23 @@
       if (this.paused) return;
       this.distance += this.speed;
 
+      // Touch following analog steering
+      if (this.isTouchSteering && !this.flyingTimer && !this.fallTimer) {
+        const playerScreenX = this.width / 2.0;
+        const dx = this.touchX - playerScreenX;
+        if (dx < -70) {
+          this.surferAction = 1; // Hard left
+        } else if (dx < -18) {
+          this.surferAction = 2; // Gentle left
+        } else if (dx > 70) {
+          this.surferAction = 5; // Hard right
+        } else if (dx > 18) {
+          this.surferAction = 4; // Gentle right
+        } else {
+          this.surferAction = 3; // Straight
+        }
+      }
+
       let ratio = 0;
       switch (this.surferAction) {
         case 1: ratio = -0.6; break;
@@ -662,16 +690,16 @@
             this.fallTimer++;
             if (this.fallTimer > 180) {
               this.fallTimer = 0;
-              this.surferAction = 3;
-              this.paused = false;
-              this.speed = this.initialSpeed;
+              this.surferAction = 0;
+              this.paused = true;
+              this.speed = 0;
               this.invincibleTimer = 1;
             }
           }
 
           if (this.invincibleTimer && this.surferAction !== 0) {
             this.invincibleTimer++;
-            if (this.invincibleTimer > 250) this.invincibleTimer = 0;
+            if (this.invincibleTimer > 300) this.invincibleTimer = 0;
           }
 
           if (this.flyingTimer > 0) this.flyingTimer--;
@@ -684,7 +712,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // RENDERING ACCURATO 1:1
+    // RENDERING
     // --------------------------------------------------------------------------
     draw() {
       const ctx = this.ctx;
@@ -693,7 +721,7 @@
       const w = this.width;
       const h = this.height;
 
-      // 1. Pulizia sfondo con gradiente identico a game.c
+      // 1. Sfondo mare
       const center = w / 2.0;
       const grad = ctx.createLinearGradient(center, 0, center, h);
       grad.addColorStop(0, '#38C2EE');
@@ -701,7 +729,7 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Tiling continuo di water256.png
+      // 2. Onde animate piastrellate
       const bgImg = this.images.background;
       if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
         const offX = ((Math.floor(this.offset) % 256) + 256) % 256;
@@ -713,7 +741,7 @@
         }
       }
 
-      // 3. Elementi di gioco
+      // 3. Entità
       if (this.started) {
         this.drawObjects(ctx);
         if (this.enemyTimer) this.drawEnemy(ctx);
@@ -724,7 +752,7 @@
         this.drawStarterViewer(ctx);
       }
 
-      // 4. Status Bar sempre in primo piano
+      // 4. Status Bar
       this.drawStatusBar(ctx);
     }
 
@@ -754,7 +782,6 @@
         const boxX = OBJECT_HITBOXES[type][0];
         const boxY = OBJECT_HITBOXES[type][1];
 
-        // Oggetto uscito dallo schermo
         if (obj.y + boxY < this.distance - 100) {
           this.objects.splice(i, 1);
           continue;
@@ -777,7 +804,6 @@
           case 6: y = 125; break;
         }
 
-        // Render sprite con divisione intera esatta
         const texture = this.getTextureForType(type);
         if (texture && texture.complete && texture.naturalWidth > 0) {
           if (!obj.once || obj.stage > 80) {
@@ -797,17 +823,16 @@
 
         if (this.finished) continue;
 
-        // Collision Check da game.c
         if (!this.flyingTimer && playerX > cx - x && playerX < cx + x && playerY > cy - y && playerY < cy + y) {
           switch (type) {
             case 7: // INTERACT
               switch (obj.index) {
                 case 0: // Rampa
-                  this.flyingTimer = 220;
+                  this.flyingTimer = 300;
                   if (this.enemyTimer) this.enemyStoped = true;
                   this.audio.playJump();
                   break;
-                case 1: // Mostro
+                case 1: // Kraken
                   if (!this.isInvincible()) {
                     this.enemyTimer = 1;
                     this.enemyX = obj.x;
@@ -816,11 +841,11 @@
                   }
                   break;
                 case 2: // Boost
-                  if (this.power < 3) this.power++;
+                  if (this.power < 5) this.power++;
                   this.audio.playCollect();
                   break;
                 case 3: // Cuore
-                  if (this.heart < 3) this.heart++;
+                  if (this.heart < 5) this.heart++;
                   this.audio.playCollect();
                   break;
                 case 4: // Moneta
@@ -835,16 +860,16 @@
               this.objects.splice(i, 1);
               continue;
 
-            case 0: // Small object: sbandata
+            case 0: // Small object
               if (!this.isInvincible() && !this.changeDirectionTimer) {
                 this.surferAction = 1 + Math.floor(Math.random() * 5);
                 this.changeDirectionTimer = 40;
               }
               break;
 
-            case 2: // Slowdown: alghe
+            case 2: // Slowdown
               if (!this.isInvincible()) {
-                this.speed = 1.5;
+                this.speed = 1;
                 this.rushTimer = 0;
               }
               break;
@@ -890,7 +915,6 @@
         this.enemyX += 2.0 * (this.enemyX > tx ? -1 : this.enemyX === tx ? 0 : 1);
         if (Math.abs(this.enemyX - tx) < 2.5) this.enemyX = tx;
 
-        // Collisione Kraken
         const nx = this.enemyX - this.offset + 64;
         const ny = this.enemyY - this.distance + 64;
         if (!this.isInvincible() && !this.flyingTimer && playerX > nx - 64 && playerX < nx + 64 && playerY > ny - 64 && playerY < ny + 64) {
@@ -944,7 +968,6 @@
         ctx.drawImage(img, sx, 0, 64, 64, Math.round(this.naughtySurfer.x - this.offset), Math.round(dis), 64, 64);
       }
 
-      // Collisione con il surfer
       const playerX = this.width / 2.0;
       const playerY = this.height * SURFER_TOP + 32;
       const nx = this.naughtySurfer.x - this.offset + 32;
@@ -988,7 +1011,7 @@
         ctx.drawImage(this.images.player, action * 64.0, 512, 64, 64, Math.round(left), Math.round(top), 64, 64);
       }
 
-      // Ombra durante il salto
+      // Ombra del salto
       if (this.flyingTimer) {
         ctx.save();
         ctx.fillStyle = `rgba(0, 0, 0, ${this.flyingTimer > 50 ? 0.35 : this.flyingTimer / 150})`;
@@ -1014,34 +1037,56 @@
       ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.9})`;
-      ctx.font = 'bold 44px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 44px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("LET'S SURF!", center, top - 80);
 
-      // Frecce indicatrici selezione
-      ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.8})`;
-      ctx.lineWidth = 3;
+      // Frecce touch per smartphone
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = 2;
+
+      // Freccia Sinistra
       if (this.surfer > 0) {
         ctx.beginPath();
-        ctx.moveTo(oLeft - 8, top + 14);
-        ctx.lineTo(oLeft - 22, top + 30);
-        ctx.lineTo(oLeft - 8, top + 46);
+        ctx.arc(oLeft - 22, top + 32, 22, 0, Math.PI * 2);
+        ctx.fill();
         ctx.stroke();
+        ctx.fillStyle = '#0F172A';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('◄', oLeft - 22, top + 40);
       }
+
+      // Freccia Destra
       if (this.surfer < 7) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.beginPath();
-        ctx.moveTo(oLeft + 72, top + 14);
-        ctx.lineTo(oLeft + 86, top + 30);
-        ctx.lineTo(oLeft + 72, top + 46);
+        ctx.arc(oLeft + 86, top + 32, 22, 0, Math.PI * 2);
+        ctx.fill();
         ctx.stroke();
+        ctx.fillStyle = '#0F172A';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText('►', oLeft + 86, top + 40);
       }
 
-      ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.8})`;
-      ctx.fillText("◄ A / D PER CAMBIARE SURFER ►", center, top + 95);
+      // Istruzioni touch-friendly
+      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.85})`;
+      ctx.font = 'bold 15px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("◄ TOCCA FRECCE PER SCEGLIERE ►", center, top + 95);
 
-      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = '#EA580C';
-      ctx.fillText("🎮 TOCCA O PREMI SPAZIO PER PARTIRE!", center, top + 135);
+      // Bottone Play Centrale
+      const btnW = 260;
+      const btnH = 46;
+      const btnX = center - btnW / 2;
+      const btnY = top + 125;
+
+      ctx.fillStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.roundRect(btnX, btnY, btnW, btnH, 23);
+      ctx.fill();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 16px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("▶ TOCCA PER PARTIRE!", center, btnY + 29);
 
       ctx.restore();
     }
@@ -1052,18 +1097,18 @@
       const centerY = this.height / 2.0 - 50;
 
       ctx.save();
-      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.88})`;
       ctx.fillRect(0, 0, this.width, this.height);
 
       ctx.textAlign = 'center';
       ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.95})`;
-      ctx.font = 'bold 44px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 44px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("GAME OVER!", center, centerY - 40);
 
-      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText("Tocca o premi Spazio per ricominciare", center, centerY + 10);
+      ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("Tocca ovunque per fare un'altra partita", center, centerY + 10);
 
-      ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 24px "FiraCode", monospace, sans-serif';
       ctx.fillStyle = '#EA580C';
       ctx.fillText(`Punti: ${this.getScore().toLocaleString()}`, center, centerY + 55);
 
@@ -1085,13 +1130,13 @@
       ctx.lineTo(this.width, 50);
       ctx.stroke();
 
-      // Distanza centrale in metri
+      // Distanza
       ctx.textAlign = 'center';
-      ctx.font = 'bold 18px "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.font = 'bold 18px "FiraCode", monospace, sans-serif';
       ctx.fillStyle = '#0F172A';
-      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 32);
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 33);
 
-      // Cuori a sinistra
+      // Cuori
       let hLeft = center - 80;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
@@ -1104,7 +1149,7 @@
         hLeft -= 26;
       }
 
-      // Fulmini boost a destra
+      // Fulmini Boost
       let pLeft = center + 56;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.power;
@@ -1117,7 +1162,7 @@
         pLeft += 26;
       }
 
-      // Cane compagno e Monete
+      // Cane e Monete
       let lLeft = 12;
       if (this.hasDog && iface && iface.complete) {
         ctx.drawImage(iface, 24, 48, 24, 24, lLeft, 14, 24, 24);
@@ -1128,7 +1173,7 @@
           ctx.drawImage(iface, 24, 72, 24, 24, lLeft, 15, 24, 24);
         }
         ctx.textAlign = 'left';
-        ctx.font = 'bold 14px "Plus Jakarta Sans", monospace, sans-serif';
+        ctx.font = 'bold 14px "FiraCode", monospace, sans-serif';
         ctx.fillStyle = '#B45309';
         ctx.fillText(`x${this.coinCount}`, lLeft + 26, 31);
       }
@@ -1137,25 +1182,48 @@
     }
 
     // --------------------------------------------------------------------------
-    // CONTROLLI TOUCH, MOUSE E TASTIERA
+    // INPUT LISTENERS MOBILE & DESKTOP
     // --------------------------------------------------------------------------
-    bindControls() {
+    bindInputs() {
       if (!this.canvas) return;
+
+      let lastTapTime = 0;
+
+      const getCanvasPos = (e) => {
+        const touch = e.touches && e.touches.length > 0 ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : e);
+        const rect = this.canvas.getBoundingClientRect();
+        const x = ((touch.clientX - rect.left) / rect.width) * this.width;
+        const y = ((touch.clientY - rect.top) / rect.height) * this.height;
+        return { x, y };
+      };
 
       const handlePointerDown = (e) => {
         e.preventDefault();
         this.audio.init();
 
-        const touch = e.touches ? e.touches[0] : e;
-        const rect = this.canvas.getBoundingClientRect();
-        const curX = ((touch.clientX - rect.left) / rect.width) * this.width;
+        const { x, y } = getCanvasPos(e);
+
+        // Double tap detection per Boost su smartphone
+        const now = Date.now();
+        if (now - lastTapTime < 300 && this.started && !this.paused && !this.finished) {
+          this.triggerBoost();
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
 
         if (!this.started || this.finished) {
           if (!this.started) {
-            if (curX < this.width * 0.35) {
+            const top = this.height * SURFER_TOP;
+            const oLeft = (this.width - 64) / 2.0;
+
+            // Tocco su freccia sinistra o area sinistra
+            if (x < oLeft || (x < this.width * 0.4 && y > top - 20 && y < top + 80)) {
               this.setSurferCharacter(this.surfer - 1);
               return;
-            } else if (curX > this.width * 0.65) {
+            }
+            // Tocco su freccia destra o area destra
+            if (x > oLeft + 64 || (x > this.width * 0.6 && y > top - 20 && y < top + 80)) {
               this.setSurferCharacter(this.surfer + 1);
               return;
             }
@@ -1164,19 +1232,38 @@
           return;
         }
 
-        const center = this.width / 2.0;
-        if (curX < center - 30) {
-          this.steerLeft();
-        } else if (curX > center + 30) {
-          this.steerRight();
-        } else {
+        // Se il surfer era fermo (idle), riparte
+        if (this.paused && !this.fallTimer) {
+          this.paused = false;
+          this.speed = this.initialSpeed;
           this.surferAction = 3;
         }
+
+        this.isTouchSteering = true;
+        this.touchX = x;
+      };
+
+      const handlePointerMove = (e) => {
+        if (!this.isTouchSteering || !this.started || this.finished) return;
+        e.preventDefault();
+        const { x } = getCanvasPos(e);
+        this.touchX = x;
+      };
+
+      const handlePointerUp = (e) => {
+        this.isTouchSteering = false;
       };
 
       this.canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-      this.canvas.addEventListener('mousedown', handlePointerDown);
+      this.canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+      this.canvas.addEventListener('touchend', handlePointerUp, { passive: false });
+      this.canvas.addEventListener('touchcancel', handlePointerUp, { passive: false });
 
+      this.canvas.addEventListener('mousedown', handlePointerDown);
+      window.addEventListener('mousemove', handlePointerMove);
+      window.addEventListener('mouseup', handlePointerUp);
+
+      // Tastiera Desktop
       window.addEventListener('keydown', (e) => {
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
           this.audio.init();
@@ -1236,6 +1323,12 @@
       if (scoreEl) scoreEl.textContent = this.highScore.toLocaleString();
       if (barrelEl) barrelEl.textContent = `${this.bestDistance}m`;
       if (distEl) distEl.textContent = `Surfer #${this.surfer + 1}`;
+
+      // Aggiorna pills esterne
+      document.querySelectorAll('#edgeSurferPillRow .surf-skin-pill').forEach((pill, idx) => {
+        if (idx === this.surfer) pill.classList.add('active');
+        else pill.classList.remove('active');
+      });
     }
   }
 
