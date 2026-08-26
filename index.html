@@ -2045,6 +2045,545 @@
     .footer-nav a:hover {
       color: var(--charcoal);
     }
+
+    /* ==========================================================================
+       SALENTO PIXEL SURF - RETRO ARCADE & MOBILE GAME STYLES
+       ========================================================================== */
+    .post-vacation-banner {
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 50%, #0F172A 100%);
+      color: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin: 14px 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    @media (min-width: 600px) {
+      .post-vacation-banner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+      }
+    }
+    .post-vacation-banner::before {
+      content: '🌊';
+      position: absolute;
+      right: -10px;
+      bottom: -15px;
+      font-size: 80px;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .post-vacation-content {
+      position: relative;
+      z-index: 2;
+    }
+    .post-vacation-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .post-vacation-title {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .post-vacation-sub {
+      font-size: 12.5px;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+    .btn-play-banner {
+      background: #FFFFFF;
+      color: #0284C7;
+      font-weight: 800;
+      font-size: 13.5px;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: var(--transition);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+      cursor: pointer;
+    }
+    .btn-play-banner:hover, .btn-play-banner:active {
+      transform: scale(1.04);
+      background: #F0F9FF;
+    }
+
+    /* Section Block Surf */
+    .surf-arcade-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    @media (min-width: 768px) {
+      .surf-arcade-card {
+        padding: 26px;
+        gap: 20px;
+      }
+    }
+    .surf-hero-preview {
+      position: relative;
+      background: #0284C7;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      max-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+    .surf-preview-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+    .surf-preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #FFFFFF;
+      transition: var(--transition);
+    }
+    .surf-preview-overlay:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .surf-big-play-btn {
+      width: 58px;
+      height: 58px;
+      background: var(--rausch);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(255, 56, 92, 0.5);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .surf-hero-preview:hover .surf-big-play-btn {
+      transform: scale(1.12);
+    }
+    .surf-big-play-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: #FFFFFF;
+      margin-left: 3px;
+    }
+
+    /* Stats Grid */
+    .surf-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .surf-stat-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .surf-stat-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .surf-stat-val {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--charcoal);
+      line-height: 1.2;
+    }
+    .surf-stat-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Skin Selector */
+    .surf-skin-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .surf-skin-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--charcoal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .surf-skin-pills-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .surf-skin-pills-row::-webkit-scrollbar {
+      display: none;
+    }
+    .surf-skin-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: var(--surface-subtle);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--charcoal);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .surf-skin-pill.active {
+      background: #E0F2FE;
+      border-color: #0284C7;
+      color: #0369A1;
+    }
+
+    /* Action Buttons */
+    .surf-actions-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    @media (min-width: 540px) {
+      .surf-actions-row {
+        flex-direction: row;
+      }
+    }
+    .btn-surf-main {
+      flex: 1;
+      background: linear-gradient(135deg, var(--rausch) 0%, var(--rausch-dark) 100%);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 14.5px;
+      padding: 13px 20px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(255, 56, 92, 0.35);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .btn-surf-main:active {
+      transform: scale(0.97);
+    }
+    .btn-surf-share-board {
+      background: #FFFFFF;
+      border: 1.5px solid var(--border-strong);
+      color: var(--charcoal);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 18px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .btn-surf-share-board:hover, .btn-surf-share-board:active {
+      background: var(--surface-subtle);
+      border-color: var(--charcoal);
+    }
+
+    /* Instructions Box */
+    .surf-instructions-box {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #166534;
+      line-height: 1.45;
+    }
+    .surf-instructions-box b {
+      color: #14532D;
+    }
+
+    /* ==========================================================================
+       SURF GAME FULLSCREEN MODAL OVERLAY
+       ========================================================================== */
+    .surf-game-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: #000000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .surf-game-modal-overlay.active {
+      display: flex;
+    }
+    .surf-modal-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(12px + env(safe-area-inset-top)) 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+      color: #FFFFFF;
+      pointer-events: auto;
+    }
+    .surf-hud-score-box {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .surf-hud-score-val {
+      font-family: 'Plus Jakarta Sans', monospace, sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #FDE047;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      letter-spacing: 0.5px;
+    }
+    .surf-hud-combo-badge {
+      background: var(--rausch);
+      color: #FFFFFF;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(255, 56, 92, 0.5);
+      animation: pulseCombo 0.8s infinite alternate;
+    }
+    @keyframes pulseCombo {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+    .surf-hud-stats-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+    .surf-hud-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-surf-hud-icon {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-surf-hud-icon:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .btn-surf-close-x {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      padding: 0;
+    }
+
+    /* Modal Canvas Container */
+    .surf-modal-canvas-container {
+      width: 100vw;
+      height: 100vh;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .surf-active-canvas {
+      width: 100%;
+      height: 100%;
+      max-width: 900px;
+      max-height: 520px;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    /* Floating Touch Hint */
+    .surf-touch-hint-pill {
+      position: absolute;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+      max-width: calc(100% - 32px);
+    }
+
+    /* Prompt Inizio */
+    .surf-start-prompt {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 20px;
+      z-index: 5;
+      cursor: pointer;
+    }
+    .surf-start-prompt h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: #FDE047;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    .surf-start-prompt p {
+      font-size: 13.5px;
+      opacity: 0.95;
+    }
+
+    /* Game Over Modal Inside Game */
+    .surf-gameover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 20;
+    }
+    .surf-gameover-overlay.active {
+      display: flex;
+    }
+    .surf-gameover-card {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 22px 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      color: var(--charcoal);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .surf-gameover-badge {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #B45309;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 8px;
+    }
+    .surf-gameover-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .surf-gameover-score-big {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0284C7;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    .surf-gameover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .surf-go-stat {
+      background: var(--surface-subtle);
+      border-radius: var(--radius-xs);
+      padding: 8px;
+    }
+    .surf-go-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--charcoal);
+    }
+    .surf-go-lbl {
+      font-size: 10.5px;
+      color: var(--gray-muted);
+    }
+    .surf-gameover-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -2113,6 +2652,7 @@
       <nav class="category-bar" id="categoryNav">
         <a href="javascript:void(0)" onclick="promptInstallPWA()" class="cat-pill cat-pill-install" id="catPillInstall">📲 Installa</a>
         <a href="#overview" class="cat-pill active">✨ Info</a>
+        <a href="#surf" class="cat-pill" style="color: #0284C7; font-weight: 700;">🏄‍♂️ Surf <span class="cat-pill-badge" style="background:#0284C7; color:#FFF; display:inline-block;">NEW</span></a>
         <a href="#g22" class="cat-pill">🏖️ Sab 22</a>
         <a href="#g23" class="cat-pill">🌊 Dom 23</a>
         <a href="#g24" class="cat-pill">🚗 Lun 24</a>
@@ -2141,6 +2681,19 @@
       </div>
 
       <h1 class="listing-title">Tre giorni di mare nel Salento,<br>senza complicazioni.</h1>
+
+      <!-- Post-Vacation Banner & Mini-Game Callout -->
+      <div class="post-vacation-banner">
+        <div class="post-vacation-content">
+          <div class="post-vacation-tag">🎮 Dopovacanza Arcade · Novità</div>
+          <div class="post-vacation-title">La vacanza è finita, ma il mare resta con noi! 🏄‍♂️</div>
+          <div class="post-vacation-sub">Divertiti con <b>Salento Pixel Surf</b>: cavalca le onde dello Ionio, entra nei tubi e sfida gli amici a battere il tuo record!</div>
+        </div>
+        <button class="btn-play-banner" onclick="openSurfGameModal()">
+          <span>🎮 Gioca Ora</span>
+          <span>→</span>
+        </button>
+      </div>
 
       <!-- Gallery Grid -->
       <div class="hero-gallery">
@@ -2199,6 +2752,94 @@
           <div class="spec-info">
             <strong>2 Cene Asporto</strong>
             <span>Zero ristoranti</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SALENTO PIXEL SURF (DOPPO-VACANZA MINI-GAME)
+         ========================================================================== -->
+    <section class="section-block" id="surf">
+      <div class="section-head">
+        <div class="section-eyebrow">Dopovacanza Arcade · Novità 🏄‍♂️</div>
+        <h2 class="section-title">Salento Pixel Surf</h2>
+        <p class="section-sub">Il mini-gioco retro a onde dinamiche per continuare a surfare nel mare del Salento.</p>
+      </div>
+
+      <div class="surf-arcade-card">
+        <!-- Live Pixel Art Preview Screen -->
+        <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero">
+          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="420" height="240"></canvas>
+          <div class="surf-preview-overlay">
+            <div class="surf-big-play-btn">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div style="font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">🎮 TOCCA PER GIOCARE</div>
+          </div>
+        </div>
+
+        <!-- Personal Records Grid -->
+        <div class="surf-stats-grid">
+          <div class="surf-stat-box">
+            <div class="surf-stat-icon">🏆</div>
+            <div class="surf-stat-val" id="surfRecordScore">0</div>
+            <div class="surf-stat-lbl">Record Punti</div>
+          </div>
+          <div class="surf-stat-box">
+            <div class="surf-stat-icon">🌊</div>
+            <div class="surf-stat-val" id="surfRecordBarrel">0.0s</div>
+            <div class="surf-stat-lbl">Max Tubo</div>
+          </div>
+          <div class="surf-stat-box">
+            <div class="surf-stat-icon">🏖️</div>
+            <div class="surf-stat-val" id="surfRecordDist">0m</div>
+            <div class="surf-stat-lbl">Distanza</div>
+          </div>
+        </div>
+
+        <!-- Skin Selector -->
+        <div class="surf-skin-section">
+          <div class="surf-skin-label">
+            <span>🏄‍♂️ Scegli il tuo Surfer:</span>
+          </div>
+          <div class="surf-skin-pills-row" id="surfSkinRow">
+            <button type="button" class="surf-skin-pill active" onclick="selectSurfSkin('pietro')" id="skinPill_pietro">
+              <span>😎 Pietro Superhost</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('delfino')" id="skinPill_delfino">
+              <span>🐬 Delfino Anonimo</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('fenicottero')" id="skinPill_fenicottero">
+              <span>🦩 Fenicottero</span>
+            </button>
+            <button type="button" class="surf-skin-pill" onclick="selectSurfSkin('scirocco')" id="skinPill_scirocco">
+              <span>🌪️ Scirocco Gold</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="surf-actions-row">
+          <button type="button" class="btn-surf-main" onclick="openSurfGameModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Avvia Partita a Schermo Intero</span>
+          </button>
+          <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()">
+            <span>💬 Condividi Record in Bacheca</span>
+          </button>
+        </div>
+
+        <!-- Mobile & Desktop Instructions -->
+        <div class="surf-instructions-box">
+          <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span>📱</span> <span>Come Giocare da Smartphone & Computer:</span>
+          </div>
+          <div>
+            • <b>Tieni premuto sullo schermo (o Spazio / Freccia Giù)</b>: il surfer si abbassa (pump) e guadagna velocità scendendo l'onda.<br>
+            • <b>Rilascia sulla cresta</b>: salta in aria per acrobazie altissime!<br>
+            • <b>Tieni premuto in volo</b>: esegue rotazioni e flip a 360° per moltiplicare i punti.<br>
+            • <b>Nel Tubo / Barile</b>: resta coperto dall'onda per accumulare punti continui!
           </div>
         </div>
       </div>
@@ -2837,6 +3478,85 @@
   </div>
 
   <!-- ==========================================================================
+       SALENTO PIXEL SURF - MODAL SCHERMO INTERO GIOCO
+       ========================================================================== -->
+  <div class="surf-game-modal-overlay" id="surfGameModalOverlay">
+    
+    <!-- Top Floating HUD Bar -->
+    <div class="surf-modal-hud">
+      <div class="surf-hud-score-box">
+        <div class="surf-hud-score-val" id="surfLiveScore">0</div>
+        <div class="surf-hud-combo-badge" id="surfLiveCombo" style="display:none;">x2 COMBO!</div>
+      </div>
+
+      <div class="surf-hud-stats-mini">
+        <span>🏖️ <span id="surfLiveDist">0m</span></span>
+        <span>🐚 <span id="surfLiveShells">0</span></span>
+      </div>
+
+      <div class="surf-hud-buttons">
+        <button type="button" class="btn-surf-hud-icon" id="btnSurfMute" onclick="window.SalentoSurf.toggleAudioMute()">
+          🔊 Audio On
+        </button>
+        <button type="button" class="btn-surf-hud-icon btn-surf-close-x" onclick="closeSurfGameModal()" title="Chiudi Gioco">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Wrapper -->
+    <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
+      <canvas id="surfGameCanvas" class="surf-active-canvas" width="420" height="240"></canvas>
+
+      <!-- Start Prompt Overlay -->
+      <div class="surf-start-prompt" id="surfStartPrompt" onclick="window.SalentoSurf.startGame()">
+        <h2>🏄‍♂️ SALENTO PIXEL SURF</h2>
+        <p style="font-weight: 700; margin-bottom: 8px;">Tocca lo schermo per iniziare a surfare!</p>
+        <div style="font-size: 11.5px; opacity: 0.85; max-width: 280px; margin: 0 auto;">
+          Tieni premuto per abbassarti e prendere velocità · Rilascia per saltare in aria!
+        </div>
+      </div>
+
+      <!-- Game Over Card Overlay inside game -->
+      <div class="surf-gameover-overlay" id="surfGameOverModal">
+        <div class="surf-gameover-card">
+          <div class="surf-gameover-badge" id="surfNewRecordBadge" style="display:none;">🏆 NUOVO RECORD!</div>
+          <div class="surf-gameover-title">Onda Cavalcata! 🌊</div>
+          <div class="surf-gameover-score-big" id="surfFinalScore">0</div>
+          
+          <div class="surf-gameover-grid">
+            <div class="surf-go-stat">
+              <div class="surf-go-val" id="surfFinalDist">0m</div>
+              <div class="surf-go-lbl">Distanza</div>
+            </div>
+            <div class="surf-go-stat">
+              <div class="surf-go-val" id="surfFinalBarrel">0.0s</div>
+              <div class="surf-go-lbl">Tempo nel Tubo</div>
+            </div>
+          </div>
+
+          <div class="surf-gameover-btns">
+            <button type="button" class="btn-surf-main" onclick="window.SalentoSurf.restartGame()" style="min-height: 44px;">
+              <span>🔄 Gioca Ancora</span>
+            </button>
+            <button type="button" class="btn-surf-share-board" onclick="postSurfScoreToBoard()" style="min-height: 42px;">
+              <span>💬 Condividi Record in Bacheca</span>
+            </button>
+            <button type="button" class="btn-action btn-subtle" onclick="closeSurfGameModal()" style="min-height: 38px; justify-content: center; margin-top: 4px;">
+              <span>Chiudi Schermata</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Touch Hint Bar for Mobile -->
+      <div class="surf-touch-hint-pill">
+        👇 Tieni premuto per velocità · Rilascia per decollo · In aria tieni premuto per i 360° flip!
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
        TOAST NOTIFICATION
        ========================================================================== -->
   <div class="toast-pill" id="toastBox">
@@ -2865,6 +3585,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
+  <script src="./surf-game.js"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -4146,8 +4867,101 @@
       isRoadScrollTicking = false;
     }
 
+    // --------------------------------------------------------------------------
+    // 7. Salento Pixel Surf Integration & Bacheca Connector
+    // --------------------------------------------------------------------------
+    function openSurfGameModal() {
+      const modal = document.getElementById('surfGameModalOverlay');
+      if (!modal) return;
+
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      if (window.SalentoSurf) {
+        window.SalentoSurf.init('surfGameCanvas');
+      }
+    }
+
+    function closeSurfGameModal() {
+      const modal = document.getElementById('surfGameModalOverlay');
+      if (!modal) return;
+
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+
+      if (window.SalentoSurf) {
+        window.SalentoSurf.gameState = 'READY';
+        if (window.SalentoSurf.animationFrameId) {
+          cancelAnimationFrame(window.SalentoSurf.animationFrameId);
+        }
+        window.SalentoSurf.updateRecordsUI();
+      }
+
+      updateSurfCardStats();
+    }
+
+    function selectSurfSkin(skinId) {
+      if (window.SalentoSurf) {
+        window.SalentoSurf.setSurferSkin(skinId);
+      }
+      document.querySelectorAll('.surf-skin-pill').forEach(pill => {
+        pill.classList.remove('active');
+      });
+      const selectedPill = document.getElementById(`skinPill_${skinId}`);
+      if (selectedPill) {
+        selectedPill.classList.add('active');
+      }
+    }
+
+    function updateSurfCardStats() {
+      if (!window.SalentoSurf) return;
+      const scoreEl = document.getElementById('surfRecordScore');
+      const barrelEl = document.getElementById('surfRecordBarrel');
+      const distEl = document.getElementById('surfRecordDist');
+
+      if (scoreEl) scoreEl.textContent = window.SalentoSurf.highScore.toLocaleString();
+      if (barrelEl) barrelEl.textContent = `${window.SalentoSurf.bestBarrelTime}s`;
+      if (distEl) distEl.textContent = `${window.SalentoSurf.bestDistance}m`;
+    }
+
+    function postSurfScoreToBoard() {
+      if (!window.SalentoSurf) return;
+      const score = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.score : window.SalentoSurf.highScore;
+      const dist = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.distance : window.SalentoSurf.bestDistance;
+      const barrel = window.SalentoSurf.surfer ? window.SalentoSurf.surfer.barrelTimer.toFixed(1) : window.SalentoSurf.bestBarrelTime;
+      const skinName = window.SalentoSurf.surfer && window.SalentoSurf.surfer.skin ? window.SalentoSurf.surfer.skin.name : 'Pietro';
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      const scoreMsgText = `🏄‍♂️ SALENTO PIXEL SURF RECORD! 🏆\nHo totalizzato ${score.toLocaleString()} punti! (Distanza: ${dist}m, Tubo: ${barrel}s con ${skinName}) 🌊\nChi riesce a fare di meglio? 😎🤙`;
+
+      const newMsg = {
+        id: 'msg_surf_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        userId: currentUser ? currentUser.id : 'anon',
+        author: currentUser ? currentUser.name : 'Surfer Salentino',
+        avatar: '🏄‍♂️',
+        bg: '#E0F2FE',
+        text: scoreMsgText,
+        time: timeStr,
+        timestamp: Date.now(),
+        isEdited: false,
+        replyTo: null
+      };
+
+      addMessageToBoard(newMsg, false);
+
+      fetch(NTFY_URL, {
+        method: 'POST',
+        headers: { 'Title': 'Salento Surf Record' },
+        body: JSON.stringify(newMsg)
+      }).catch(err => console.warn('Sync post error', err));
+
+      showToast('Record inviato nella Bacheca Live! 💬🏆');
+    }
+
     window.addEventListener('scroll', () => {
-      const sections = ['overview', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
+      const sections = ['overview', 'surf', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
       const currentPos = window.scrollY + 130;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -4184,6 +4998,12 @@
       registerNotificationServiceWorker();
       updateNotificationButtonUI();
       updateInstallUI();
+
+      // Inizializza anteprima Salento Pixel Surf
+      if (window.SalentoSurf) {
+        window.SalentoSurf.init('surfPreviewCanvas');
+        updateSurfCardStats();
+      }
 
       // Se aperto da notifica di sistema (?openBoard=1)
       const urlParams = new URLSearchParams(window.location.search);
