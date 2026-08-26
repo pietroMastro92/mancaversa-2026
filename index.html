@@ -3897,7 +3897,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_v6302001"></script>
+  <script src="./surf-game.js?v=20260826_vFinal"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
@@ -5196,6 +5196,9 @@
       document.body.style.overflow = 'hidden';
 
       if (window.SalentoSurf) {
+        if (window.SalentoSurf.audio) {
+          window.SalentoSurf.audio.unlockAudio();
+        }
         window.SalentoSurf.init('surfGameCanvas');
       }
     }
@@ -5221,6 +5224,9 @@
       if (goModal) goModal.classList.remove('active');
 
       if (window.SalentoSurf) {
+        if (window.SalentoSurf.audio) {
+          window.SalentoSurf.audio.unlockAudio();
+        }
         window.SalentoSurf.resetGame();
         window.SalentoSurf.startSurfing();
       }
@@ -5255,16 +5261,66 @@
     }
 
     /* ==========================================================================
-       SURF LEADERBOARD (100% REAL SCORES ONLY)
+       SURF LEADERBOARD (100% REAL SCORES · RECORD SINGOLI AGGIORNATI PER PLAYER)
        ========================================================================== */
     const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v5';
+
+    function normalizeLeaderboard(rawList) {
+      if (!Array.isArray(rawList)) return [];
+
+      const map = new Map();
+
+      rawList.forEach(item => {
+        if (!item || typeof item.score !== 'number' || item.score <= 0) return;
+        const name = (item.name || 'Surfer').trim();
+        if (!name) return;
+
+        // Identificatore univoco del player: raggruppa per userId o nome
+        const key = (item.userId || name).toLowerCase().trim();
+        const existing = map.get(key);
+
+        if (!existing) {
+          map.set(key, {
+            id: item.id || ('lb_' + Math.random().toString(36).substring(2, 8)),
+            userId: item.userId || key,
+            name: name,
+            avatar: item.avatar || '🏄‍♂️',
+            bg: item.bg || '#E0F2FE',
+            score: Number(item.score) || 0,
+            dist: Number(item.dist) || 0,
+            surfer: item.surfer !== undefined ? item.surfer : null,
+            date: item.date || 'Oggi',
+            timestamp: item.timestamp || Date.now()
+          });
+        } else {
+          // Se lo stesso player ha realizzato un nuovo record più alto, aggiorna
+          if (item.score > existing.score) {
+            existing.score = item.score;
+            existing.dist = Math.max(existing.dist || 0, item.dist || 0);
+            existing.avatar = item.avatar || existing.avatar;
+            existing.bg = item.bg || existing.bg;
+            if (item.surfer !== undefined) existing.surfer = item.surfer;
+            existing.date = item.date || existing.date;
+            existing.timestamp = Math.max(existing.timestamp || 0, item.timestamp || 0);
+          } else if (item.score === existing.score) {
+            if ((item.dist || 0) > (existing.dist || 0)) {
+              existing.dist = item.dist;
+            }
+          }
+        }
+      });
+
+      const list = Array.from(map.values());
+      list.sort((a, b) => b.score - a.score || (b.dist || 0) - (a.dist || 0));
+      return list.slice(0, 10);
+    }
 
     function getSurfLeaderboard() {
       try {
         const saved = localStorage.getItem(SURF_LEADERBOARD_KEY);
         if (saved) {
           const list = JSON.parse(saved);
-          if (Array.isArray(list)) return list;
+          return normalizeLeaderboard(list);
         }
       } catch (e) {}
       return [];
@@ -5272,7 +5328,8 @@
 
     function saveSurfLeaderboard(list) {
       try {
-        localStorage.setItem(SURF_LEADERBOARD_KEY, JSON.stringify(list));
+        const cleanList = normalizeLeaderboard(list);
+        localStorage.setItem(SURF_LEADERBOARD_KEY, JSON.stringify(cleanList));
       } catch (e) {}
     }
 
@@ -5291,7 +5348,7 @@
           <div style="grid-column: 1 / -1; text-align: center; padding: 26px 14px; background: var(--surface-subtle); border-radius: var(--radius-md); color: var(--charcoal); border: 1.5px dashed var(--border-strong);">
             <div style="font-size: 32px; margin-bottom: 6px;">🏄‍♂️🌊</div>
             <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Nessun record ancora registrato!</div>
-            <div style="font-size: 12.5px; color: var(--gray-muted);">Fai una partita a Edge Surf e conquista il <b>1° Posto</b> sulla Classifica Live!</div>
+            <div style="font-size: 12.5px; color: var(--gray-muted);">Fai una partita a Salento Surf e conquista il <b>1° Posto</b> sulla Classifica Live!</div>
           </div>
         `;
         listContainer.innerHTML = '';
@@ -5300,7 +5357,7 @@
 
       const renderPodiumItem = (entry, rank, placeClass, medal) => {
         if (!entry) return `<div></div>`;
-        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name === currentUserName);
+        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name.toLowerCase() === currentUserName.toLowerCase());
         return `
           <div class="podium-card ${placeClass} ${isMe ? 'is-me' : ''}">
             <div class="podium-rank-badge">${medal}</div>
@@ -5334,7 +5391,7 @@
       const rest = leaderboard.slice(3, 10);
       listContainer.innerHTML = rest.map((entry, idx) => {
         const rank = idx + 4;
-        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name === currentUserName);
+        const isMe = (currentUserId && entry.userId === currentUserId) || (currentUserName && entry.name.toLowerCase() === currentUserName.toLowerCase());
         return `
           <div class="leaderboard-row ${isMe ? 'is-me' : ''}">
             <div class="leaderboard-left">
@@ -5355,41 +5412,17 @@
     }
 
     function handleIncomingSurfScore(payload, isBulk = false) {
-      if (!payload || !payload.score || !payload.name) return;
+      if (!payload || typeof payload.score !== 'number' || payload.score <= 0 || !payload.name) return;
 
       let leaderboard = getSurfLeaderboard();
-      const uId = payload.userId || payload.name;
-      const existingIdx = leaderboard.findIndex(e => (e.userId && e.userId === uId) || (e.name === payload.name));
-
-      if (existingIdx !== -1) {
-        if (payload.score > leaderboard[existingIdx].score) {
-          leaderboard[existingIdx].score = payload.score;
-          leaderboard[existingIdx].dist = payload.dist || 0;
-          leaderboard[existingIdx].avatar = payload.avatar || '🏄‍♂️';
-          leaderboard[existingIdx].bg = payload.bg || '#E0F2FE';
-          leaderboard[existingIdx].date = payload.date || 'Oggi';
-        }
-      } else {
-        leaderboard.push({
-          id: payload.id || ('lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)),
-          userId: uId,
-          name: payload.name,
-          avatar: payload.avatar || '🏄‍♂️',
-          bg: payload.bg || '#E0F2FE',
-          score: payload.score,
-          dist: payload.dist || 0,
-          date: payload.date || 'Oggi'
-        });
-      }
-
-      leaderboard.sort((a, b) => b.score - a.score);
-      leaderboard = leaderboard.slice(0, 10);
+      leaderboard.push(payload);
+      leaderboard = normalizeLeaderboard(leaderboard);
 
       saveSurfLeaderboard(leaderboard);
       renderSurfLeaderboard();
     }
 
-    function recordSurfScoreToLeaderboard(score, dist) {
+    function recordSurfScoreToLeaderboard(score, dist, surferIdx) {
       if (!score || score <= 0) return;
       if (!currentUser || !currentUser.name) initUserIdentity();
 
@@ -5398,15 +5431,21 @@
       const myAvatar = currentUser ? currentUser.avatar : '🏄‍♂️';
       const myBg = currentUser ? currentUser.bg : '#E0F2FE';
 
+      const prevLeaderboard = getSurfLeaderboard();
+      const myPrevEntry = prevLeaderboard.find(e => (e.userId && e.userId === myId) || (e.name && e.name.toLowerCase() === myName.toLowerCase()));
+      const prevBestScore = myPrevEntry ? myPrevEntry.score : 0;
+      const isNewPersonalBest = score > prevBestScore;
+
       const payload = {
         type: 'surf_score',
-        id: 'lb_' + Date.now(),
+        id: 'lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         userId: myId,
         name: myName,
         avatar: myAvatar,
         bg: myBg,
         score: score,
         dist: dist,
+        surfer: surferIdx !== undefined ? surferIdx : null,
         date: 'Oggi',
         timestamp: Date.now()
       };
@@ -5415,18 +5454,23 @@
 
       fetch(NTFY_URL, {
         method: 'POST',
-        headers: { 'Title': 'Salento Surf Real Score' },
+        headers: { 'Title': 'Salento Surf Record' },
         body: JSON.stringify(payload)
       }).catch(() => {});
 
-      const leaderboard = getSurfLeaderboard();
-      const myRank = leaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name === myName));
-      if (myRank === 0) {
-        showToast('🏆 INCREDIBILE! Sei 1° nella Classifica Top 10!');
-      } else if (myRank > 0 && myRank < 3) {
-        showToast(`🥈 Grande! Sei al ${myRank + 1}° posto nella Top 10!`);
-      } else if (myRank >= 3 && myRank < 10) {
-        showToast(`🎉 Sei entrato nella Top 10 al ${myRank + 1}° posto!`);
+      const updatedLeaderboard = getSurfLeaderboard();
+      const myRank = updatedLeaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name && e.name.toLowerCase() === myName.toLowerCase()));
+
+      if (isNewPersonalBest) {
+        if (myRank === 0) {
+          showToast(`🏆 NUOVO RECORD! Sei 1° nella Top 10 con ${score.toLocaleString()} pt!`);
+        } else if (myRank > 0 && myRank < 3) {
+          showToast(`🥈 Nuovo Record Personale! Sei al ${myRank + 1}° posto (${score.toLocaleString()} pt)!`);
+        } else if (myRank >= 3 && myRank < 10) {
+          showToast(`🎉 Nuovo Record Personale! Sei nella Top 10 al ${myRank + 1}° posto!`);
+        } else {
+          showToast(`✨ Nuovo Record Personale: ${score.toLocaleString()} pt!`);
+        }
       }
     }
 

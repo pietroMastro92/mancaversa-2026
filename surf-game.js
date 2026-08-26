@@ -77,33 +77,61 @@
         try {
           this.bgm = new Audio('./surf-assets/bgm.mp3');
           this.bgm.loop = true;
-          this.bgm.volume = 0.4;
+          this.bgm.volume = 0.45;
         } catch (e) {}
       }
     }
 
-    playMusic() {
+    unlockAudio() {
       this.init();
-      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
       if (this.bgm && !this.isMuted) {
         this.bgm.play().catch(() => {});
       }
     }
 
+    playMusic() {
+      this.unlockAudio();
+    }
+
     pauseMusic() {
-      if (this.bgm) this.bgm.pause();
+      if (this.bgm) {
+        try { this.bgm.pause(); } catch (e) {}
+      }
     }
 
     toggleMute() {
       this.isMuted = !this.isMuted;
       try { localStorage.setItem('salento_surf_muted_v1', this.isMuted); } catch (e) {}
       if (this.bgm) {
-        if (this.isMuted) this.bgm.pause();
-        else this.bgm.play().catch(() => {});
+        if (this.isMuted) {
+          try { this.bgm.pause(); } catch (e) {}
+        } else {
+          this.bgm.play().catch(() => {});
+        }
       }
       const btn = document.getElementById('btnSurfMute');
       if (btn) btn.innerHTML = `<span>${this.isMuted ? '🔇 Muto' : '🔊 Audio'}</span>`;
       return this.isMuted;
+    }
+
+    playSelect() {
+      if (!this.ctx || this.isMuted) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, t);
+      osc.frequency.exponentialRampToValueAtTime(783.99, t + 0.08);
+      g.gain.setValueAtTime(0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.1);
     }
 
     playJump() {
@@ -639,32 +667,38 @@
       if (this.heart < 1) {
         this.finished = true;
         this.animationTimer = 1;
+        const isNew = this.getScore() > this.highScore && this.getScore() > 0;
         this.saveScores();
-        this.showGameOverModal();
+        this.showGameOverModal(isNew);
       } else {
         this.fallTimer = 1;
       }
     }
 
-    showGameOverModal() {
+    showGameOverModal(isNewRecord = false) {
       const modal = document.getElementById('surfGameOverModal');
       const finalScore = document.getElementById('surfFinalScore');
       const finalDist = document.getElementById('surfFinalDist');
       const finalBarrel = document.getElementById('surfFinalBarrel');
       const recordBadge = document.getElementById('surfNewRecordBadge');
 
-      const isNew = this.getScore() >= this.highScore;
+      const curScore = this.getScore();
+      const curDist = Math.floor(this.distance / 10.0);
+      const isNew = isNewRecord || (curScore >= this.highScore && curScore > 0);
 
-      if (finalScore) finalScore.textContent = this.getScore().toLocaleString();
-      if (finalDist) finalDist.textContent = `${Math.floor(this.distance / 10.0)}m`;
+      if (finalScore) finalScore.textContent = curScore.toLocaleString();
+      if (finalDist) finalDist.textContent = `${curDist}m`;
       if (finalBarrel) finalBarrel.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
-      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
+      if (recordBadge) {
+        recordBadge.style.display = isNew ? 'inline-block' : 'none';
+        if (isNew) recordBadge.textContent = '🏆 NUOVO RECORD!';
+      }
 
       if (modal) modal.classList.add('active');
 
-      // Salva automaticamente il punteggio nella Classifica Top 10 sotto il gioco
+      // Salva automaticamente il punteggio nella Classifica Top 10 dei record singoli
       if (window.recordSurfScoreToLeaderboard) {
-        window.recordSurfScoreToLeaderboard(this.getScore(), Math.floor(this.distance / 10.0));
+        window.recordSurfScoreToLeaderboard(curScore, curDist, this.surfer);
       }
     }
 
@@ -961,8 +995,9 @@
           this.surferAction = 7;
           this.boardBrokenTimer = 1;
           this.audio.playKraken();
+          const isNew = this.getScore() > this.highScore && this.getScore() > 0;
           this.saveScores();
-          this.showGameOverModal();
+          this.showGameOverModal(isNew);
           return;
         }
       }
@@ -1059,58 +1094,61 @@
     }
 
     drawStarterViewer(ctx) {
-      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
       const center = this.width / 2.0;
       const oLeft = (this.width - 64) / 2.0;
       const top = this.height * SURFER_TOP;
 
+      // Scorrimento orizzontale degli 8 Surfer
       let left = oLeft - this.surfer * 84;
       for (let i = 0; i < 8; i++, left += 84) {
         const act = this.surfer === i ? 1 + (this.boardTimer >= 60 ? 4 - Math.floor((this.boardTimer - 60) / 12.0) : Math.floor(this.boardTimer / 12.0)) : 3;
-        this.drawSurferOrigin(ctx, i, act, alpha, left, top);
+        const sAlpha = this.surfer === i ? 1.0 : 0.45;
+        this.drawSurferOrigin(ctx, i, act, sAlpha, left, top);
       }
 
       ctx.save();
       ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.9})`;
-      ctx.font = 'bold 40px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("LET'S SURF!", center, top - 80);
 
-      // Frecce touch eleganti per smartphone
+      // Titolo SALENTO SURF
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 36px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("SALENTO SURF", center, top - 70);
+
+      // Frecce touch ben visibili ed evidenziate per smartphone
       ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.lineWidth = 2;
 
-      // Freccia Sinistra
+      // Freccia Sinistra (Cerchio bianco rialzato)
       if (this.surfer > 0) {
         ctx.beginPath();
-        ctx.arc(oLeft - 24, top + 32, 24, 0, Math.PI * 2);
+        ctx.arc(oLeft - 26, top + 32, 24, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#0F172A';
         ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('◄', oLeft - 24, top + 40);
+        ctx.fillText('◄', oLeft - 26, top + 40);
       }
 
-      // Freccia Destra
+      // Freccia Destra (Cerchio bianco rialzato)
       if (this.surfer < 7) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         ctx.beginPath();
-        ctx.arc(oLeft + 88, top + 32, 24, 0, Math.PI * 2);
+        ctx.arc(oLeft + 90, top + 32, 24, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#0F172A';
         ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('►', oLeft + 88, top + 40);
+        ctx.fillText('►', oLeft + 90, top + 40);
       }
 
-      // Istruzioni touch-friendly
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.85})`;
-      ctx.font = 'bold 15px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      // Istruzioni touch chiare
+      ctx.fillStyle = '#0F172A';
+      ctx.font = 'bold 14px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("◄ TOCCA FRECCE PER SCEGLIERE ►", center, top + 95);
 
       // Bottone Play Centrale Pop
-      const btnW = Math.min(280, this.width - 40);
+      const btnW = Math.min(290, this.width - 40);
       const btnH = 50;
       const btnX = center - btnW / 2;
       const btnY = top + 125;
@@ -1122,33 +1160,43 @@
       ctx.fill();
 
       // Corpo bottone
-      ctx.fillStyle = '#FF9500';
+      ctx.fillStyle = '#FF385C';
       ctx.beginPath();
       ctx.roundRect(btnX, btnY, btnW, btnH, 25);
       ctx.fill();
+
+      // Bordo luminoso
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 17px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("▶ TOCCA PER PARTIRE!", center, btnY + 31);
 
+      // Hint tastiera sotto
+      ctx.fillStyle = '#475569';
+      ctx.font = '500 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("Oppure premi Spazio o Invio", center, btnY + btnH + 20);
+
       ctx.restore();
     }
 
     drawFinishViewer(ctx) {
-      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
       const center = this.width / 2.0;
       const centerY = this.height / 2.0 - 50;
 
       ctx.save();
-      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.88})`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
       ctx.fillRect(0, 0, this.width, this.height);
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.95})`;
+      ctx.fillStyle = '#0F172A';
       ctx.font = 'bold 42px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("GAME OVER!", center, centerY - 40);
 
       ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#64748B';
       ctx.fillText("Tocca ovunque per fare un'altra partita", center, centerY + 10);
 
       ctx.font = 'bold 24px "FiraCode", monospace, sans-serif';
@@ -1247,7 +1295,53 @@
 
         const { x, y } = getCanvasPos(e);
 
-        // Double tap detection per Boost su smartphone
+        // Se siamo nella schermata iniziale o finale
+        if (!this.started || this.finished) {
+          if (this.finished) {
+            this.resetGame();
+            this.startSurfing();
+            return;
+          }
+
+          const top = this.height * SURFER_TOP;
+          const oLeft = (this.width - 64) / 2.0;
+
+          // 1. Tocco preciso su Freccia Sinistra
+          const isLeftArrow = Math.hypot(x - (oLeft - 26), y - (top + 32)) <= 36 || (x >= oLeft - 68 && x <= oLeft - 6 && y >= top && y <= top + 64);
+          if (isLeftArrow) {
+            this.audio.playSelect();
+            this.setSurferCharacter(this.surfer - 1);
+            return;
+          }
+
+          // 2. Tocco preciso su Freccia Destra
+          const isRightArrow = Math.hypot(x - (oLeft + 90), y - (top + 32)) <= 36 || (x >= oLeft + 70 && x <= oLeft + 132 && y >= top && y <= top + 64);
+          if (isRightArrow) {
+            this.audio.playSelect();
+            this.setSurferCharacter(this.surfer + 1);
+            return;
+          }
+
+          // 3. Tocco sulle anteprime laterali dei surfer nella fascia orizzontale
+          if (y >= top - 20 && y <= top + 75) {
+            if (x < oLeft - 10) {
+              this.audio.playSelect();
+              this.setSurferCharacter(this.surfer - 1);
+              return;
+            }
+            if (x > oLeft + 74) {
+              this.audio.playSelect();
+              this.setSurferCharacter(this.surfer + 1);
+              return;
+            }
+          }
+
+          // 4. In qualsiasi altro punto (pulsante Play arancione, centro, tocco libero): AVVIA SUBITO IL GIOCO!
+          this.startSurfing();
+          return;
+        }
+
+        // Double tap detection per Boost su smartphone durante il gioco
         const now = Date.now();
         if (now - lastTapTime < 300 && this.started && !this.paused && !this.finished) {
           this.triggerBoost();
@@ -1255,26 +1349,6 @@
           return;
         }
         lastTapTime = now;
-
-        if (!this.started || this.finished) {
-          if (!this.started) {
-            const top = this.height * SURFER_TOP;
-            const oLeft = (this.width - 64) / 2.0;
-
-            // Tocco su freccia sinistra o area sinistra
-            if (x < oLeft || (x < this.width * 0.4 && y > top - 20 && y < top + 80)) {
-              this.setSurferCharacter(this.surfer - 1);
-              return;
-            }
-            // Tocco su freccia destra o area destra
-            if (x > oLeft + 64 || (x > this.width * 0.6 && y > top - 20 && y < top + 80)) {
-              this.setSurferCharacter(this.surfer + 1);
-              return;
-            }
-          }
-          this.startSurfing();
-          return;
-        }
 
         // Se il surfer era fermo (idle), riparte
         if (this.paused && !this.fallTimer) {
@@ -1315,19 +1389,21 @@
 
       // Tastiera Desktop
       window.addEventListener('keydown', (e) => {
-        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
           this.audio.init();
 
           if (!this.started || this.finished) {
-            if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'KeyS') {
+            if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowDown' || e.code === 'KeyS') {
               this.startSurfing();
               return;
             }
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+              this.audio.playSelect();
               this.setSurferCharacter(this.surfer - 1);
               return;
             }
             if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+              this.audio.playSelect();
               this.setSurferCharacter(this.surfer + 1);
               return;
             }
