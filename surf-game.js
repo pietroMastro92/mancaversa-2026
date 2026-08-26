@@ -1177,14 +1177,12 @@
 
       // Shadow del bottone
       ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.beginPath();
-      ctx.roundRect(btnX, btnY + 4, btnW, btnH, 25);
+      this.drawRoundedRect(ctx, btnX, btnY + 4, btnW, btnH, 25);
       ctx.fill();
 
       // Corpo bottone
       ctx.fillStyle = '#FF385C';
-      ctx.beginPath();
-      ctx.roundRect(btnX, btnY, btnW, btnH, 25);
+      this.drawRoundedRect(ctx, btnX, btnY, btnW, btnH, 25);
       ctx.fill();
 
       // Bordo luminoso
@@ -1202,6 +1200,23 @@
       ctx.fillText("Oppure premi Spazio o Invio", center, btnY + btnH + 20);
 
       ctx.restore();
+    }
+
+    drawRoundedRect(ctx, x, y, width, height, radius) {
+      if (typeof ctx.roundRect === 'function') {
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+      } else {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+      }
     }
 
     drawFinishViewer(ctx) {
@@ -1492,10 +1507,13 @@
     }
 
     loop() {
-      this.update();
-      this.draw();
-      this.updateHUD();
-
+      try {
+        this.update();
+        this.draw();
+        this.updateHUD();
+      } catch (err) {
+        console.error('SalentoSurf loop error:', err);
+      }
       this.animId = requestAnimationFrame(() => this.loop());
     }
 
