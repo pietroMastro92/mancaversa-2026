@@ -218,6 +218,40 @@
       osc.start(t);
       osc.stop(t + 0.65);
     }
+
+    playDog() {
+      if (!this.ctx || this.isMuted) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(520, t);
+      osc.frequency.exponentialRampToValueAtTime(320, t + 0.12);
+      g.gain.setValueAtTime(0.25, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    }
+
+    playCoin() {
+      if (!this.ctx || this.isMuted) return;
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(987.77, t);
+      osc.frequency.setValueAtTime(1318.51, t + 0.08);
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    }
   }
 
   // ----------------------------------------------------------------------------
@@ -942,11 +976,11 @@
                   break;
                 case 4: // Moneta
                   this.coinCount++;
-                  this.audio.playCollect();
+                  this.audio.playCoin();
                   break;
                 case 6: // Cane
                   this.hasDog = true;
-                  this.audio.playCollect();
+                  this.audio.playDog();
                   break;
               }
               this.objects.splice(i, 1);
@@ -984,6 +1018,10 @@
       }
       if (++this.enemyTimer === 160) this.enemyTimer = 100;
       if (this.enemyTimer < 100) return;
+
+      if (this.hasDog && this.enemyTimer === 105) {
+        this.audio.playDog();
+      }
 
       if (this.enemyY + 200 < this.distance) {
         this.enemyX = this.enemyY = this.enemyTimer = 0;
