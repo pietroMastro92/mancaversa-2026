@@ -1,246 +1,188 @@
 /**
  * ==============================================================================
- * SALENTO SURF SANDBOX - CASUAL SURF SIM & WAVE GENERATOR
+ * SALENTO SURF SANDBOX - TRUE CASUAL SURF SIMULATOR & FLUID WAVE PHYSICS
  * ==============================================================================
- * Ispirato a "Surf Sandbox" (Steam indie casual surfing sim).
- * Caratteristiche:
- * - Simulazione fisica realistica dell'acqua a onde continue e fondali personalizzabili
- * - Catching the wave: Nuota (Paddle), aspetta il set, fai il Pop-Up al momento giusto!
- * - Vero Surf: Carving sulla parete, Bottom Turn, Snap, Air section e Tubi profondi (Barreled)
- * - Shorebreak & Wipeouts: Fatti travolgere dalla schiuma con fisica ragdoll/tumble
- * - Sandbox Spot Editor: Personalizza altezza onde, vento (Tramontana/Scirocco), marea e fondale
- * - Modalità Zen / Relax: Galleggia sulla tavola e goditi il rumore rilassante del mare
- * - Selezione Tavole: Shortboard, Longboard, Bodyboard, Bodysurf
- * - Audio sintetizzato Web Audio 8-bit con rumore reale delle onde e risonanza del tubo
- * - Controlli Touch per Smartphone (Joystick/Touch Drag + Pulsanti Azione) & Tastiera
+ * Fedele a "Surf Sandbox" (Steam indie):
+ * 1. Fisica idrodinamica 2D reale con profilo di sezione dell'oceano
+ * 2. Fondale marino interattivo & sculptabile (Sabbia, Reef, Scogliere)
+ * 3. Onde reali che frangono per shoaling: si impennano, creano la parete verticale,
+ *    la cresta si lancia in avanti formando un vero TUBO/BARREL scavato in 2D
+ * 4. Tavola con fisica di galleggiamento (Archimede), planata idrodinamica, gravità e drag
+ * 5. Controllo reale del trim/inclinazione della tavola, paddle, pop-up, carving, tubi e aerials
+ * 6. Fauna marina interattiva (tartarughe marine, banchi di pesci, posidonia)
+ * 7. Pennello Sandbox per scavare/alzare il fondale con un dito o mouse in tempo reale!
  */
 
 (function (window) {
   'use strict';
 
   // ----------------------------------------------------------------------------
-  // 1. CONFIGURAZIONE E PRESET SPOT SALENTINI
+  // 1. CONFIGURAZIONE SIMULAZIONE FISICA
   // ----------------------------------------------------------------------------
-  const SANDBOX_CONFIG = {
-    CANVAS_WIDTH: 440,
-    CANVAS_HEIGHT: 250,
-    PHYSICS_FPS: 60,
-    NUM_WATER_POINTS: 110,
-    SPRING_K: 0.024,
-    DAMPING: 0.035,
-    SPREAD: 0.24,
+  const CONFIG = {
+    WIDTH: 520,
+    HEIGHT: 300,
+    GRAVITY: 9.81 * 0.05,
+    DENSITY: 1.0,
+    WATER_DRAG: 0.965,
+    AIR_DRAG: 0.995,
+    SEABED_POINTS: 130, // Risoluzione orizzontale fondale
   };
 
-  const SPOT_PRESETS = {
+  // Spot pre-configurati del Salento con profili fondale reali
+  const SALENTO_SPOTS = {
     baia_verde: {
       id: 'baia_verde',
-      name: 'Baia Verde',
-      tag: '🏖️ Onde Pulite & Divertenti',
-      swellHeight: 32,
-      waveSpeed: 3.8,
-      tideDepth: 175,
-      windChop: 0.15,
-      windType: 'tramontana',
+      name: 'Baia Verde (Gallipoli)',
+      tag: '🏖️ Sabbia Dorata · Onde Pulite',
+      swellHeight: 34,
+      swellSpeed: 3.6,
+      tide: 195,
+      wind: 0.12,
       seabedType: 'sand',
-      desc: 'Onde regolari e perfette per carvare e rilassarsi al sole di Gallipoli.'
+      // Generatore profilo fondale: pendenza graduale verso la riva a destra
+      generateSeabed: (num, w, h) => {
+        const arr = [];
+        for (let i = 0; i < num; i++) {
+          const x = (i / (num - 1)) * w;
+          // Profondo a sinistra (260px), banco di sabbia al centro (170px), riva a destra (140px)
+          const depth = 265 - Math.sin((i / num) * Math.PI * 0.9) * 85 - (i / num) * 55;
+          arr.push(depth);
+        }
+        return arr;
+      }
     },
     mare_cavalli: {
       id: 'mare_cavalli',
-      name: 'Mare dei Cavalli',
-      tag: '🌊 Tubi & Barriera Rocciosa',
-      swellHeight: 46,
-      waveSpeed: 4.5,
-      tideDepth: 165,
-      windChop: 0.22,
-      windType: 'tramontana',
+      name: 'Mare dei Cavalli (Mancaversa)',
+      tag: '🌊 Reef Basso · Hollow Barrel',
+      swellHeight: 48,
+      swellSpeed: 4.4,
+      tide: 185,
+      wind: 0.18,
       seabedType: 'reef',
-      desc: 'Fondale roccioso che crea tubi scavati e cavità profonde (Barrel paradise).'
+      // Barriera rocciosa a gradino che forza l'onda a creare un tubo profondo
+      generateSeabed: (num, w, h) => {
+        const arr = [];
+        for (let i = 0; i < num; i++) {
+          const norm = i / (num - 1);
+          let depth = 270;
+          if (norm > 0.35 && norm < 0.65) {
+            // Scalino di roccia secca
+            depth = 155 - Math.sin((norm - 0.35) / 0.3 * Math.PI) * 45;
+          } else if (norm >= 0.65) {
+            depth = 175 - (norm - 0.65) * 60;
+          }
+          arr.push(depth);
+        }
+        return arr;
+      }
     },
     scirocco_storm: {
       id: 'scirocco_storm',
       name: 'Scirocco Heavy Shorebreak',
-      tag: '🌪️ Onde Alte & Heavy Lip',
-      swellHeight: 62,
-      waveSpeed: 5.4,
-      tideDepth: 155,
-      windChop: 0.45,
-      windType: 'scirocco',
+      tag: '🌪️ Onde Giganti & Shorebreak',
+      swellHeight: 65,
+      swellSpeed: 5.5,
+      tide: 175,
+      wind: 0.45,
       seabedType: 'slab',
-      desc: 'Mare grosso e onde potenti con rampe aeree e shorebreak pesante.'
+      // Muro di scoglio ripido sotto costa
+      generateSeabed: (num, w, h) => {
+        const arr = [];
+        for (let i = 0; i < num; i++) {
+          const norm = i / (num - 1);
+          const depth = 275 - Math.pow(norm, 2.2) * 165;
+          arr.push(depth);
+        }
+        return arr;
+      }
     },
     tramontana_zen: {
       id: 'tramontana_zen',
-      name: 'Tramontana Zen & Relax',
-      tag: '🧘‍♂️ Onde Piatte & Relax',
+      name: 'Tramontana Zen (Relax)',
+      tag: '🧘‍♂️ Mare Piatto Cristallino',
       swellHeight: 18,
-      waveSpeed: 2.8,
-      tideDepth: 180,
-      windChop: 0.05,
-      windType: 'tramontana',
+      swellSpeed: 2.5,
+      tide: 205,
+      wind: 0.04,
       seabedType: 'sand',
-      desc: 'Acqua cristallina come una piscina, ideale per galleggiare e guardare il mare.'
+      generateSeabed: (num, w, h) => {
+        const arr = [];
+        for (let i = 0; i < num; i++) {
+          arr.push(265 - (i / num) * 50);
+        }
+        return arr;
+      }
     }
   };
 
-  const SURF_BOARDS = {
+  // Tipologie di tavole/craft
+  const CRAFT_TYPES = {
     shortboard: {
       id: 'shortboard',
       name: 'Shortboard Thruster',
       icon: '🏄‍♂️',
-      length: 28,
-      width: 6,
-      speedBonus: 1.25,
-      carveAgility: 1.35,
-      paddleSpeed: 3.2,
-      airPotential: 1.4,
-      desc: 'Veloce e reattiva per manovre radicali, snap e salti aerei.'
+      length: 30,
+      thickness: 6,
+      mass: 4.5,
+      buoyancyCoeff: 1.45,
+      liftCoeff: 1.8,
+      agility: 1.35,
+      maxSpeed: 12.0
     },
     longboard: {
       id: 'longboard',
       name: 'Longboard 9’0 Classic',
       icon: '🛹',
-      length: 42,
-      width: 7.5,
-      speedBonus: 0.95,
-      carveAgility: 0.85,
-      paddleSpeed: 4.2,
-      airPotential: 0.6,
-      desc: 'Galleggiamento superiore, ideale per partire presto e passeggiare sull’onda.'
+      length: 44,
+      thickness: 8,
+      mass: 8.0,
+      buoyancyCoeff: 2.1,
+      liftCoeff: 1.3,
+      agility: 0.85,
+      maxSpeed: 9.5
     },
     bodyboard: {
       id: 'bodyboard',
       name: 'Bodyboard & Pinne',
       icon: '🌊',
       length: 22,
-      width: 8,
-      speedBonus: 1.1,
-      carveAgility: 1.4,
-      paddleSpeed: 3.6,
-      airPotential: 1.2,
-      desc: 'Massima aderenza dentro il tubo e tubi profondi a pelo d’acqua.'
+      thickness: 7,
+      mass: 3.2,
+      buoyancyCoeff: 1.6,
+      liftCoeff: 1.5,
+      agility: 1.5,
+      maxSpeed: 10.5
     },
     bodysurf: {
       id: 'bodysurf',
-      name: 'Bodysurf Puro (Senza Tavola)',
+      name: 'Bodysurf Puro',
       icon: '🏊‍♂️',
       length: 16,
-      width: 5,
-      speedBonus: 0.85,
-      carveAgility: 1.1,
-      paddleSpeed: 2.8,
-      airPotential: 0.3,
-      desc: 'Il contatto più intimo con l’onda: solo tu, le pinne e l’energia dell’acqua.'
-    }
-  };
-
-  const SURFER_SKINS = {
-    pietro: {
-      id: 'pietro',
-      name: 'Pietro Superhost',
-      emoji: '😎',
-      hairColor: '#4A2E18',
-      skinColor: '#FFCC99',
-      trunksColor: '#FF385C',
-      boardColor: '#FFFFFF',
-      boardStripe: '#FF385C',
-      glasses: true
-    },
-    delfino: {
-      id: 'delfino',
-      name: 'Delfino Anonimo',
-      emoji: '🐬',
-      hairColor: '#0284C7',
-      skinColor: '#BAE6FD',
-      trunksColor: '#0369A1',
-      boardColor: '#E0F2FE',
-      boardStripe: '#0284C7',
-      glasses: true
-    },
-    fenicottero: {
-      id: 'fenicottero',
-      name: 'Fenicottero Rosa',
-      emoji: '🦩',
-      hairColor: '#DB2777',
-      skinColor: '#FBCFE8',
-      trunksColor: '#BE185D',
-      boardColor: '#FFF1F2',
-      boardStripe: '#F43F5E',
-      glasses: true
-    },
-    scirocco: {
-      id: 'scirocco',
-      name: 'Scirocco Gold',
-      emoji: '🌪️',
-      hairColor: '#EA580C',
-      skinColor: '#FED7AA',
-      trunksColor: '#C2410C',
-      boardColor: '#FEF08A',
-      boardStripe: '#EA580C',
-      glasses: true
+      thickness: 5,
+      mass: 2.0,
+      buoyancyCoeff: 1.1,
+      liftCoeff: 0.9,
+      agility: 1.2,
+      maxSpeed: 7.5
     }
   };
 
   // ----------------------------------------------------------------------------
-  // 1b. MOTORE PARTICELLE PER SCHIUMA, SPRAY E SCIE D'ACQUA
-  // ----------------------------------------------------------------------------
-  class SurfParticleEngine {
-    constructor() {
-      this.particles = [];
-    }
-
-    add(x, y, vx, vy, color = '#FFFFFF', size = 3, life = 20, type = 'spray') {
-      if (this.particles.length > 180) this.particles.shift();
-      this.particles.push({
-        x,
-        y,
-        vx,
-        vy,
-        color,
-        size,
-        life,
-        maxLife: life,
-        type
-      });
-    }
-
-    update() {
-      for (let i = this.particles.length - 1; i >= 0; i--) {
-        const p = this.particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.16;
-        p.life--;
-        if (p.life <= 0) {
-          this.particles.splice(i, 1);
-        }
-      }
-    }
-
-    draw(ctx) {
-      for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i];
-        const alpha = Math.max(0.1, p.life / p.maxLife);
-        ctx.fillStyle = p.color === '#FFFFFF' ? `rgba(255, 255, 255, ${alpha})` : p.color;
-        const s = Math.max(1, Math.round(p.size * (p.life / p.maxLife)));
-        ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s);
-      }
-    }
-  }
-
-  // ----------------------------------------------------------------------------
-  // 2. SINTETIZZATORE AUDIO WEB AUDIO (SUONO REALISTICO OCEANO & TUBO)
+  // 2. SINTETIZZATORE AUDIO WEB AUDIO PER RUMORE REALISTICO MARE & TUBO
   // ----------------------------------------------------------------------------
   class RealisticOceanAudio {
     constructor() {
       this.ctx = null;
       this.isMuted = false;
       this.waveNoise = null;
-      this.waveFilter = null;
-      this.waveGain = null;
+      this.filter = null;
+      this.gain = null;
       this.isInit = false;
 
-      const savedMute = localStorage.getItem('salento_surf_muted');
-      if (savedMute !== null) this.isMuted = savedMute === 'true';
+      const saved = localStorage.getItem('salento_surf_muted');
+      if (saved !== null) this.isMuted = saved === 'true';
     }
 
     init() {
@@ -249,7 +191,29 @@
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         this.ctx = new AudioCtx();
-        this.initAmbience();
+
+        // Genera rumore bianco costante per il frangersi dell'onda
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const out = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) out[i] = Math.random() * 2 - 1;
+
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        this.filter = this.ctx.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.frequency.value = 380;
+
+        this.gain = this.ctx.createGain();
+        this.gain.gain.value = this.isMuted ? 0 : 0.045;
+
+        whiteNoise.connect(this.filter);
+        this.filter.connect(this.gain);
+        this.gain.connect(this.ctx.destination);
+        whiteNoise.start(0);
+
         this.isInit = true;
       } catch (e) {}
     }
@@ -261,568 +225,606 @@
     toggleMute() {
       this.isMuted = !this.isMuted;
       localStorage.setItem('salento_surf_muted', this.isMuted);
-      if (this.waveGain) {
-        this.waveGain.gain.setValueAtTime(this.isMuted ? 0 : 0.045, this.ctx ? this.ctx.currentTime : 0);
+      if (this.gain && this.ctx) {
+        this.gain.gain.setValueAtTime(this.isMuted ? 0 : 0.045, this.ctx.currentTime);
       }
       return this.isMuted;
     }
 
-    initAmbience() {
-      if (!this.ctx) return;
-      try {
-        const bufferSize = this.ctx.sampleRate * 2;
-        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const out = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) out[i] = Math.random() * 2 - 1;
-
-        const whiteNoise = this.ctx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-
-        this.waveFilter = this.ctx.createBiquadFilter();
-        this.waveFilter.type = 'lowpass';
-        this.waveFilter.frequency.value = 420;
-
-        this.waveGain = this.ctx.createGain();
-        this.waveGain.gain.value = this.isMuted ? 0 : 0.04;
-
-        whiteNoise.connect(this.waveFilter);
-        this.waveFilter.connect(this.waveGain);
-        this.waveGain.connect(this.ctx.destination);
-        whiteNoise.start(0);
-        this.waveNoise = whiteNoise;
-      } catch (e) {}
-    }
-
-    setAmbience(inBarrel, waveBreakEnergy) {
-      if (!this.ctx || !this.waveFilter || !this.waveGain || this.isMuted) return;
+    setDynamicAcoustics(inBarrel, speedNorm) {
+      if (!this.ctx || !this.filter || !this.gain || this.isMuted) return;
       const t = this.ctx.currentTime;
       if (inBarrel) {
-        this.waveFilter.frequency.setTargetAtTime(1050, t, 0.06);
-        this.waveGain.gain.setTargetAtTime(0.09, t, 0.06);
+        // Dentro il tubo: risonanza profonda e riverbero
+        this.filter.frequency.setTargetAtTime(950, t, 0.08);
+        this.gain.gain.setTargetAtTime(0.085, t, 0.08);
       } else {
-        const freq = 360 + waveBreakEnergy * 420;
-        this.waveFilter.frequency.setTargetAtTime(freq, t, 0.1);
-        this.waveGain.gain.setTargetAtTime(0.04 + waveBreakEnergy * 0.03, t, 0.1);
+        const freq = 340 + speedNorm * 480;
+        this.filter.frequency.setTargetAtTime(freq, t, 0.12);
+        this.gain.gain.setTargetAtTime(0.04 + speedNorm * 0.035, t, 0.12);
       }
     }
 
-    playPopUpSound() {
+    playSpray() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
       const t = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(240, t);
-      osc.frequency.exponentialRampToValueAtTime(480, t + 0.12);
-      gain.gain.setValueAtTime(0.14, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(t);
-      osc.stop(t + 0.14);
-    }
-
-    playSnapSpray() {
-      if (!this.ctx || this.isMuted) return;
-      this.resume();
-      const t = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const g = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(520, t);
-      osc.frequency.exponentialRampToValueAtTime(120, t + 0.15);
-      gain.gain.setValueAtTime(0.18, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      osc.frequency.setValueAtTime(460, t);
+      osc.frequency.exponentialRampToValueAtTime(110, t + 0.12);
+      g.gain.setValueAtTime(0.14, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
       osc.start(t);
-      osc.stop(t + 0.16);
+      osc.stop(t + 0.13);
     }
 
-    playTubeSpit() {
+    playTubeChime() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
-      const notes = [440, 554.37, 659.25, 880];
-      notes.forEach((freq, i) => {
-        const t = this.ctx.currentTime + i * 0.04;
+      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+        const t = this.ctx.currentTime + idx * 0.04;
         const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const g = this.ctx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, t);
-        gain.gain.setValueAtTime(0.16, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
         osc.start(t);
         osc.stop(t + 0.11);
       });
     }
 
-    playWipeoutCrash() {
+    playWipeout() {
       if (!this.ctx || this.isMuted) return;
       this.resume();
       const t = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const g = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(280, t);
-      osc.frequency.linearRampToValueAtTime(45, t + 0.45);
-      gain.gain.setValueAtTime(0.24, t);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.48);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      osc.frequency.setValueAtTime(260, t);
+      osc.frequency.linearRampToValueAtTime(40, t + 0.4);
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
       osc.start(t);
-      osc.stop(t + 0.48);
+      osc.stop(t + 0.42);
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 3. SIMULATORE IDRODINAMICO DELL'ACQUA (FLUID WAVE SPRING HEIGHTFIELD)
+  // 3. SIMULATORE 2D ONDE IDRODINAMICHE & FONDALE SCULPTABILE
   // ----------------------------------------------------------------------------
-  class RealisticWaterSimulation {
-    constructor(preset) {
-      this.preset = preset || SPOT_PRESETS.baia_verde;
-      this.points = [];
-      this.numPoints = SANDBOX_CONFIG.NUM_WATER_POINTS;
-      this.baseY = this.preset.tideDepth;
-      this.swellPhase = 0;
-      this.lipCurlParticles = [];
-      this.initPoints();
+  class FluidOceanSimulator {
+    constructor(spotConfig) {
+      this.spot = spotConfig || SALENTO_SPOTS.baia_verde;
+      this.numPoints = CONFIG.SEABED_POINTS;
+      this.width = CONFIG.WIDTH;
+      this.height = CONFIG.HEIGHT;
+
+      this.seabed = this.spot.generateSeabed(this.numPoints, this.width, this.height);
+      this.waterSurface = new Float32Array(this.numPoints);
+      this.waterVelocityY = new Float32Array(this.numPoints);
+      this.waterVelocityX = new Float32Array(this.numPoints);
+
+      this.swellTime = 0;
+      this.swellHeight = this.spot.swellHeight;
+      this.swellSpeed = this.spot.swellSpeed;
+      this.wind = this.spot.wind;
+      this.baseTide = this.spot.tide;
+
+      // Particelle d'acqua e schiuma
+      this.foamParticles = [];
+      this.curlingLipParts = [];
+
+      // Fauna marina
+      this.seaCreatures = [
+        { type: 'turtle', x: 220, y: 220, vx: 0.4, vy: 0, size: 14, anim: 0 },
+        { type: 'fish', x: 120, y: 240, vx: 0.8, vy: 0, size: 8, anim: 0 },
+        { type: 'fish', x: 135, y: 245, vx: 0.8, vy: 0, size: 7, anim: 0.5 },
+        { type: 'fish', x: 380, y: 200, vx: -0.6, vy: 0, size: 8, anim: 0 }
+      ];
+
+      this.initWater();
     }
 
-    initPoints() {
-      this.points = [];
-      this.baseY = this.preset.tideDepth;
-      const stepX = SANDBOX_CONFIG.CANVAS_WIDTH / (this.numPoints - 1);
+    setSpot(spotKey) {
+      if (SALENTO_SPOTS[spotKey]) {
+        this.spot = SALENTO_SPOTS[spotKey];
+        this.swellHeight = this.spot.swellHeight;
+        this.swellSpeed = this.spot.swellSpeed;
+        this.wind = this.spot.wind;
+        this.baseTide = this.spot.tide;
+        this.seabed = this.spot.generateSeabed(this.numPoints, this.width, this.height);
+        this.initWater();
+      }
+    }
+
+    initWater() {
       for (let i = 0; i < this.numPoints; i++) {
-        this.points.push({
-          x: i * stepX,
-          y: this.baseY,
-          targetY: this.baseY,
-          speed: 0
-        });
+        this.waterSurface[i] = this.baseTide;
+        this.waterVelocityY[i] = 0;
+        this.waterVelocityX[i] = 0;
       }
     }
 
-    setPreset(preset) {
-      this.preset = preset;
-      this.baseY = preset.tideDepth;
-      for (let i = 0; i < this.points.length; i++) {
-        this.points[i].targetY = this.baseY;
+    // SCULPT TOOL: Alza o scava il fondale con il tocco/mouse
+    sculptSeabed(canvasX, deltaDepth) {
+      const stepX = this.width / (this.numPoints - 1);
+      const centerIdx = Math.round(canvasX / stepX);
+      const radius = 6;
+
+      for (let i = -radius; i <= radius; i++) {
+        const idx = centerIdx + i;
+        if (idx >= 0 && idx < this.numPoints) {
+          const falloff = Math.cos((i / radius) * (Math.PI / 2));
+          this.seabed[idx] = Math.max(70, Math.min(this.height - 15, this.seabed[idx] + deltaDepth * falloff));
+        }
       }
     }
 
-    update(timeSec) {
-      this.swellPhase += 0.038 * (this.preset.waveSpeed / 4.0);
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const height = SANDBOX_CONFIG.CANVAS_HEIGHT;
+    update(dt) {
+      this.swellTime += dt * (this.swellSpeed * 0.95);
+      const stepX = this.width / (this.numPoints - 1);
 
-      // 1. Genera lo swell oceanico principale che viaggia da sinistra verso riva
-      for (let i = 0; i < this.points.length; i++) {
-        const pt = this.points[i];
-        const normX = pt.x / width;
+      // 1. ONDA DA SWELL OCEANICO CHE SI PROPAGA DA SINISTRA A DESTRA
+      for (let i = 0; i < this.numPoints; i++) {
+        const x = i * stepX;
+        const normX = x / this.width;
+        const seabedDepth = this.seabed[i];
+        const waterDepth = Math.max(10, seabedDepth - this.baseTide);
 
-        // Shoaling: mentre l'onda si avvicina al fondale (a destra o sinistra in base allo spot), cresce in altezza
-        const shoalEffect = Math.sin(normX * Math.PI * 0.9);
-        const primarySwell = Math.sin(normX * 4.5 - this.swellPhase) * this.preset.swellHeight * (0.6 + shoalEffect * 0.7);
-        const secondaryChop = Math.sin(normX * 12.0 + this.swellPhase * 2.0) * (this.preset.windChop * 6);
+        // Shoaling: mentre l'acqua diventa più bassa sopra il reef/sabbia,
+        // l'altezza dell'onda cresce vertiginosamente e la lunghezza d'onda si accorcia!
+        const shoalingFactor = Math.pow(160 / waterDepth, 0.65);
+        const wavePhase = normX * 4.2 - this.swellTime;
 
-        // Profilo dell'onda che si impenna e frange
-        const steepness = Math.pow(Math.max(0, Math.sin(normX * 3.5 - this.swellPhase)), 2.2);
-        const breakingRamp = steepness * (this.preset.swellHeight * 0.85);
+        // Profilo non-lineare dell'onda (trochoid / solitary wave profile)
+        const primaryWave = Math.sin(wavePhase);
+        const steepCrest = Math.pow(Math.max(0, primaryWave), 2.8) * 1.8; // cresta affilata
+        const trough = Math.min(0, primaryWave) * 0.6; // cavo piatto
 
-        pt.targetY = this.baseY - primarySwell - secondaryChop - breakingRamp;
+        const waveElev = (steepCrest + trough) * this.swellHeight * shoalingFactor * 0.45;
+        const windChop = Math.sin(normX * 16.0 + this.swellTime * 2.5) * (this.wind * 8);
 
-        // Fisica molle (Springs)
-        const dy = pt.targetY - pt.y;
-        pt.speed += SANDBOX_CONFIG.SPRING_K * dy - pt.speed * SANDBOX_CONFIG.DAMPING;
-        pt.y += pt.speed;
+        const targetY = this.baseTide - waveElev + windChop;
+
+        // Dinamica della superficie dell'acqua (Molle con smorzamento)
+        const dy = targetY - this.waterSurface[i];
+        this.waterVelocityY[i] += dy * 0.08 - this.waterVelocityY[i] * 0.05;
+        this.waterSurface[i] += this.waterVelocityY[i];
+
+        // Calcolo velocità orizzontale dell'acqua (corrente orbitale)
+        this.waterVelocityX[i] = Math.cos(wavePhase) * (this.swellSpeed * 1.1) * shoalingFactor;
       }
 
-      // 2. Propagazione d'onda fra punti vicini (Wave dispersion)
-      for (let j = 0; j < 4; j++) {
-        for (let i = 0; i < this.points.length; i++) {
-          if (i > 0) {
-            const leftD = this.points[i].y - this.points[i - 1].y;
-            this.points[i - 1].speed += leftD * SANDBOX_CONFIG.SPREAD;
-            this.points[i - 1].y += leftD * SANDBOX_CONFIG.SPREAD;
-          }
-          if (i < this.points.length - 1) {
-            const rightD = this.points[i].y - this.points[i + 1].y;
-            this.points[i + 1].speed += rightD * SANDBOX_CONFIG.SPREAD;
-            this.points[i + 1].y += rightD * SANDBOX_CONFIG.SPREAD;
-          }
+      // 2. DISPERSIONE ORIZZONTALE & SMORZAMENTO
+      for (let pass = 0; pass < 3; pass++) {
+        for (let i = 1; i < this.numPoints - 1; i++) {
+          const avg = (this.waterSurface[i - 1] + this.waterSurface[i + 1]) * 0.5;
+          this.waterSurface[i] += (avg - this.waterSurface[i]) * 0.12;
         }
       }
 
-      // 3. Generazione particelle del Lip che scavalca e cade nel tubo
-      this.updateLipCurl();
+      // 3. FRANGIMENTO DELL'ONDA & CREAZIONE VERO TUBO (BARREL LIP CURLING)
+      this.updateBarrelLip(stepX);
+
+      // 4. AGGIORNA PARTICELLE DI SCHIUMA E FAUNA MARINA
+      this.updateFoamAndSeaLife(dt);
     }
 
-    updateLipCurl() {
-      // Trova la cresta più ripida dove l'onda si lancia in avanti (Curling Lip)
-      for (let i = 2; i < this.points.length - 2; i++) {
-        const pt = this.points[i];
-        const prev = this.points[i - 1];
-        const next = this.points[i + 1];
+    updateBarrelLip(stepX) {
+      for (let i = 2; i < this.numPoints - 2; i++) {
+        const x = i * stepX;
+        const y = this.waterSurface[i];
+        const prevY = this.waterSurface[i - 1];
+        const nextY = this.waterSurface[i + 1];
 
-        const slope = (next.y - prev.y) / (next.x - prev.x);
-        
-        // Se la pendenza è ripida e l'onda è alta -> spara getti del barile
-        if (slope < -0.45 && pt.y < this.baseY - 25) {
-          if (Math.random() < 0.35) {
-            this.lipCurlParticles.push({
-              x: pt.x + (Math.random() * 8 - 4),
-              y: pt.y - 2,
-              vx: 1.8 + Math.random() * 2.2,
-              vy: -1.0 - Math.random() * 1.5,
-              life: 24,
-              maxLife: 24,
-              size: Math.random() > 0.5 ? 3 : 4
+        // Pendenza della parete
+        const slope = (nextY - prevY) / (stepX * 2);
+
+        // Se la pendenza è ripida e l'onda è in cima -> il lip si lancia in avanti creando il tubo!
+        if (slope < -0.42 && y < this.baseTide - 28) {
+          if (Math.random() < 0.45) {
+            this.curlingLipParts.push({
+              x: x + 2,
+              y: y - 2,
+              vx: 2.8 + Math.random() * 2.2,
+              vy: -1.2 - Math.random() * 1.8,
+              life: 28,
+              maxLife: 28,
+              size: Math.random() > 0.5 ? 4 : 3
             });
           }
         }
       }
 
-      // Aggiorna particelle del lip
-      for (let i = this.lipCurlParticles.length - 1; i >= 0; i--) {
-        const p = this.lipCurlParticles[i];
+      // Aggiorna particelle getto del barile
+      for (let i = this.curlingLipParts.length - 1; i >= 0; i--) {
+        const p = this.curlingLipParts[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.22; // gravità caduta getto d'acqua
+        p.vy += CONFIG.GRAVITY * 1.4; // gravità caduta del getto d'acqua
         p.life--;
-        if (p.life <= 0) this.lipCurlParticles.splice(i, 1);
+
+        // Quando il lip tocca l'acqua sotto -> impatto con spruzzi di schiuma bianca
+        const waterY = this.getWaterHeight(p.x);
+        if (p.y >= waterY) {
+          for (let k = 0; k < 2; k++) {
+            this.foamParticles.push({
+              x: p.x + (Math.random() * 6 - 3),
+              y: waterY + (Math.random() * 4 - 2),
+              vx: p.vx * 0.4 + (Math.random() * 2 - 1),
+              vy: -Math.random() * 1.5,
+              life: 30,
+              maxLife: 30,
+              size: 3
+            });
+          }
+          this.curlingLipParts.splice(i, 1);
+        } else if (p.life <= 0) {
+          this.curlingLipParts.splice(i, 1);
+        }
       }
     }
 
-    getWaterHeightAt(x) {
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const clampedX = Math.max(0, Math.min(width, x));
-      const stepX = width / (this.numPoints - 1);
-      const index = Math.floor(clampedX / stepX);
-      const nextIndex = Math.min(this.numPoints - 1, index + 1);
-
-      if (index >= this.numPoints - 1) return this.points[this.numPoints - 1].y;
-
-      const t = (clampedX - this.points[index].x) / stepX;
-      return this.points[index].y * (1 - t) + this.points[nextIndex].y * t;
-    }
-
-    getWaterSlopeAt(x) {
-      const delta = 4;
-      const y1 = this.getWaterHeightAt(x - delta);
-      const y2 = this.getWaterHeightAt(x + delta);
-      return Math.atan2(y2 - y1, delta * 2);
-    }
-
-    splashAt(x, strength = 6) {
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const stepX = width / (this.numPoints - 1);
-      const index = Math.max(0, Math.min(this.numPoints - 1, Math.floor(x / stepX)));
-      if (this.points[index]) {
-        this.points[index].speed += strength;
+    updateFoamAndSeaLife(dt) {
+      // Particelle schiuma
+      for (let i = this.foamParticles.length - 1; i >= 0; i--) {
+        const f = this.foamParticles[i];
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vx *= 0.94;
+        f.vy *= 0.94;
+        f.life--;
+        if (f.life <= 0) this.foamParticles.splice(i, 1);
       }
+
+      // Fauna marina (Tartaruga e pesciolini)
+      for (let i = 0; i < this.seaCreatures.length; i++) {
+        const c = this.seaCreatures[i];
+        c.x += c.vx;
+        c.anim += dt * 3.5;
+        c.y += Math.sin(c.anim) * 0.35;
+
+        // Limiti mondo
+        if (c.x > this.width + 30) c.x = -30;
+        if (c.x < -30) c.x = this.width + 30;
+
+        // Mantieni i pesci sotto il pelo dell'acqua e sopra il fondale
+        const surfY = this.getWaterHeight(c.x);
+        const bedY = this.getSeabedHeight(c.x);
+        c.y = Math.max(surfY + 20, Math.min(bedY - 15, c.y));
+      }
+    }
+
+    getWaterHeight(x) {
+      const clampedX = Math.max(0, Math.min(this.width, x));
+      const stepX = this.width / (this.numPoints - 1);
+      const idx = Math.floor(clampedX / stepX);
+      const nextIdx = Math.min(this.numPoints - 1, idx + 1);
+      const t = (clampedX - idx * stepX) / stepX;
+
+      return this.waterSurface[idx] * (1 - t) + this.waterSurface[nextIdx] * t;
+    }
+
+    getWaterSlope(x) {
+      const d = 6;
+      const y1 = this.getWaterHeight(x - d);
+      const y2 = this.getWaterHeight(x + d);
+      return Math.atan2(y2 - y1, d * 2);
+    }
+
+    getSeabedHeight(x) {
+      const clampedX = Math.max(0, Math.min(this.width, x));
+      const stepX = this.width / (this.numPoints - 1);
+      const idx = Math.floor(clampedX / stepX);
+      const nextIdx = Math.min(this.numPoints - 1, idx + 1);
+      const t = (clampedX - idx * stepX) / stepX;
+
+      return this.seabed[idx] * (1 - t) + this.seabed[nextIdx] * t;
+    }
+
+    getWaterVelocityAt(x, y) {
+      const stepX = this.width / (this.numPoints - 1);
+      const idx = Math.max(0, Math.min(this.numPoints - 1, Math.floor(x / stepX)));
+      return {
+        vx: this.waterVelocityX[idx] || 0,
+        vy: this.waterVelocityY[idx] || 0
+      };
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 4. FISICA DEL SURFISTA (PADDLE, CATCH WAVE, POP-UP, CARVE, BARREL, SLAMMED)
+  // 4. FISICA CORPO RIGIDO DEL SURFISTA (IDRODINAMICA & CONTROLLO REALE)
   // ----------------------------------------------------------------------------
-  class SandboxSurfer {
-    constructor(skinId = 'pietro', boardId = 'shortboard') {
-      this.skin = SURFER_SKINS[skinId] || SURFER_SKINS.pietro;
-      this.board = SURF_BOARDS[boardId] || SURF_BOARDS.shortboard;
+  class RealisticSurferBody {
+    constructor(craftKey = 'shortboard') {
+      this.craft = CRAFT_TYPES[craftKey] || CRAFT_TYPES.shortboard;
       this.reset();
     }
 
     reset() {
-      this.x = 140;
-      this.y = 170;
+      this.x = 110;
+      this.y = 180;
       this.vx = 0;
       this.vy = 0;
-      this.angle = 0;
-      this.targetAngle = 0;
-      this.speed = 0;
+      this.angle = 0; // radianti inclinazione tavola
+      this.angularVelocity = 0;
 
-      // Stati:
-      // 'PADDLING'      -> Sdraiato sulla tavola che rema
-      // 'CATCHING'      -> Ha preso la spinta dell'onda
-      // 'SURFING'       -> In piedi sulla tavola, in carving
+      // STATI:
+      // 'PADDLING'      -> Sdraiato a remare
+      // 'SURFING'       -> In piedi in planata sulla parete
       // 'BARRELED'      -> Nel tubo dell'onda
-      // 'AIR'           -> Lanciato in aria dal lip
-      // 'WIPEOUT'       -> Slammed / Caduto in acqua
-      // 'RELAX_FLOAT'   -> Galleggia rilassato
+      // 'AIR'           -> In volo sopra la cresta
+      // 'WIPEOUT'       -> Slammed / Caduto in acqua con rotolamento
       this.state = 'PADDLING';
 
-      this.isPopUpReady = false;
-      this.paddleTimer = 0;
-      this.barrelTimer = 0;
-      this.totalBarrelTime = 0;
-      this.rideTime = 0;
       this.score = 0;
-      this.comboCount = 1;
-      this.wipeoutTimer = 0;
-      this.wipeoutReason = '';
+      this.rideTime = 0;
+      this.barrelTime = 0;
+      this.totalBarrelTime = 0;
+      this.comboMultiplier = 1;
 
-      this.actionMessage = '';
-      this.actionMsgTimer = 0;
-      this.actionColor = '#FFFFFF';
-
-      this.inputX = 0; // -1 (dietro / frena / rema indietro), +1 (avanti / rema / pump)
-      this.inputY = 0; // -1 (verso la cresta), +1 (verso il fondo)
       this.isStallActive = false;
+      this.inputSteer = 0; // -1 (nose up / climb), +1 (nose down / drop)
+      this.inputThrust = 0; // +1 (paddle forward / pump)
+
+      this.actionText = '';
+      this.actionTimer = 0;
+      this.actionColor = '#FFFFFF';
 
       this.sprayTrail = [];
     }
 
-    setSkin(skinId) {
-      if (SURFER_SKINS[skinId]) this.skin = SURFER_SKINS[skinId];
-    }
-
-    setBoard(boardId) {
-      if (SURF_BOARDS[boardId]) this.board = SURF_BOARDS[boardId];
+    setCraft(craftKey) {
+      if (CRAFT_TYPES[craftKey]) this.craft = CRAFT_TYPES[craftKey];
     }
 
     popUp() {
-      if (this.state === 'PADDLING' || this.state === 'CATCHING') {
+      if (this.state === 'PADDLING') {
         this.state = 'SURFING';
-        this.speed = Math.max(5.0, this.speed * 1.3);
+        this.vx = Math.max(4.5, this.vx * 1.3);
         this.showMessage('⚡ POP-UP! ON THE WAVE!', '#10B981');
         return true;
+      }
+      if (this.state === 'SURFING') {
+        // Snap radicale se già in piedi
+        return this.snap();
       }
       return false;
     }
 
     snap() {
-      if (this.state === 'SURFING' && this.speed > 5.5) {
-        this.speed *= 0.82;
-        this.vy = 2.2;
-        this.targetAngle = 0.75;
-        this.comboCount++;
-        const pts = 500 * this.comboCount;
+      if (this.state === 'SURFING' && Math.abs(this.vx) > 4.0) {
+        this.vx *= 0.85;
+        this.angularVelocity = 0.35;
+        this.comboMultiplier++;
+        const pts = 600 * this.comboMultiplier;
         this.score += pts;
-        this.showMessage(`💥 SNAP OFF THE LIP! +${pts}`, '#EC4899');
+        this.showMessage(`💥 RADICAL SNAP! +${pts}`, '#EC4899');
         return true;
       }
       return false;
     }
 
-    update(waterSim, particles, audio, timeSec) {
-      const waterY = waterSim.getWaterHeightAt(this.x);
-      const waterSlope = waterSim.getWaterSlopeAt(this.x);
+    showMessage(text, color = '#FFFFFF') {
+      this.actionText = text;
+      this.actionColor = color;
+      this.actionTimer = 60;
+    }
 
-      // Scia della tavola
+    update(ocean, audio, dt) {
+      const waterY = ocean.getWaterHeight(this.x);
+      const waterSlope = ocean.getWaterSlope(this.x);
+      const seabedY = ocean.getSeabedHeight(this.x);
+      const waterVel = ocean.getWaterVelocityAt(this.x, this.y);
+
+      // Scia e spray
       if (this.state === 'SURFING' || this.state === 'BARRELED') {
-        this.sprayTrail.push({ x: this.x, y: this.y, life: 14 });
-        if (this.sprayTrail.length > 22) this.sprayTrail.shift();
+        this.sprayTrail.push({ x: this.x, y: this.y, life: 16 });
+        if (this.sprayTrail.length > 25) this.sprayTrail.shift();
       }
       for (let i = this.sprayTrail.length - 1; i >= 0; i--) {
         this.sprayTrail[i].life--;
         if (this.sprayTrail[i].life <= 0) this.sprayTrail.splice(i, 1);
       }
 
-      // GESTIONE STATI
+      // Profondità di immersione
+      const immersion = Math.max(0, (this.y + this.craft.thickness * 0.5) - waterY);
+      const isSubmerged = immersion > 0;
 
-      // 1. STATO PADDLING / CATCHING WAVE
-      if (this.state === 'PADDLING' || this.state === 'CATCHING') {
-        this.targetAngle = waterSlope * 0.6;
-        this.y = waterY - 2;
+      // 1. FORZA DI GRAVITÀ
+      this.vy += CONFIG.GRAVITY;
 
-        // Nuotata
-        const paddlePower = this.board.paddleSpeed;
-        if (this.inputX > 0.2) {
-          this.speed += 0.08 * paddlePower;
-          this.x += 1.4;
-          if (Math.random() < 0.25) {
-            particles.add(this.x - 10, this.y + 2, -1.2, -0.4, '#FFFFFF', 2, 10, 'paddle');
-          }
-        } else if (this.inputX < -0.2) {
-          this.speed = Math.max(0, this.speed - 0.1);
-          this.x -= 1.0;
-        } else {
-          this.speed *= 0.94;
+      // 2. FORZA DI GALLEGGIAMENTO (ARCHIMEDE) & PLANATA IDRODINAMICA
+      if (isSubmerged) {
+        // Spinta idrostatica verso l'alto
+        const buoyancyForce = immersion * 0.18 * this.craft.buoyancyCoeff;
+        this.vy -= buoyancyForce;
+
+        // Trascina la tavola con la corrente dell'onda
+        this.vx += (waterVel.vx - this.vx) * 0.08;
+
+        // Lift idrodinamico (la tavola scivola lungo la pendenza dell'onda)
+        if (this.state === 'SURFING' || this.state === 'BARRELED') {
+          const speed = Math.hypot(this.vx, this.vy);
+          const attackAngle = this.angle - waterSlope;
+          const lift = Math.sin(attackAngle) * speed * 0.15 * this.craft.liftCoeff;
+
+          this.vy -= lift;
+          this.vx += Math.cos(waterSlope) * 0.22; // spinta lungo la parete
         }
 
-        // L'onda che arriva da dietro solleva il surfer
-        if (waterSlope < -0.22 && this.speed > 2.0) {
-          this.state = 'CATCHING';
-          this.speed += 0.18;
-          this.x += 1.8;
-          this.isPopUpReady = true;
-          this.showMessage('🌊 CATCHING WAVE! Fai Pop-Up!', '#F59E0B');
-        } else {
-          this.isPopUpReady = false;
+        // Attrito viscoso dell'acqua
+        this.vx *= CONFIG.WATER_DRAG;
+        this.vy *= CONFIG.WATER_DRAG;
+      } else {
+        // In aria
+        this.vx *= CONFIG.AIR_DRAG;
+        this.vy *= CONFIG.AIR_DRAG;
+      }
+
+      // 3. STATO PADDLING & CATCH WAVE
+      if (this.state === 'PADDLING') {
+        this.angle += (waterSlope - this.angle) * 0.2;
+
+        if (this.inputThrust > 0.1) {
+          // Remata in avanti
+          this.vx += 0.22;
+          if (Math.random() < 0.2) audio.playSpray();
+        }
+
+        // L'onda che arriva dietro crea una forte pendenza: se hai velocità sufficiente parti!
+        if (waterSlope < -0.26 && this.vx > 2.2) {
+          this.showMessage('🌊 ONDA PRESA! Tocca POP-UP!', '#F59E0B');
         }
       }
 
-      // 2. STATO SURFING (IN PIEDI SULLA PARETE)
+      // 4. STATO SURFING (IN PIEDI SULLA PARETE)
       else if (this.state === 'SURFING' || this.state === 'BARRELED') {
-        this.rideTime += 1 / 60;
-        this.y = waterY;
+        this.rideTime += dt;
+
+        // Controllo orientamento tramite input
+        if (this.inputSteer < -0.1) {
+          // Gira verso la cresta (Carve Up / Bottom Turn Drive)
+          this.angularVelocity = -0.06 * this.craft.agility;
+          this.vx -= 0.08;
+          this.vy -= 0.28;
+        } else if (this.inputSteer > 0.1) {
+          // Gira verso la base (Drop / Accelerate down the face)
+          this.angularVelocity = 0.06 * this.craft.agility;
+          this.vx += 0.25;
+          this.vy += 0.15;
+        } else {
+          // Tendenza ad allinearsi alla pendenza dell'acqua
+          this.angularVelocity += (waterSlope - this.angle) * 0.08;
+          this.angularVelocity *= 0.82;
+        }
+        this.angle += this.angularVelocity;
+
+        // Stall (frenata con la mano nell'acqua per farsi inglobare nel barile)
+        if (this.isStallActive) {
+          this.vx = Math.max(1.5, this.vx * 0.92);
+          if (Math.random() < 0.25) audio.playSpray();
+        }
 
         // Controllo se è nel tubo (Barreled)
-        const isUnderLip = waterSlope < -0.38 && this.x < 130;
-        if (isUnderLip) {
-          this.state = 'BARRELED';
-          this.barrelTimer += 1 / 60;
-          this.totalBarrelTime += 1 / 60;
-          const pts = Math.floor(18 * this.comboCount);
-          this.score += pts;
-          particles.add(this.x - 6, this.y - 8, 1.5, -0.5, '#80DEEA', 2, 12, 'barrel');
-          audio.setAmbience(true, 1.0);
-
-          if (Math.random() < 0.12) {
-            this.showMessage(`🌊 GETTING BARRELED! +${pts}`, '#38BDF8');
+        const isUnderLip = (waterSlope < -0.42 || Math.abs(waterY - this.y) < 12) && (this.x > 80 && this.x < 240);
+        if (isUnderLip && this.y < waterY + 8) {
+          if (this.state !== 'BARRELED') {
+            this.state = 'BARRELED';
+            audio.playTubeChime();
           }
+          this.barrelTime += dt;
+          this.totalBarrelTime += dt;
+          const barrelPts = Math.floor(25 * this.comboMultiplier);
+          this.score += barrelPts;
+          this.showMessage(`🌊 IN THE BARREL! +${barrelPts}`, '#38BDF8');
         } else {
           if (this.state === 'BARRELED') {
             this.state = 'SURFING';
-            if (this.barrelTimer > 1.5) {
-              const spitPts = Math.floor(1000 * this.barrelTimer * this.comboCount);
+            if (this.barrelTime > 1.2) {
+              const spitPts = Math.floor(1200 * this.barrelTime * this.comboMultiplier);
               this.score += spitPts;
-              this.showMessage(`💥 SPIT OUT! +${spitPts}`, '#FBBF24');
-              audio.playTubeSpit();
-              this.comboCount++;
+              this.showMessage(`💥 TUBE SPIT OUT! +${spitPts}`, '#FBBF24');
+              audio.playTubeChime();
+              this.comboMultiplier++;
             }
-            this.barrelTimer = 0;
-            audio.setAmbience(false, 0.5);
+            this.barrelTime = 0;
           }
         }
 
-        // Carving verticale lungo la parete
-        if (this.inputY > 0.2) {
-          // Bottom turn (scende verso la base dell'onda e accelera con la gravità)
-          this.speed = Math.min(10.5, this.speed + 0.15 * this.board.speedBonus);
-          this.x += 1.2;
-          this.targetAngle = 0.45;
-          particles.add(this.x - 8, this.y + 4, -this.speed * 0.4, -1, '#FFFFFF', 2, 12, 'carve');
-        } else if (this.inputY < -0.2) {
-          // Risale verso la cresta (Drive to the lip)
-          this.speed = Math.max(3.0, this.speed - 0.08);
-          this.x -= 0.8;
-          this.targetAngle = -0.55;
-
-          // Se arriva in cima a tutta velocità -> Air Section!
-          if (waterY < 100 && this.speed > 7.5 && this.board.airPotential > 1.0) {
-            this.state = 'AIR';
-            this.vy = -5.2;
-            this.vx = 2.4;
-            this.showMessage('🚀 AIR SECTION BOOST!', '#6366F1');
-            return;
-          }
-        } else {
-          this.targetAngle = waterSlope;
+        // Air Section: decollo dalla cresta dell'onda a tutta velocità!
+        if (this.y < waterY - 8 && this.vy < -2.5 && Math.abs(this.vx) > 5.5) {
+          this.state = 'AIR';
+          this.showMessage('🚀 AIR LAUNCH OFF THE LIP!', '#6366F1');
         }
 
-        // Stall (Hand Drag nel tubo) o Pump (Spinta in avanti)
-        if (this.isStallActive || this.inputX < -0.2) {
-          this.speed = Math.max(2.0, this.speed - 0.28);
-          this.x -= 2.2;
-          particles.add(this.x - 6, this.y + 4, -2, -0.5, '#FFFFFF', 2, 10, 'spray');
-        } else if (this.inputX > 0.2) {
-          this.speed = Math.min(11.0, this.speed + 0.18);
-          this.x += 1.6;
-        }
-
-        // Limiti schermo orizzontali
-        if (this.x < 35) {
-          // Troppo indietro: slammed by heavy shorebreak / crushed by lip!
-          this.triggerWipeout('💥 SLAMMED BY HEAVY SHOREBREAK!', waterSim, particles, audio);
+        // Collisione con il fondale o schiacciato dalla cresta -> WIPEOUT
+        if (this.y >= seabedY - 6) {
+          this.triggerWipeout('💥 SLAMMED ON THE REEF!', ocean, audio);
           return;
         }
-        if (this.x > SANDBOX_CONFIG.CANVAS_WIDTH - 40) {
-          // Troppo avanti: uscito dall'onda
-          this.x = SANDBOX_CONFIG.CANVAS_WIDTH - 40;
-          this.speed *= 0.9;
-        }
 
-        // Punti continui di surfing
-        this.score += Math.floor(this.speed * 0.15);
+        // Punti continui per la surfata
+        this.score += Math.floor(Math.abs(this.vx) * 0.2);
+        audio.setDynamicAcoustics(this.state === 'BARRELED', Math.min(1.0, this.vx / 10));
       }
 
-      // 3. STATO AIR (AERIAL SECTION)
+      // 5. STATO AIR (AERIAL IN VOLO)
       else if (this.state === 'AIR') {
-        this.vy += 0.28; // gravità
-        this.x += this.vx;
-        this.y += this.vy;
-        this.angle += 0.09;
-
-        // Atterraggio sull'acqua
-        if (this.y >= waterY - 4) {
-          this.y = waterY;
-          this.state = 'SURFING';
-          this.vy = 0;
-          this.speed = Math.min(10.0, this.speed + 2.0);
-          this.comboCount++;
-          const airPts = 800 * this.comboCount;
-          this.score += airPts;
-          this.showMessage(`✨ CLEAN AIR LANDING! +${airPts}`, '#10B981');
-          waterSim.splashAt(this.x, 8);
-          audio.playSnapSpray();
+        this.angle += this.angularVelocity;
+        if (this.y >= waterY - 2) {
+          // Atterraggio
+          if (Math.abs(this.angle - waterSlope) < 0.75) {
+            this.state = 'SURFING';
+            this.comboMultiplier++;
+            const pts = 800 * this.comboMultiplier;
+            this.score += pts;
+            this.showMessage(`✨ CLEAN AIR RE-ENTRY! +${pts}`, '#10B981');
+            audio.playSpray();
+          } else {
+            this.triggerWipeout('💥 HARD AIR CRASH!', ocean, audio);
+            return;
+          }
         }
       }
 
-      // 4. STATO WIPEOUT / SLAMMED
+      // 6. STATO WIPEOUT (ROTOLAMENTO SOTT'ACQUA)
       else if (this.state === 'WIPEOUT') {
+        this.angle += 0.2;
+        this.angularVelocity *= 0.95;
+        this.vx *= 0.92;
+        this.vy *= 0.92;
+
+        if (this.y < waterY + 10) this.y += 0.5;
+
         this.wipeoutTimer--;
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += 0.22;
-        this.angle += 0.16;
-
-        if (this.y > waterY + 12) {
-          this.y = waterY + 12;
-          this.vx *= 0.85;
-          this.vy = 0;
-        }
-
         if (this.wipeoutTimer <= 0) {
-          // Respawn tranquillo a remare
           this.state = 'PADDLING';
-          this.x = 120;
-          this.speed = 0;
+          this.vx = 0;
           this.vy = 0;
           this.angle = 0;
         }
       }
 
-      // Morbidezza rotazione tavola
-      this.angle += (this.targetAngle - this.angle) * 0.2;
+      // Integrazione velocità -> posizione
+      this.x += this.vx;
+      this.y += this.vy;
 
-      // Timer testo azione
-      if (this.actionMsgTimer > 0) this.actionMsgTimer--;
-    }
-
-    triggerWipeout(reason, waterSim, particles, audio) {
-      this.state = 'WIPEOUT';
-      this.wipeoutTimer = 85;
-      this.comboCount = 1;
-      this.barrelTimer = 0;
-      this.vy = -3.8;
-      this.vx = -1.6;
-      this.wipeoutReason = reason;
-
-      waterSim.splashAt(this.x, 14);
-      for (let i = 0; i < 24; i++) {
-        const ang = -Math.PI * 0.5 + (Math.random() * Math.PI - Math.PI * 0.5);
-        const spd = 2.0 + Math.random() * 4.5;
-        particles.add(this.x, this.y, Math.cos(ang) * spd, Math.sin(ang) * spd, '#FFFFFF', 3, 28, 'splash');
+      // Limiti laterali dello schermo
+      if (this.x < 25) {
+        this.x = 25;
+        this.vx = Math.max(0, this.vx);
+      }
+      if (this.x > CONFIG.WIDTH - 30) {
+        this.x = CONFIG.WIDTH - 30;
+        this.vx = Math.min(0, this.vx);
       }
 
-      audio.playWipeoutCrash();
+      if (this.actionTimer > 0) this.actionTimer--;
+    }
+
+    triggerWipeout(reason, ocean, audio) {
+      this.state = 'WIPEOUT';
+      this.wipeoutTimer = 75;
+      this.comboMultiplier = 1;
+      this.barrelTime = 0;
+      this.vx = -1.8;
+      this.vy = 1.2;
       this.showMessage(reason, '#EF4444');
+      audio.playWipeout();
 
       if (navigator.vibrate) {
-        try { navigator.vibrate([70, 50, 110]); } catch (e) {}
+        try { navigator.vibrate([80, 40, 120]); } catch (e) {}
       }
-    }
-
-    showMessage(text, color = '#FFFFFF') {
-      this.actionMessage = text;
-      this.actionColor = color;
-      this.actionMsgTimer = 55;
     }
 
     draw(ctx) {
@@ -830,349 +832,349 @@
       ctx.translate(Math.round(this.x), Math.round(this.y));
       ctx.rotate(this.angle);
 
-      if (this.state === 'PADDLING' || this.state === 'CATCHING' || this.state === 'RELAX_FLOAT') {
-        this.drawPaddlingSurfer(ctx);
+      const b = this.craft;
+      const isLying = this.state === 'PADDLING' || this.state === 'WIPEOUT';
+
+      // 1. Tavola da surf
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(-b.length / 2, 2, b.length, b.thickness);
+      ctx.fillStyle = '#FF385C'; // Strip centrale rossa
+      ctx.fillRect(-b.length / 2 + 4, 3, b.length - 8, 2);
+
+      // Pinne sotto la tavola
+      ctx.fillStyle = '#0284C7';
+      ctx.fillRect(-b.length / 2 + 2, 2 + b.thickness, 4, 3);
+
+      // 2. Surfer in pixel art
+      if (isLying) {
+        // Sdraiato a remare
+        ctx.fillStyle = '#FF385C'; // costume
+        ctx.fillRect(-8, -2, 10, 4);
+        ctx.fillStyle = '#FFCC99'; // pelle
+        ctx.fillRect(0, -3, 8, 4);
+        ctx.fillRect(6, -6, 6, 6); // testa
+        ctx.fillStyle = '#4A2E18'; // capelli
+        ctx.fillRect(5, -7, 7, 3);
+
+        // Occhiali 😎
+        ctx.fillStyle = '#0F172A';
+        ctx.fillRect(8, -5, 4, 2);
+
+        // Braccio che rema
+        const paddleSwing = Math.sin(Date.now() * 0.014) * 4;
+        ctx.fillStyle = '#FFCC99';
+        ctx.fillRect(2, -1 + paddleSwing, 3, 5);
       } else {
-        this.drawStandingSurfer(ctx);
+        // In piedi sulla tavola
+        const hipY = this.state === 'BARRELED' || this.isStallActive ? -2 : -6;
+        const headY = this.state === 'BARRELED' || this.isStallActive ? -10 : -18;
+
+        // Gambe
+        ctx.fillStyle = '#FFCC99';
+        ctx.fillRect(-5, hipY + 4, 4, 4);
+        ctx.fillRect(3, hipY + 4, 4, 4);
+
+        // Costume
+        ctx.fillStyle = '#FF385C';
+        ctx.fillRect(-6, hipY, 13, 5);
+
+        // Busto
+        ctx.fillStyle = '#FFCC99';
+        ctx.fillRect(-4, headY + 5, 9, 6);
+
+        // Braccia / Hand drag nel tubo
+        if (this.state === 'BARRELED' || this.isStallActive) {
+          ctx.fillRect(-9, headY + 8, 5, 3);
+          ctx.fillRect(-11, headY + 11, 3, 3); // mano nell'acqua
+          ctx.fillRect(4, headY + 4, 6, 3);
+        } else {
+          ctx.fillRect(-8, headY + 6, 4, 3);
+          ctx.fillRect(4, headY + 6, 5, 3);
+        }
+
+        // Testa
+        ctx.fillStyle = '#FFCC99';
+        ctx.fillRect(-3, headY - 4, 8, 8);
+
+        // Capelli
+        ctx.fillStyle = '#4A2E18';
+        ctx.fillRect(-4, headY - 6, 9, 4);
+
+        // Occhiali 😎
+        ctx.fillStyle = '#0F172A';
+        ctx.fillRect(0, headY - 2, 5, 3);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(2, headY - 2, 1, 1);
       }
 
       ctx.restore();
 
-      // Disegna Testo Azione
-      if (this.actionMsgTimer > 0) {
+      // Testo azione a schermo
+      if (this.actionTimer > 0) {
         ctx.save();
         ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillStyle = this.actionColor || '#FFFFFF';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 5;
-        const textY = Math.round(this.y) - 28 - (55 - this.actionMsgTimer) * 0.35;
-        ctx.fillText(this.actionMessage, Math.round(this.x), textY);
+        const textY = Math.round(this.y) - 26 - (60 - this.actionTimer) * 0.3;
+        ctx.fillText(this.actionText, Math.round(this.x), textY);
         ctx.restore();
-      }
-    }
-
-    drawPaddlingSurfer(ctx) {
-      const s = this.skin;
-      const b = this.board;
-
-      // Tavola sotto al corpo
-      ctx.fillStyle = s.boardColor || '#FFFFFF';
-      ctx.fillRect(-b.length / 2, 2, b.length, b.width);
-      ctx.fillStyle = s.boardStripe || '#FF385C';
-      ctx.fillRect(-b.length / 2 + 4, 3, b.length - 8, 2);
-
-      // Surfer sdraiato
-      ctx.fillStyle = s.trunksColor;
-      ctx.fillRect(-8, -2, 10, 4);
-
-      ctx.fillStyle = s.skinColor;
-      ctx.fillRect(0, -3, 8, 4); // Busto
-      ctx.fillRect(6, -6, 6, 6); // Testa
-
-      // Capelli
-      ctx.fillStyle = s.hairColor;
-      ctx.fillRect(5, -7, 7, 3);
-
-      // Occhiali 😎
-      if (s.glasses) {
-        ctx.fillStyle = '#0F172A';
-        ctx.fillRect(8, -5, 4, 2);
-      }
-
-      // Braccio che rema
-      const paddleSwing = Math.sin(Date.now() * 0.012) * 5;
-      ctx.fillStyle = s.skinColor;
-      ctx.fillRect(2, -1 + paddleSwing, 3, 5);
-    }
-
-    drawStandingSurfer(ctx) {
-      const s = this.skin;
-      const b = this.board;
-      const isLowStance = this.state === 'BARRELED' || this.isStallActive;
-
-      // Tavola da surf
-      ctx.fillStyle = s.boardColor || '#FFFFFF';
-      ctx.fillRect(-b.length / 2, 3, b.length, 4);
-      ctx.fillRect(-b.length / 2 + 2, 2, b.length - 4, 6);
-      ctx.fillStyle = s.boardStripe || '#FF385C';
-      ctx.fillRect(-b.length / 2 + 4, 4, b.length - 8, 2);
-
-      const hipY = isLowStance ? -1 : -5;
-      const headY = isLowStance ? -9 : -17;
-
-      // Gambe
-      ctx.fillStyle = s.skinColor;
-      ctx.fillRect(-5, hipY + 4, 4, 4);
-      ctx.fillRect(3, hipY + 4, 4, 4);
-
-      // Costume
-      ctx.fillStyle = s.trunksColor;
-      ctx.fillRect(-6, hipY, 13, 5);
-
-      // Busto
-      ctx.fillStyle = s.skinColor;
-      ctx.fillRect(-4, headY + 5, 9, 6);
-
-      // Braccia
-      if (this.state === 'BARRELED' || this.isStallActive) {
-        // Hand Drag nel tubo
-        ctx.fillRect(-9, headY + 8, 5, 3);
-        ctx.fillRect(-11, headY + 11, 3, 3); // Mano nell'acqua
-        ctx.fillRect(4, headY + 4, 6, 3);
-      } else {
-        ctx.fillRect(-8, headY + 6, 4, 3);
-        ctx.fillRect(4, headY + 6, 5, 3);
-      }
-
-      // Testa
-      ctx.fillStyle = s.skinColor;
-      ctx.fillRect(-3, headY - 4, 8, 8);
-
-      // Capelli
-      ctx.fillStyle = s.hairColor;
-      ctx.fillRect(-4, headY - 6, 9, 4);
-
-      // Occhiali 😎
-      if (s.glasses) {
-        ctx.fillStyle = '#0F172A';
-        ctx.fillRect(0, headY - 2, 5, 3);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(2, headY - 2, 1, 1);
       }
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 5. RENDERER SANDBOX COMPLETO CON ACQUA MULTISTRATO & FONDALI
+  // 5. RENDERER 2.5D DELL'OCEANO, FONDALI & GETTI D'ACQUA DEL TUBO
   // ----------------------------------------------------------------------------
-  class SandboxRenderer {
+  class RealisticOceanRenderer {
     constructor(canvas) {
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
       this.ctx.imageSmoothingEnabled = false;
     }
 
-    render(waterSim, surfer, particles, timeSec) {
+    render(ocean, surfer, timeSec) {
       const ctx = this.ctx;
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const height = SANDBOX_CONFIG.CANVAS_HEIGHT;
+      const w = CONFIG.WIDTH;
+      const h = CONFIG.HEIGHT;
 
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, w, h);
 
-      // 1. Cielo e Atmosfera Salentina (Tramontana / Scirocco mood)
-      this.drawSkyAndHorizon(ctx, waterSim.preset, timeSec);
+      // 1. Cielo Salentino e Sole
+      this.drawSky(ctx, ocean.spot, timeSec);
 
-      // 2. Costa in lontananza (Gallipoli, Torre del Pizzo)
-      this.drawDistantCoast(ctx);
+      // 2. Costa in lontananza
+      this.drawCoast(ctx);
 
-      // 3. Fondale marino dinamico (Sabbia, Scogli o Slab)
-      this.drawSeabed(ctx, waterSim.preset);
+      // 3. Fondale Marino (Sabbia o Reef con vegetazione marina)
+      this.drawSeabed(ctx, ocean);
 
-      // 4. Simulazione Acqua a strati (Pixel Water Body)
-      this.drawFluidWater(ctx, waterSim);
+      // 4. Fauna marina (Tartarughe e pesci)
+      this.drawSeaLife(ctx, ocean);
 
-      // 5. Particelle, Scia e Schiuma
-      this.drawSprayTrails(ctx, surfer);
-      particles.draw(ctx);
+      // 5. Massa d'acqua multistrato con trasparenza
+      this.drawWaterBody(ctx, ocean);
 
-      // 6. Getti d'acqua del Lip che curva (Curling Wave Lip)
-      this.drawCurlingLip(ctx, waterSim);
+      // 6. Getti d'acqua del lip che curva (Tube Barrel) & Schiuma
+      this.drawCurlingLipAndFoam(ctx, ocean);
 
-      // 7. Surfer
+      // 7. Scia del Surfer
+      this.drawSurferTrail(ctx, surfer);
+
+      // 8. Surfer
       surfer.draw(ctx);
     }
 
-    drawSkyAndHorizon(ctx, preset, timeSec) {
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, 160);
+    drawSky(ctx, spot, timeSec) {
+      const w = CONFIG.WIDTH;
+      const grad = ctx.createLinearGradient(0, 0, 0, 180);
 
-      if (preset.windType === 'scirocco') {
-        // Cielo caldo e mosso da Scirocco
-        skyGrad.addColorStop(0, '#38BDF8');
-        skyGrad.addColorStop(0.6, '#FDE68A');
-        skyGrad.addColorStop(1, '#F59E0B');
+      if (spot.seabedType === 'slab') {
+        grad.addColorStop(0, '#0284C7');
+        grad.addColorStop(0.6, '#FDE68A');
+        grad.addColorStop(1, '#F59E0B');
       } else {
-        // Cielo limpido e azzurro da Tramontana
-        skyGrad.addColorStop(0, '#7FD1F7');
-        skyGrad.addColorStop(0.65, '#BAE6FD');
-        skyGrad.addColorStop(1, '#FEF08A');
+        grad.addColorStop(0, '#38BDF8');
+        grad.addColorStop(0.65, '#BAE6FD');
+        grad.addColorStop(1, '#FEF08A');
       }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, 180);
 
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, width, 180);
-
-      // Sole luminoso
-      const sunX = width - 55;
-      const sunY = 32;
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
-      ctx.beginPath();
-      ctx.arc(sunX, sunY, 28, 0, Math.PI * 2);
-      ctx.fill();
-
+      // Sole
       ctx.fillStyle = '#FDE047';
-      ctx.fillRect(sunX - 9, sunY - 9, 18, 18);
+      ctx.fillRect(w - 55, 26, 20, 20);
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(sunX - 4, sunY - 4, 8, 8);
-
-      // Nuvole in movimento
-      ctx.fillStyle = '#FFFFFF';
-      const c1 = (40 + timeSec * 5) % (width + 60) - 30;
-      ctx.fillRect(c1, 22, 32, 8);
-      ctx.fillRect(c1 + 4, 18, 22, 12);
+      ctx.fillRect(w - 50, 31, 10, 10);
     }
 
-    drawDistantCoast(ctx) {
-      const baseY = 100;
-      ctx.fillStyle = '#64748B'; // Faraglioni e pini marittimi
-      ctx.fillRect(180, baseY - 14, 50, 14);
-      ctx.fillRect(190, baseY - 20, 24, 6);
-      ctx.fillRect(280, baseY - 10, 70, 10);
-
-      // Linea di mare calmo all'orizzonte
-      ctx.fillStyle = '#38BDF8';
-      ctx.fillRect(0, baseY, SANDBOX_CONFIG.CANVAS_WIDTH, 14);
+    drawCoast(ctx) {
+      const baseY = 110;
+      ctx.fillStyle = '#64748B'; // Scogliera Gallipoli / Mancaversa
+      ctx.fillRect(220, baseY - 12, 60, 12);
+      ctx.fillRect(320, baseY - 8, 90, 8);
     }
 
-    drawSeabed(ctx, preset) {
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      const height = SANDBOX_CONFIG.CANVAS_HEIGHT;
-      const seabedY = preset.tideDepth + 32;
+    drawSeabed(ctx, ocean) {
+      const w = CONFIG.WIDTH;
+      const h = CONFIG.HEIGHT;
+      const stepX = w / (ocean.numPoints - 1);
 
-      if (preset.seabedType === 'reef' || preset.seabedType === 'slab') {
-        // Scogli e rocce del Salento
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      for (let i = 0; i < ocean.numPoints; i++) {
+        ctx.lineTo(i * stepX, ocean.seabed[i]);
+      }
+      ctx.lineTo(w, h);
+      ctx.closePath();
+
+      if (ocean.spot.seabedType === 'reef' || ocean.spot.seabedType === 'slab') {
         ctx.fillStyle = '#78350F';
-        ctx.fillRect(0, seabedY, width, height - seabedY);
+        ctx.fill();
         ctx.fillStyle = '#451A03';
-        for (let x = 0; x < width; x += 18) {
-          ctx.fillRect(x, seabedY - 4 + (x % 7), 12, 6);
+        for (let i = 0; i < ocean.numPoints; i += 3) {
+          ctx.fillRect(i * stepX, ocean.seabed[i], 8, 6);
         }
       } else {
-        // Sabbia dorata di Baia Verde
         ctx.fillStyle = '#F59E0B';
-        ctx.fillRect(0, seabedY, width, 8);
-        ctx.fillStyle = '#B45309';
-        ctx.fillRect(0, seabedY + 8, width, height - (seabedY + 8));
+        ctx.fill();
+        ctx.fillStyle = '#D97706';
+        ctx.fillRect(0, h - 14, w, 14);
+      }
+
+      // Posidonia oceanica / Alghe verdi
+      ctx.fillStyle = '#15803D';
+      for (let i = 8; i < ocean.numPoints - 8; i += 7) {
+        const x = i * stepX;
+        const y = ocean.seabed[i];
+        const sway = Math.sin(Date.now() * 0.004 + i) * 4;
+        ctx.fillRect(x + sway, y - 8, 3, 8);
+        ctx.fillRect(x + 3 + sway * 0.7, y - 6, 2, 6);
       }
     }
 
-    drawFluidWater(ctx, waterSim) {
-      const pts = waterSim.points;
-      const height = SANDBOX_CONFIG.CANVAS_HEIGHT;
-      const width = SANDBOX_CONFIG.CANVAS_WIDTH;
+    drawSeaLife(ctx, ocean) {
+      for (let i = 0; i < ocean.seaCreatures.length; i++) {
+        const c = ocean.seaCreatures[i];
+        if (c.type === 'turtle') {
+          // Tartaruga marina Carretta Carretta
+          ctx.fillStyle = '#166534';
+          ctx.fillRect(Math.round(c.x), Math.round(c.y), 14, 8);
+          ctx.fillStyle = '#15803D';
+          ctx.fillRect(Math.round(c.x) + 3, Math.round(c.y) - 2, 8, 12);
+          ctx.fillStyle = '#22C55E';
+          ctx.fillRect(Math.round(c.x) + (c.vx > 0 ? 12 : -3), Math.round(c.y) + 2, 4, 4);
+        } else {
+          // Pesciolino
+          ctx.fillStyle = '#38BDF8';
+          ctx.fillRect(Math.round(c.x), Math.round(c.y), 7, 3);
+          ctx.fillStyle = '#F43F5E';
+          ctx.fillRect(Math.round(c.x) + (c.vx > 0 ? -2 : 7), Math.round(c.y) + 1, 2, 2);
+        }
+      }
+    }
+
+    drawWaterBody(ctx, ocean) {
+      const w = CONFIG.WIDTH;
+      const h = CONFIG.HEIGHT;
+      const stepX = w / (ocean.numPoints - 1);
 
       // 1. Corpo d'acqua profondo (#0369A1)
       ctx.beginPath();
-      ctx.moveTo(0, height);
-      for (let i = 0; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y + 24);
+      ctx.moveTo(0, h);
+      for (let i = 0; i < ocean.numPoints; i++) {
+        ctx.lineTo(i * stepX, ocean.waterSurface[i] + 16);
       }
-      ctx.lineTo(width, height);
+      ctx.lineTo(w, h);
       ctx.closePath();
-      ctx.fillStyle = '#0369A1';
+      ctx.fillStyle = 'rgba(3, 105, 161, 0.85)';
       ctx.fill();
 
       // 2. Strato intermedio turchese cyan (#0284C7)
       ctx.beginPath();
-      ctx.moveTo(0, height);
-      for (let i = 0; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y + 10);
+      ctx.moveTo(0, h);
+      for (let i = 0; i < ocean.numPoints; i++) {
+        ctx.lineTo(i * stepX, ocean.waterSurface[i] + 6);
       }
-      ctx.lineTo(width, height);
+      ctx.lineTo(w, h);
       ctx.closePath();
-      ctx.fillStyle = '#0284C7';
+      ctx.fillStyle = 'rgba(2, 132, 199, 0.75)';
       ctx.fill();
 
-      // 3. Superficie d'acqua e cresta (#22D3EE)
+      // 3. Superficie d'acqua cristallina (#22D3EE)
       ctx.beginPath();
-      ctx.moveTo(0, height);
-      for (let i = 0; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.moveTo(0, h);
+      for (let i = 0; i < ocean.numPoints; i++) {
+        ctx.lineTo(i * stepX, ocean.waterSurface[i]);
       }
-      ctx.lineTo(width, height);
+      ctx.lineTo(w, h);
       ctx.closePath();
-      ctx.fillStyle = '#22D3EE';
+      ctx.fillStyle = 'rgba(34, 211, 238, 0.8)';
       ctx.fill();
 
-      // 4. Schiuma bianca sulla cresta superiore
+      // 4. Cresta bianca schiumosa
       ctx.fillStyle = '#FFFFFF';
-      for (let i = 1; i < pts.length - 1; i++) {
-        const pt = pts[i];
-        if (pt.y < waterSim.baseY - 10) {
-          ctx.fillRect(Math.round(pt.x) - 2, Math.round(pt.y) - 1, 4, 3);
+      for (let i = 1; i < ocean.numPoints - 1; i++) {
+        const y = ocean.waterSurface[i];
+        if (y < ocean.baseTide - 10) {
+          ctx.fillRect(Math.round(i * stepX) - 2, Math.round(y) - 1, 4, 3);
         }
       }
     }
 
-    drawCurlingLip(ctx, waterSim) {
-      const parts = waterSim.lipCurlParticles;
-      for (let i = 0; i < parts.length; i++) {
-        const p = parts[i];
+    drawCurlingLipAndFoam(ctx, ocean) {
+      // Getti d'acqua del tubo
+      for (let i = 0; i < ocean.curlingLipParts.length; i++) {
+        const p = ocean.curlingLipParts[i];
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
       }
+
+      // Schiuma di impatto
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      for (let i = 0; i < ocean.foamParticles.length; i++) {
+        const f = ocean.foamParticles[i];
+        ctx.fillRect(Math.round(f.x), Math.round(f.y), f.size, f.size);
+      }
     }
 
-    drawSprayTrails(ctx, surfer) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    drawSurferTrail(ctx, surfer) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       for (let i = 0; i < surfer.sprayTrail.length; i++) {
         const p = surfer.sprayTrail[i];
-        const sz = Math.max(1, Math.floor(p.life / 3.5));
-        ctx.fillRect(Math.round(p.x), Math.round(p.y), sz, sz);
+        const s = Math.max(1, Math.floor(p.life / 4));
+        ctx.fillRect(Math.round(p.x), Math.round(p.y), s, s);
       }
     }
   }
 
   // ----------------------------------------------------------------------------
-  // 6. GESTORE DEL GIOCO SANDBOX & CONTROLLI (TOUCH JOYSTICK + SANDBOX SLIDERS)
+  // 6. GESTORE GIOCO SANDBOX COMPLETO & CONTROLLI (TOUCH, JOYSTICK, SCULPT)
   // ----------------------------------------------------------------------------
   class SalentoSurfSandboxEngine {
     constructor() {
       this.canvas = null;
       this.renderer = null;
-      this.waterSim = null;
+      this.ocean = null;
       this.surfer = null;
-      this.particles = null;
       this.audio = null;
 
-      this.currentPresetId = 'baia_verde';
-      this.currentBoardId = 'shortboard';
-      this.currentSkinId = 'pietro';
+      this.currentSpotKey = 'baia_verde';
+      this.currentCraftKey = 'shortboard';
+      this.isSculptMode = false; // Se attivo, toccare il canvas scava/alza il fondale!
 
-      this.gameState = 'PLAYING';
-      this.timeSec = 0;
       this.highScore = 0;
       this.bestBarrelTime = 0;
       this.bestRideTime = 0;
-      this.animationFrameId = null;
+
       this.lastTimestamp = 0;
+      this.animId = null;
 
       this.touchStartX = 0;
       this.touchStartY = 0;
-      this.isTouchActive = false;
+      this.isPointerDown = false;
 
-      this.loadSavedRecords();
+      this.loadRecords();
     }
 
-    loadSavedRecords() {
+    loadRecords() {
       try {
-        const saved = localStorage.getItem('salento_surf_sandbox_v1');
+        const saved = localStorage.getItem('salento_surf_real_sim_v1');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
           this.bestBarrelTime = d.bestBarrelTime || 0;
           this.bestRideTime = d.bestRideTime || 0;
-          this.currentSkinId = d.skinId || 'pietro';
-          this.currentBoardId = d.boardId || 'shortboard';
-          this.currentPresetId = d.presetId || 'baia_verde';
+          this.currentSpotKey = d.spotKey || 'baia_verde';
+          this.currentCraftKey = d.craftKey || 'shortboard';
         }
       } catch (e) {}
     }
 
     saveRecords() {
       try {
-        const isNew = this.surfer.score > this.highScore;
-        if (isNew) this.highScore = this.surfer.score;
+        if (this.surfer.score > this.highScore) this.highScore = this.surfer.score;
         if (this.surfer.totalBarrelTime > this.bestBarrelTime) {
           this.bestBarrelTime = Number(this.surfer.totalBarrelTime.toFixed(1));
         }
@@ -1180,172 +1182,160 @@
           this.bestRideTime = Number(this.surfer.rideTime.toFixed(0));
         }
 
-        const data = {
+        const d = {
           highScore: this.highScore,
           bestBarrelTime: this.bestBarrelTime,
           bestRideTime: this.bestRideTime,
-          skinId: this.currentSkinId,
-          boardId: this.currentBoardId,
-          presetId: this.currentPresetId
+          spotKey: this.currentSpotKey,
+          craftKey: this.currentCraftKey
         };
-        localStorage.setItem('salento_surf_sandbox_v1', JSON.stringify(data));
-        return isNew;
-      } catch (e) {
-        return false;
-      }
+        localStorage.setItem('salento_surf_real_sim_v1', JSON.stringify(d));
+      } catch (e) {}
     }
 
     init(canvasId) {
       this.canvas = document.getElementById(canvasId);
       if (!this.canvas) return;
 
-      this.canvas.width = SANDBOX_CONFIG.CANVAS_WIDTH;
-      this.canvas.height = SANDBOX_CONFIG.CANVAS_HEIGHT;
+      this.canvas.width = CONFIG.WIDTH;
+      this.canvas.height = CONFIG.HEIGHT;
 
-      const preset = SPOT_PRESETS[this.currentPresetId] || SPOT_PRESETS.baia_verde;
-      this.waterSim = new RealisticWaterSimulation(preset);
-      this.renderer = new SandboxRenderer(this.canvas);
-      this.surfer = new SandboxSurfer(this.currentSkinId, this.currentBoardId);
-      this.particles = new SurfParticleEngine();
+      const spot = SALENTO_SPOTS[this.currentSpotKey] || SALENTO_SPOTS.baia_verde;
+      this.ocean = new FluidOceanSimulator(spot);
+      this.renderer = new RealisticOceanRenderer(this.canvas);
+      this.surfer = new RealisticSurferBody(this.currentCraftKey);
       this.audio = new RealisticOceanAudio();
 
-      this.bindControls();
+      this.bindInputs();
       this.updateRecordsUI();
 
-      // Render iniziale
-      this.renderer.render(this.waterSim, this.surfer, this.particles, 0);
-
-      // Avvia loop continuo (Sandbox è sempre vivo e rilassante!)
-      this.startGame();
+      // Avvia simulazione continua in tempo reale
+      this.lastTimestamp = performance.now();
+      if (this.animId) cancelAnimationFrame(this.animId);
+      this.loop(this.lastTimestamp);
     }
 
-    setSpotPreset(presetId) {
-      if (SPOT_PRESETS[presetId]) {
-        this.currentPresetId = presetId;
-        this.waterSim.setPreset(SPOT_PRESETS[presetId]);
-        this.surfer.showMessage(`📍 Spot: ${SPOT_PRESETS[presetId].name}`, '#38BDF8');
+    setSpotPreset(spotKey) {
+      if (SALENTO_SPOTS[spotKey]) {
+        this.currentSpotKey = spotKey;
+        this.ocean.setSpot(spotKey);
+        this.surfer.showMessage(`📍 Spot: ${SALENTO_SPOTS[spotKey].name}`, '#38BDF8');
         this.saveRecords();
         this.updateSandboxUI();
       }
     }
 
-    setBoardType(boardId) {
-      if (SURF_BOARDS[boardId]) {
-        this.currentBoardId = boardId;
-        this.surfer.setBoard(boardId);
-        this.surfer.showMessage(`🏄 Tavola: ${SURF_BOARDS[boardId].name}`, '#F59E0B');
+    setBoardType(craftKey) {
+      if (CRAFT_TYPES[craftKey]) {
+        this.currentCraftKey = craftKey;
+        this.surfer.setCraft(craftKey);
+        this.surfer.showMessage(`🏄 Tavola: ${CRAFT_TYPES[craftKey].name}`, '#F59E0B');
         this.saveRecords();
         this.updateSandboxUI();
       }
     }
 
-    setSurferSkin(skinId) {
-      if (SURFER_SKINS[skinId]) {
-        this.currentSkinId = skinId;
-        this.surfer.setSkin(skinId);
-        this.saveRecords();
-      }
-    }
-
-    // SLIDER SANDBOX IN TEMPO REALE
     setCustomWaveHeight(val) {
-      this.waterSim.preset.swellHeight = Number(val);
+      if (this.ocean) this.ocean.swellHeight = Number(val);
     }
     setCustomWaveSpeed(val) {
-      this.waterSim.preset.waveSpeed = Number(val);
+      if (this.ocean) this.ocean.swellSpeed = Number(val);
     }
     setCustomWind(val) {
-      this.waterSim.preset.windChop = Number(val);
+      if (this.ocean) this.ocean.wind = Number(val);
     }
 
     triggerBigSetWave() {
-      // Spinge un mega set di onde
-      this.waterSim.preset.swellHeight += 18;
-      this.surfer.showMessage('🌊 SET IN ARRIVO! ONDA GIGANTE!', '#EC4899');
-      this.audio.playPopUpSound();
+      if (!this.ocean) return;
+      this.ocean.swellHeight += 20;
+      this.surfer.showMessage('🌊 SET GIGANTE IN ARRIVO!', '#EC4899');
+      this.audio.playTubeChime();
       setTimeout(() => {
-        const p = SPOT_PRESETS[this.currentPresetId] || SPOT_PRESETS.baia_verde;
-        this.waterSim.preset.swellHeight = p.swellHeight;
-      }, 7000);
+        const spot = SALENTO_SPOTS[this.currentSpotKey] || SALENTO_SPOTS.baia_verde;
+        if (this.ocean) this.ocean.swellHeight = spot.swellHeight;
+      }, 8000);
     }
 
-    bindControls() {
+    toggleSculptMode() {
+      this.isSculptMode = !this.isSculptMode;
+      this.surfer.showMessage(this.isSculptMode ? '🖌️ SCULPT MODE: Trascina per scavare/alzare il fondale!' : '🏄 SURF MODE ATTIVO', '#10B981');
+      return this.isSculptMode;
+    }
+
+    bindInputs() {
       if (!this.canvas) return;
 
-      const handleTouchStart = (e) => {
+      const handlePointerDown = (e) => {
         e.preventDefault();
         this.audio.init();
         this.audio.resume();
 
         const touch = e.touches ? e.touches[0] : e;
         const rect = this.canvas.getBoundingClientRect();
-        this.touchStartX = touch.clientX - rect.left;
-        this.touchStartY = touch.clientY - rect.top;
-        this.isTouchActive = true;
+        this.touchStartX = ((touch.clientX - rect.left) / rect.width) * CONFIG.WIDTH;
+        this.touchStartY = ((touch.clientY - rect.top) / rect.height) * CONFIG.HEIGHT;
+        this.isPointerDown = true;
 
-        this.processTouch(this.touchStartX, this.touchStartY, rect);
+        if (this.isSculptMode) {
+          // Modalità pennello fondale: scava o alza in base all'altezza del tocco
+          const delta = this.touchStartY < 150 ? -12 : 12;
+          this.ocean.sculptSeabed(this.touchStartX, delta);
+        } else {
+          this.processSurferTouch(this.touchStartX, this.touchStartY);
+        }
       };
 
-      const handleTouchMove = (e) => {
-        if (!this.isTouchActive) return;
+      const handlePointerMove = (e) => {
+        if (!this.isPointerDown) return;
         e.preventDefault();
         const touch = e.touches ? e.touches[0] : e;
         const rect = this.canvas.getBoundingClientRect();
-        const curX = touch.clientX - rect.left;
-        const curY = touch.clientY - rect.top;
+        const curX = ((touch.clientX - rect.left) / rect.width) * CONFIG.WIDTH;
+        const curY = ((touch.clientY - rect.top) / rect.height) * CONFIG.HEIGHT;
 
-        const dx = curX - this.touchStartX;
-        const dy = curY - this.touchStartY;
+        if (this.isSculptMode) {
+          const delta = curY < 150 ? -8 : 8;
+          this.ocean.sculptSeabed(curX, delta);
+        } else {
+          const dy = curY - this.touchStartY;
+          const dx = curX - this.touchStartX;
 
-        let steerX = 0;
-        let steerY = 0;
-        if (Math.abs(dx) > 6) steerX = dx > 0 ? 1 : -1;
-        if (Math.abs(dy) > 6) steerY = dy > 0 ? 1 : -1;
+          // Su / Giù -> Trim e Carving
+          if (dy < -8) this.surfer.inputSteer = -1; // Sali alla cresta
+          else if (dy > 8) this.surfer.inputSteer = 1; // Scendi al fondo
+          else this.surfer.inputSteer = 0;
 
-        const isStall = dx < -14;
-        this.surfer.inputX = steerX;
-        this.surfer.inputY = steerY;
-        this.surfer.isStallActive = isStall;
+          // Sinistra -> Stall / Hand drag nel tubo
+          this.surfer.isStallActive = dx < -14;
+          // Destra -> Paddle / Spinta in avanti
+          this.surfer.inputThrust = dx > 10 ? 1 : 0;
+        }
       };
 
-      const handleTouchEnd = (e) => {
+      const handlePointerUp = (e) => {
         e.preventDefault();
-        this.isTouchActive = false;
+        this.isPointerDown = false;
         if (this.surfer) {
-          this.surfer.inputX = 0;
-          this.surfer.inputY = 0;
+          this.surfer.inputSteer = 0;
+          this.surfer.inputThrust = 0;
           this.surfer.isStallActive = false;
         }
       };
 
-      this.processTouch = (x, y, rect) => {
-        const normX = x / rect.width;
-        const normY = y / rect.height;
+      this.processSurferTouch = (x, y) => {
+        if (y < 120) this.surfer.inputSteer = -1;
+        else if (y > 180) this.surfer.inputSteer = 1;
 
-        let steerX = 0;
-        let steerY = 0;
-        let isStall = false;
-
-        if (normY < 0.4) steerY = -1; // Sali alla cresta
-        else if (normY > 0.6) steerY = 1; // Scendi al fondo
-
-        if (normX < 0.35) {
-          steerX = -1;
-          isStall = true;
-        } else if (normX > 0.65) {
-          steerX = 1;
-        }
-
-        this.surfer.inputX = steerX;
-        this.surfer.inputY = steerY;
-        this.surfer.isStallActive = isStall;
+        if (x < CONFIG.WIDTH * 0.35) this.surfer.isStallActive = true;
+        else if (x > CONFIG.WIDTH * 0.65) this.surfer.inputThrust = 1;
       };
 
-      this.canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-      this.canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-      this.canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-      this.canvas.addEventListener('mousedown', handleTouchStart);
-      window.addEventListener('mouseup', handleTouchEnd);
+      this.canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+      this.canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+      this.canvas.addEventListener('touchend', handlePointerUp, { passive: false });
+      this.canvas.addEventListener('mousedown', handlePointerDown);
+      window.addEventListener('mousemove', handlePointerMove);
+      window.addEventListener('mouseup', handlePointerUp);
 
       // TASTIERA
       window.addEventListener('keydown', (e) => {
@@ -1358,51 +1348,38 @@
               this.surfer.snap();
             }
           }
-          if (e.code === 'ArrowUp' || e.code === 'KeyW') this.surfer.inputY = -1;
-          if (e.code === 'ArrowDown' || e.code === 'KeyS') this.surfer.inputY = 1;
-          if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
-            this.surfer.inputX = -1;
-            this.surfer.isStallActive = true;
-          }
-          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.surfer.inputX = 1;
+          if (e.code === 'ArrowUp' || e.code === 'KeyW') this.surfer.inputSteer = -1;
+          if (e.code === 'ArrowDown' || e.code === 'KeyS') this.surfer.inputSteer = 1;
+          if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.surfer.isStallActive = true;
+          if (e.code === 'ArrowRight' || e.code === 'KeyD') this.surfer.inputThrust = 1;
         }
       });
 
       window.addEventListener('keyup', (e) => {
-        if (['ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) this.surfer.inputY = 0;
+        if (['ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) this.surfer.inputSteer = 0;
         if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) {
-          this.surfer.inputX = 0;
           this.surfer.isStallActive = false;
+          this.surfer.inputThrust = 0;
         }
       });
     }
 
-    startGame() {
-      this.gameState = 'PLAYING';
-      this.timeSec = 0;
-      this.lastTimestamp = performance.now();
-      if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-      this.loop(this.lastTimestamp);
-    }
-
     loop(timestamp) {
-      const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.1);
+      const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.08);
       this.lastTimestamp = timestamp;
-      this.timeSec += dt;
 
-      // Aggiorna Simulazione Idrodinamica & Surfer
-      this.waterSim.update(this.timeSec);
-      this.surfer.update(this.waterSim, this.particles, this.audio, this.timeSec);
-      this.particles.update();
+      // Aggiorna Simulatore
+      this.ocean.update(dt);
+      this.surfer.update(this.ocean, this.audio, dt);
 
       // Render scena
-      this.renderer.render(this.waterSim, this.surfer, this.particles, this.timeSec);
+      this.renderer.render(this.ocean, this.surfer, timestamp * 0.001);
 
       // Aggiorna HUD
       this.updateHUD();
       this.saveRecords();
 
-      this.animationFrameId = requestAnimationFrame((t) => this.loop(t));
+      this.animId = requestAnimationFrame((t) => this.loop(t));
     }
 
     updateHUD() {
@@ -1416,20 +1393,19 @@
       if (distEl) distEl.textContent = `${this.surfer.rideTime.toFixed(0)}s`;
       if (shellsEl) shellsEl.textContent = `${this.surfer.totalBarrelTime.toFixed(1)}s Tubo`;
 
-      // Mostra / Lampeggia pulsante Pop-up quando l'onda è pronta
       if (btnPopUp) {
-        if (this.surfer.state === 'PADDLING' || this.surfer.state === 'CATCHING') {
-          btnPopUp.textContent = this.surfer.isPopUpReady ? '⚡ POP-UP ORA!' : '🏊 Rema';
-          btnPopUp.style.background = this.surfer.isPopUpReady ? '#10B981' : 'rgba(255,255,255,0.2)';
+        if (this.surfer.state === 'PADDLING') {
+          btnPopUp.textContent = '⚡ POP-UP';
+          btnPopUp.style.background = '#10B981';
         } else {
-          btnPopUp.textContent = '💥 Snap / Air';
+          btnPopUp.textContent = '💥 SNAP';
           btnPopUp.style.background = '#EC4899';
         }
       }
 
       if (comboEl) {
-        if (this.surfer.comboCount > 1) {
-          comboEl.textContent = `x${this.surfer.comboCount} COMBO!`;
+        if (this.surfer.comboMultiplier > 1) {
+          comboEl.textContent = `x${this.surfer.comboMultiplier} COMBO!`;
           comboEl.style.display = 'inline-block';
         } else {
           comboEl.style.display = 'none';
@@ -1448,13 +1424,12 @@
     }
 
     updateSandboxUI() {
-      // Aggiorna pillole attive per preset e tavole
       document.querySelectorAll('.spot-preset-pill').forEach(p => p.classList.remove('active'));
-      const spotEl = document.getElementById(`spotPill_${this.currentPresetId}`);
+      const spotEl = document.getElementById(`spotPill_${this.currentSpotKey}`);
       if (spotEl) spotEl.classList.add('active');
 
       document.querySelectorAll('.board-type-pill').forEach(p => p.classList.remove('active'));
-      const boardEl = document.getElementById(`boardPill_${this.currentBoardId}`);
+      const boardEl = document.getElementById(`boardPill_${this.currentCraftKey}`);
       if (boardEl) boardEl.classList.add('active');
     }
 
@@ -1462,14 +1437,12 @@
       if (!this.audio) return false;
       const isMuted = this.audio.toggleMute();
       const muteBtn = document.getElementById('btnSurfMute');
-      if (muteBtn) {
-        muteBtn.textContent = isMuted ? '🔇 Audio Off' : '🔊 Audio On';
-      }
+      if (muteBtn) muteBtn.textContent = isMuted ? '🔇 Audio Off' : '🔊 Audio On';
       return isMuted;
     }
   }
 
-  // Istanza globale del simulatore
+  // Istanza globale
   window.SalentoSurf = new SalentoSurfSandboxEngine();
 
 })(window);

@@ -2880,7 +2880,7 @@
       <div class="surf-arcade-card">
         <!-- Live Pixel Art Preview Screen -->
         <div class="surf-hero-preview" onclick="openSurfGameModal()" title="Clicca per giocare a schermo intero">
-          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="440" height="250"></canvas>
+          <canvas id="surfPreviewCanvas" class="surf-preview-canvas" width="520" height="300"></canvas>
           <div class="surf-preview-overlay">
             <div class="surf-big-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -2931,35 +2931,40 @@
           </div>
         </div>
 
-        <!-- Sandbox Wave Sliders Panel -->
+        <!-- Sandbox Wave Sliders & Terrain Sculptor Panel -->
         <div class="sandbox-panel-wrap">
           <div class="sandbox-title-row">
             <span>🎛️ Sandbox Wave Controls (Modifica Onde in Tempo Reale):</span>
-            <button type="button" class="btn-action btn-subtle" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="window.SalentoSurf.triggerBigSetWave()">
-              🌊 Lancia Set di Onde!
-            </button>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn-action btn-subtle" id="btnDeskSculpt" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="handleToggleSculpt(event)">
+                🖌️ Pennello Fondale
+              </button>
+              <button type="button" class="btn-action btn-subtle" style="min-height:30px; padding:4px 10px; font-size:11.5px;" onclick="window.SalentoSurf.triggerBigSetWave()">
+                🌊 Lancia Set!
+              </button>
+            </div>
           </div>
           <div class="sandbox-sliders-grid">
             <div class="sandbox-slider-box">
               <div class="sandbox-slider-label">
                 <span>Altezza Swell (Onda)</span>
-                <span id="labelSwellHeight">32px</span>
+                <span id="labelSwellHeight">34px</span>
               </div>
-              <input type="range" class="sandbox-range-input" id="rangeSwellHeight" min="10" max="75" value="32" oninput="handleWaveHeightChange(this.value)">
+              <input type="range" class="sandbox-range-input" id="rangeSwellHeight" min="10" max="80" value="34" oninput="handleWaveHeightChange(this.value)">
             </div>
             <div class="sandbox-slider-box">
               <div class="sandbox-slider-label">
                 <span>Velocità Swell</span>
-                <span id="labelWaveSpeed">3.8</span>
+                <span id="labelWaveSpeed">3.6</span>
               </div>
-              <input type="range" class="sandbox-range-input" id="rangeWaveSpeed" min="1.5" max="7.0" step="0.2" value="3.8" oninput="handleWaveSpeedChange(this.value)">
+              <input type="range" class="sandbox-range-input" id="rangeWaveSpeed" min="1.5" max="7.0" step="0.2" value="3.6" oninput="handleWaveSpeedChange(this.value)">
             </div>
             <div class="sandbox-slider-box">
               <div class="sandbox-slider-label">
                 <span>Vento & Increspatura</span>
-                <span id="labelWind">0.15</span>
+                <span id="labelWind">0.12</span>
               </div>
-              <input type="range" class="sandbox-range-input" id="rangeWind" min="0.0" max="0.6" step="0.05" value="0.15" oninput="handleWindChange(this.value)">
+              <input type="range" class="sandbox-range-input" id="rangeWind" min="0.0" max="0.6" step="0.05" value="0.12" oninput="handleWindChange(this.value)">
             </div>
           </div>
         </div>
@@ -2997,14 +3002,14 @@
         <!-- Instructions Box -->
         <div class="surf-instructions-box">
           <div style="font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>Come Giocare (Simulatore di Surf Realistico):</span>
+            <span>📱</span> <span>Fisica Reale di Surf Sandbox & Controlli:</span>
           </div>
           <div style="line-height: 1.5;">
-            • <b>Nuota & Prendi l'Onda (Paddle & Catch Wave)</b>: Rema verso destra quando vedi l'onda alzarsi dietro di te.<br>
-            • <b>Pop-Up (Tasto Pop-Up / Spazio)</b>: Quando l'onda ti solleva, alzati in piedi sulla tavola per partire!<br>
-            • <b>Carving & Bottom Turn (Trascina Su/Giù)</b>: Scendi alla base dell'onda per accumulare velocità e risali verso la cresta.<br>
-            • <b>Stall & Tubo (Trascina a Sinistra / Tasto Tubo)</b>: Frena per farti inglobare nel barile dell'onda!<br>
-            • <b>Zen / Relax</b>: Puoi anche solo galleggiare e guardare le onde infrangersi sulla riva!
+            • <b>Fisica Fluida & Onde Continue</b>: L'onda si propaga dal mare aperto verso il reef, aumentando di ripidezza fino a lanciare il lip in avanti e creare un vero <b>Tubo / Barrel 2D</b>!<br>
+            • <b>Paddle & Pop-Up</b>: Rema verso destra per prendere velocità. Quando l'onda ti solleva, tocca <b>⚡ POP-UP</b> (o <i>Spazio</i>) per metterti in piedi sulla tavola!<br>
+            • <b>Trim & Carving</b>: Trascina verso il basso per scendere la parete e accelerare; trascina verso l'alto per risalire verso la cresta e fare manovre aeree!<br>
+            • <b>Stall & Tubo</b>: Trascina a sinistra (o premi <i>🛑 Frena</i>) per frenare con la mano nell'acqua ed infilarti nel tubo profondo.<br>
+            • <b>Pennello Fondale (Sculpt)</b>: Attiva il pennello e tocca il fondale marino per alzare banchi di sabbia o scavare buche rocciose e veder cambiare l'onda in tempo reale!
           </div>
         </div>
       </div>
@@ -3671,15 +3676,18 @@
 
     <!-- Canvas Wrapper -->
     <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
-      <canvas id="surfGameCanvas" class="surf-active-canvas" width="440" height="250"></canvas>
+      <canvas id="surfGameCanvas" class="surf-active-canvas" width="520" height="300"></canvas>
 
       <!-- Floating In-Game Action Bar for Mobile Touch -->
       <div class="surf-in-game-actions">
         <button type="button" class="btn-mobile-game-action" onclick="handleMobileStall(event)" title="Frena ed entra nel Tubo">
-          <span>🛑 Frena / Tubo</span>
+          <span>🛑 Frena</span>
         </button>
         <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobilePopUp" onclick="handleMobilePopUp(event)" title="Pop-Up o Snap">
           <span>⚡ POP-UP</span>
+        </button>
+        <button type="button" class="btn-mobile-game-action" id="btnToggleSculptModal" onclick="handleToggleSculpt(event)" title="Scolpisci / Alza Fondale">
+          <span>🖌️ Scolpisci</span>
         </button>
         <button type="button" class="btn-mobile-game-action" onclick="window.SalentoSurf.triggerBigSetWave()" title="Lancia serie di onde giganti">
           <span>🌊 Big Set</span>
@@ -5084,14 +5092,25 @@
     function handleMobileStall(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (window.SalentoSurf && window.SalentoSurf.surfer) {
-        window.SalentoSurf.surfer.inputX = -1;
         window.SalentoSurf.surfer.isStallActive = true;
         setTimeout(() => {
           if (window.SalentoSurf && window.SalentoSurf.surfer) {
-            window.SalentoSurf.surfer.inputX = 0;
             window.SalentoSurf.surfer.isStallActive = false;
           }
         }, 1200);
+      }
+    }
+
+    function handleToggleSculpt(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.SalentoSurf) {
+        const isSculpt = window.SalentoSurf.toggleSculptMode();
+        const btn1 = document.getElementById('btnDeskSculpt');
+        const btn2 = document.getElementById('btnToggleSculptModal');
+        const text = isSculpt ? '🖌️ Sculpt ON' : '🖌️ Pennello Fondale';
+        const bg = isSculpt ? '#10B981' : '';
+        if (btn1) { btn1.textContent = text; btn1.style.background = bg; }
+        if (btn2) { btn2.innerHTML = `<span>${isSculpt ? '🖌️ ON' : '🖌️ Scolpisci'}</span>`; btn2.style.background = isSculpt ? '#10B981' : 'rgba(0,0,0,0.7)'; }
       }
     }
 
