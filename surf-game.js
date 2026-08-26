@@ -733,7 +733,7 @@
       this.objects.push(this.makeInteractObject(x, y, 7));
     }
 
-    hitPlayer() {
+    hitPlayer(collidingObj) {
       if (this.isInvincible()) return;
       if (this.hasDog) {
         this.kickDog();
@@ -749,6 +749,12 @@
       this.surferAction = 6;
       this.damageFlashTimer = 14;
       this.audio.playHit();
+      this.invincibleTimer = 220; // Immunità estesa per dare tutto il tempo di disimpegnarsi
+
+      // Rimuove l'ostacolo impattato per impedire blocchi/incastri ripetuti
+      if (collidingObj) {
+        collidingObj.y = -99999;
+      }
 
       if (this.heart < 1) {
         this.finished = true;
@@ -789,13 +795,19 @@
     }
 
     calcOffset() {
-      if (this.paused) return;
-      this.distance += this.speed;
-
       // Touch following analog steering
-      if (this.isTouchSteering && !this.flyingTimer && !this.fallTimer) {
+      if (this.isTouchSteering && !this.flyingTimer) {
         const baseX = this.touchStartX || (this.width / 2.0);
         const dx = this.touchX - baseX;
+
+        // Se il surfer era bloccato o in caduta, muovere l'analogico lo sblocca all'istante
+        if (Math.abs(dx) > 10 && (this.fallTimer || this.paused)) {
+          this.fallTimer = 0;
+          this.paused = false;
+          this.speed = this.initialSpeed;
+          if (!this.invincibleTimer) this.invincibleTimer = 180;
+        }
+
         if (dx < -60) {
           this.surferAction = 1; // Hard left
         } else if (dx < -16) {
@@ -807,7 +819,15 @@
         } else {
           this.surferAction = 3; // Straight
         }
+
+        // Applica forza di disimpegno laterale
+        if (this.paused && Math.abs(dx) > 10) {
+          this.offset += (dx < 0 ? -3 : 3);
+        }
       }
+
+      if (this.paused) return;
+      this.distance += this.speed;
 
       let ratio = 0;
       switch (this.surferAction) {
@@ -1049,8 +1069,9 @@
               break;
 
             default:
-              this.hitPlayer();
-              break;
+              this.hitPlayer(obj);
+              this.objects.splice(i, 1);
+              continue;
           }
         }
       }
@@ -1685,15 +1706,13 @@
 
       const boostBtn = document.getElementById('btnMobileBoost');
       if (boostBtn && this.started && !this.finished) {
-        boostBtn.innerHTML = `<span>⚡ BOOST <b style="background: rgba(0,0,0,0.22); padding: 1px 6px; border-radius: 99px; font-size: 11px; margin-left: 3px;">x${this.power}</b></span>`;
+        boostBtn.innerHTML = '<span style="font-size: 34px; line-height: 1; display: flex; align-items: center; justify-content: center;">⚡</span>';
         if (this.power > 0) {
-          boostBtn.style.background = '#F59E0B';
-          boostBtn.style.borderColor = '#FDE68A';
           boostBtn.style.opacity = '1';
+          boostBtn.style.filter = 'drop-shadow(0 0 12px rgba(250, 204, 21, 0.85))';
         } else {
-          boostBtn.style.background = 'rgba(255, 255, 255, 0.35)';
-          boostBtn.style.borderColor = 'rgba(255, 255, 255, 0.55)';
-          boostBtn.style.opacity = '0.75';
+          boostBtn.style.opacity = '0.4';
+          boostBtn.style.filter = 'none';
         }
       }
     }
