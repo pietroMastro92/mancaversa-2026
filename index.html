@@ -4321,7 +4321,11 @@
               const item = JSON.parse(line);
               if (item.event === 'message' && item.message) {
                 const payload = JSON.parse(item.message);
-                rawEvents.push(payload);
+                if (payload && payload.type === 'surf_score') {
+                  handleIncomingSurfScore(payload, true);
+                } else {
+                  rawEvents.push(payload);
+                }
               }
             } catch (e) {}
           });
@@ -4792,7 +4796,9 @@
             const data = JSON.parse(e.data);
             if (data && data.message) {
               const parsedMsg = JSON.parse(data.message);
-              if (parsedMsg && parsedMsg.action) {
+              if (parsedMsg && parsedMsg.type === 'surf_score') {
+                handleIncomingSurfScore(parsedMsg);
+              } else if (parsedMsg && parsedMsg.action) {
                 handleIncomingAction(parsedMsg);
               } else if (parsedMsg && parsedMsg.id && parsedMsg.text) {
                 const isFromOther = !currentUser || (parsedMsg.userId !== currentUser.id && parsedMsg.author !== currentUser.name);
@@ -5281,31 +5287,19 @@
     }
 
     /* ==========================================================================
-       SURF LEADERBOARD (TOP 10) LOGIC
+       SURF LEADERBOARD (100% REAL SCORES ONLY)
        ========================================================================== */
-    const SURF_LEADERBOARD_KEY = 'salento_surf_leaderboard_v3';
-    const DEFAULT_SURF_LEADERBOARD = [
-      { id: 'lb_1', name: 'Pietro (Superhost)', avatar: '😎', bg: '#FEF3C7', score: 34200, dist: 2890, date: '26 Ago' },
-      { id: 'lb_2', name: 'Chiara', avatar: '🐬', bg: '#E0F2FE', score: 29500, dist: 2450, date: '26 Ago' },
-      { id: 'lb_3', name: 'Marco K.', avatar: '⚡', bg: '#DCFCE7', score: 24800, dist: 2100, date: '25 Ago' },
-      { id: 'lb_4', name: 'Alessandro', avatar: '🏄‍♂️', bg: '#F3E8FF', score: 19800, dist: 1820, date: '25 Ago' },
-      { id: 'lb_5', name: 'Elena B.', avatar: '🐙', bg: '#FFE4E6', score: 16400, dist: 1540, date: '25 Ago' },
-      { id: 'lb_6', name: 'Giacomo', avatar: '🤿', bg: '#E0E7FF', score: 13900, dist: 1310, date: '24 Ago' },
-      { id: 'lb_7', name: 'Sara Salento', avatar: '🌺', bg: '#FCE7F3', score: 11200, dist: 1080, date: '24 Ago' },
-      { id: 'lb_8', name: 'Davide', avatar: '🦊', bg: '#FFEDD5', score: 9800, dist: 940, date: '24 Ago' },
-      { id: 'lb_9', name: 'Martina', avatar: '🐱', bg: '#F1F5F9', score: 7500, dist: 750, date: '23 Ago' },
-      { id: 'lb_10', name: 'Luca G.', avatar: '🥷', bg: '#E2E8F0', score: 5400, dist: 540, date: '23 Ago' }
-    ];
+    const SURF_LEADERBOARD_KEY = 'salento_surf_real_leaderboard_v5';
 
     function getSurfLeaderboard() {
       try {
         const saved = localStorage.getItem(SURF_LEADERBOARD_KEY);
         if (saved) {
           const list = JSON.parse(saved);
-          if (Array.isArray(list) && list.length > 0) return list;
+          if (Array.isArray(list)) return list;
         }
       } catch (e) {}
-      return JSON.parse(JSON.stringify(DEFAULT_SURF_LEADERBOARD));
+      return [];
     }
 
     function saveSurfLeaderboard(list) {
@@ -5323,10 +5317,18 @@
       const currentUserId = currentUser ? currentUser.id : null;
       const currentUserName = currentUser ? currentUser.name : null;
 
-      // 1. Render Top 3 Podium
-      const first = leaderboard[0];
-      const second = leaderboard[1];
-      const third = leaderboard[2];
+      // Se non ci sono ancora partite reali registrate
+      if (leaderboard.length === 0) {
+        podiumContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 26px 14px; background: var(--surface-subtle); border-radius: var(--radius-md); color: var(--charcoal); border: 1.5px dashed var(--border-strong);">
+            <div style="font-size: 32px; margin-bottom: 6px;">🏄‍♂️🌊</div>
+            <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Nessun record ancora registrato!</div>
+            <div style="font-size: 12.5px; color: var(--gray-muted);">Fai una partita a Edge Surf e conquista il <b>1° Posto</b> sulla Classifica Live!</div>
+          </div>
+        `;
+        listContainer.innerHTML = '';
+        return;
+      }
 
       const renderPodiumItem = (entry, rank, placeClass, medal) => {
         if (!entry) return `<div></div>`;
@@ -5336,19 +5338,31 @@
             <div class="podium-rank-badge">${medal}</div>
             <div class="podium-avatar" style="background: ${entry.bg || '#E0F2FE'};">${entry.avatar || '🏄‍♂️'}</div>
             <div class="podium-name" title="${entry.name}">${entry.name}${isMe ? ' (TU)' : ''}</div>
-            <div class="podium-score">${entry.score.toLocaleString()}</div>
+            <div class="podium-score">${entry.score.toLocaleString()} pt</div>
             <div class="podium-dist">${entry.dist}m</div>
           </div>
         `;
       };
 
-      podiumContainer.innerHTML = `
-        ${renderPodiumItem(second, 2, 'second-place', '🥈')}
-        ${renderPodiumItem(first, 1, 'first-place', '🥇')}
-        ${renderPodiumItem(third, 3, 'third-place', '🥉')}
-      `;
+      if (leaderboard.length === 1) {
+        podiumContainer.style.gridTemplateColumns = '1fr';
+        podiumContainer.innerHTML = renderPodiumItem(leaderboard[0], 1, 'first-place', '🥇');
+      } else if (leaderboard.length === 2) {
+        podiumContainer.style.gridTemplateColumns = '1fr 1.15fr';
+        podiumContainer.innerHTML = `
+          ${renderPodiumItem(leaderboard[1], 2, 'second-place', '🥈')}
+          ${renderPodiumItem(leaderboard[0], 1, 'first-place', '🥇')}
+        `;
+      } else {
+        podiumContainer.style.gridTemplateColumns = '1fr 1.15fr 1fr';
+        podiumContainer.innerHTML = `
+          ${renderPodiumItem(leaderboard[1], 2, 'second-place', '🥈')}
+          ${renderPodiumItem(leaderboard[0], 1, 'first-place', '🥇')}
+          ${renderPodiumItem(leaderboard[2], 3, 'third-place', '🥉')}
+        `;
+      }
 
-      // 2. Render Ranks 4 to 10
+      // Posizioni 4..10
       const rest = leaderboard.slice(3, 10);
       listContainer.innerHTML = rest.map((entry, idx) => {
         const rank = idx + 4;
@@ -5372,36 +5386,31 @@
       }).join('');
     }
 
-    function recordSurfScoreToLeaderboard(score, dist) {
-      if (!score || score <= 0) return;
-      if (!currentUser || !currentUser.name) initUserIdentity();
+    function handleIncomingSurfScore(payload, isBulk = false) {
+      if (!payload || !payload.score || !payload.name) return;
 
       let leaderboard = getSurfLeaderboard();
-      const myId = currentUser ? currentUser.id : 'usr_me';
-      const myName = currentUser ? currentUser.name : 'Tu';
-      const myAvatar = currentUser ? currentUser.avatar : '🏄‍♂️';
-      const myBg = currentUser ? currentUser.bg : '#E0F2FE';
-
-      const existingIdx = leaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name === myName));
+      const uId = payload.userId || payload.name;
+      const existingIdx = leaderboard.findIndex(e => (e.userId && e.userId === uId) || (e.name === payload.name));
 
       if (existingIdx !== -1) {
-        if (score > leaderboard[existingIdx].score) {
-          leaderboard[existingIdx].score = score;
-          leaderboard[existingIdx].dist = dist;
-          leaderboard[existingIdx].avatar = myAvatar;
-          leaderboard[existingIdx].bg = myBg;
-          leaderboard[existingIdx].date = 'Oggi';
+        if (payload.score > leaderboard[existingIdx].score) {
+          leaderboard[existingIdx].score = payload.score;
+          leaderboard[existingIdx].dist = payload.dist || 0;
+          leaderboard[existingIdx].avatar = payload.avatar || '🏄‍♂️';
+          leaderboard[existingIdx].bg = payload.bg || '#E0F2FE';
+          leaderboard[existingIdx].date = payload.date || 'Oggi';
         }
       } else {
         leaderboard.push({
-          id: 'lb_' + Date.now(),
-          userId: myId,
-          name: myName,
-          avatar: myAvatar,
-          bg: myBg,
-          score: score,
-          dist: dist,
-          date: 'Oggi'
+          id: payload.id || ('lb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)),
+          userId: uId,
+          name: payload.name,
+          avatar: payload.avatar || '🏄‍♂️',
+          bg: payload.bg || '#E0F2FE',
+          score: payload.score,
+          dist: payload.dist || 0,
+          date: payload.date || 'Oggi'
         });
       }
 
@@ -5410,7 +5419,39 @@
 
       saveSurfLeaderboard(leaderboard);
       renderSurfLeaderboard();
+    }
 
+    function recordSurfScoreToLeaderboard(score, dist) {
+      if (!score || score <= 0) return;
+      if (!currentUser || !currentUser.name) initUserIdentity();
+
+      const myId = currentUser ? currentUser.id : 'usr_me';
+      const myName = currentUser ? currentUser.name : 'Tu';
+      const myAvatar = currentUser ? currentUser.avatar : '🏄‍♂️';
+      const myBg = currentUser ? currentUser.bg : '#E0F2FE';
+
+      const payload = {
+        type: 'surf_score',
+        id: 'lb_' + Date.now(),
+        userId: myId,
+        name: myName,
+        avatar: myAvatar,
+        bg: myBg,
+        score: score,
+        dist: dist,
+        date: 'Oggi',
+        timestamp: Date.now()
+      };
+
+      handleIncomingSurfScore(payload);
+
+      fetch(NTFY_URL, {
+        method: 'POST',
+        headers: { 'Title': 'Salento Surf Real Score' },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+
+      const leaderboard = getSurfLeaderboard();
       const myRank = leaderboard.findIndex(e => (e.userId && e.userId === myId) || (e.name === myName));
       if (myRank === 0) {
         showToast('🏆 INCREDIBILE! Sei 1° nella Classifica Top 10!');
@@ -5422,6 +5463,7 @@
     }
 
     window.recordSurfScoreToLeaderboard = recordSurfScoreToLeaderboard;
+    window.handleIncomingSurfScore = handleIncomingSurfScore;
 
     window.addEventListener('scroll', () => {
       const sections = ['overview', 'surf', 'g22', 'g23', 'g24', 'casa', 'cene', 'checklist', 'mappe'];
