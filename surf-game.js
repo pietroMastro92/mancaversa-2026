@@ -489,35 +489,36 @@
     }
 
     updateControlButtonsUI() {
+      const actionsContainer = document.getElementById('surfInGameActions');
       const leftBtn = document.getElementById('btnMobileSteerLeft');
       const rightBtn = document.getElementById('btnMobileSteerRight');
-      const boostBtn = document.getElementById('btnMobileBoost');
       const brakeBtn = document.getElementById('btnMobileBrake');
+      const boostBtn = document.getElementById('btnMobileBoost');
+
+      if (leftBtn) leftBtn.style.display = 'none';
+      if (rightBtn) rightBtn.style.display = 'none';
+      if (brakeBtn) brakeBtn.style.display = 'none';
 
       if (!this.started || this.finished) {
-        if (leftBtn) leftBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">◄ Surfer</span>';
-        if (rightBtn) rightBtn.innerHTML = '<span style="font-size: 13px; font-weight: 800;">Surfer ►</span>';
+        if (actionsContainer) actionsContainer.classList.add('start-mode');
         if (boostBtn) {
-          boostBtn.innerHTML = '<span style="font-size: 14px; font-weight: 900;">▶ INIZIA</span>';
-          boostBtn.style.background = '#FF385C';
-          boostBtn.style.borderColor = '#FDA4AF';
+          boostBtn.classList.add('btn-start-mode');
+          boostBtn.innerHTML = '<span style="font-size: 16px; font-weight: 900;">▶ INIZIA</span>';
+          boostBtn.style.display = 'flex';
           boostBtn.style.opacity = '1';
         }
-        if (brakeBtn) brakeBtn.style.display = 'none';
       } else {
-        if (leftBtn) leftBtn.innerHTML = '<span>◄</span>';
-        if (rightBtn) rightBtn.innerHTML = '<span>►</span>';
-        if (brakeBtn) brakeBtn.style.display = 'flex';
+        if (actionsContainer) actionsContainer.classList.remove('start-mode');
         if (boostBtn) {
-          boostBtn.innerHTML = `<span>⚡ BOOST <b style="background: rgba(0,0,0,0.22); padding: 1px 6px; border-radius: 99px; font-size: 11px; margin-left: 3px;">x${this.power}</b></span>`;
+          boostBtn.classList.remove('btn-start-mode');
+          boostBtn.innerHTML = '<span style="font-size: 30px; line-height: 1;">⚡</span>';
+          boostBtn.style.display = 'flex';
           if (this.power > 0) {
-            boostBtn.style.background = '#F59E0B';
-            boostBtn.style.borderColor = '#FDE68A';
             boostBtn.style.opacity = '1';
+            boostBtn.style.filter = 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.75))';
           } else {
-            boostBtn.style.background = 'rgba(255, 255, 255, 0.35)';
-            boostBtn.style.borderColor = 'rgba(255, 255, 255, 0.55)';
-            boostBtn.style.opacity = '0.75';
+            boostBtn.style.opacity = '0.45';
+            boostBtn.style.filter = 'none';
           }
         }
       }
@@ -1401,14 +1402,20 @@
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
-      // 1. Vite / Cuori (Sinistra)
-      let hLeft = barX + 22;
+      const spriteY = topY + Math.round((barHeight - 24) / 2);
+
+      // 1. Vite / Cuori originali a sinistra (sprite 24x24 da interface24.png)
+      let hLeft = barX + 16;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
-        ctx.font = '20px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(isFull ? '❤️' : '🖤', hLeft, topY + 31);
-        hLeft += 26;
+        if (iface && iface.complete && iface.naturalWidth > 0) {
+          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, hLeft, spriteY, 24, 24);
+        } else {
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(isFull ? '❤️' : '🖤', hLeft + 12, topY + 31);
+        }
+        hLeft += 28;
       }
 
       // 2. Distanza (Centro)
@@ -1417,25 +1424,35 @@
       ctx.fillStyle = '#0F172A';
       ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, topY + 31);
 
-      // 3. Fulmini Boost (Destra)
-      let pRight = barX + barWidth - 22;
+      // 3. Fulmini Boost originali a destra (sprite 24x24 da interface24.png)
+      let pRight = barX + barWidth - 36;
       for (let i = 2; i >= 0; i--) {
         const isFull = i < this.power;
-        ctx.font = '19px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(isFull ? '⚡' : '⚪', pRight, topY + 31);
-        pRight -= 25;
+        if (iface && iface.complete && iface.naturalWidth > 0) {
+          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, 24, pRight, spriteY, 24, 24);
+        } else {
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(isFull ? '⚡' : '⚪', pRight + 12, topY + 31);
+        }
+        pRight -= 28;
       }
 
       // 4. Cane e Monete (se presenti)
-      if (this.hasDog || this.coinCount > 0) {
+      let extraX = center + 52;
+      if (this.hasDog && iface && iface.complete && iface.naturalWidth > 0) {
+        ctx.drawImage(iface, 24, 48, 24, 24, extraX, spriteY, 24, 24);
+        extraX += 28;
+      }
+      if (this.coinCount > 0) {
+        if (iface && iface.complete && iface.naturalWidth > 0) {
+          ctx.drawImage(iface, 24, 72, 24, 24, extraX, spriteY, 24, 24);
+          extraX += 26;
+        }
         ctx.textAlign = 'left';
         ctx.font = 'bold 12px "FiraCode", monospace, sans-serif';
         ctx.fillStyle = '#B45309';
-        let extras = '';
-        if (this.hasDog) extras += '🐕 ';
-        if (this.coinCount > 0) extras += `🪙x${this.coinCount}`;
-        ctx.fillText(extras, center + 46, topY + 30);
+        ctx.fillText(`x${this.coinCount}`, extraX, topY + 30);
       }
 
       ctx.restore();

@@ -2824,95 +2824,48 @@
     /* Minimal & Pop Floating In-Game Action Controls */
     .surf-in-game-actions {
       position: absolute;
-      bottom: calc(18px + env(safe-area-inset-bottom));
+      bottom: calc(24px + env(safe-area-inset-bottom));
       left: 0;
       right: 0;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 0 14px;
+      justify-content: flex-end;
+      padding: 0 24px;
       z-index: 30;
-      pointer-events: auto;
+      pointer-events: none;
     }
-    .btn-surf-pop-steer {
-      width: 60px;
-      height: 60px;
+    .surf-in-game-actions.start-mode {
+      justify-content: center;
+    }
+    .btn-surf-pop-boost {
+      pointer-events: auto;
+      width: 66px;
+      height: 66px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.38);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      border: 2px solid rgba(255, 255, 255, 0.95);
-      color: #0F172A;
-      font-size: 22px;
-      font-weight: 900;
+      background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+      border: 3px solid #FFFFFF;
+      color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.7);
       cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, opacity 0.2s ease;
       touch-action: manipulation;
       user-select: none;
       -webkit-user-select: none;
     }
-    .btn-surf-pop-steer:active {
-      transform: scale(0.88);
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    .btn-surf-pop-brake {
-      height: 60px;
-      padding: 0 18px;
+    .btn-surf-pop-boost.btn-start-mode {
+      width: auto;
+      height: 54px;
+      padding: 0 28px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.34);
-      backdrop-filter: blur(24px) saturate(200%);
-      -webkit-backdrop-filter: blur(24px) saturate(200%);
-      border: 2px solid rgba(255, 255, 255, 0.9);
-      color: #0F172A;
-      font-size: 13.5px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
-      cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, color 0.15s ease;
-      touch-action: manipulation;
-    }
-    .btn-surf-pop-brake:active {
-      transform: scale(0.9);
-      background: rgba(239, 68, 68, 0.85);
-      border-color: #EF4444;
-      color: #FFFFFF;
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
-    }
-    .btn-surf-pop-boost {
-      height: 60px;
-      padding: 0 22px;
-      border-radius: 9999px;
-      background: linear-gradient(135deg, #FF6B00 0%, #FFA800 100%);
-      border: 2px solid #FFFFFF;
-      color: #FFFFFF;
-      font-size: 14.5px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48), 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 2px 3px rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
-      touch-action: manipulation;
-      animation: popPulse 2.2s infinite ease-in-out;
-    }
-    @keyframes popPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48); }
-      50% { transform: scale(1.03); box-shadow: 0 12px 34px rgba(255, 107, 0, 0.68); }
+      background: linear-gradient(135deg, #FF385C 0%, #E11D48 100%);
+      box-shadow: 0 10px 28px rgba(225, 29, 72, 0.55), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.6);
     }
     .btn-surf-pop-boost:active {
-      transform: scale(0.92);
-      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.6);
+      transform: scale(0.9);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.6);
     }
   </style>
 </head>
@@ -3897,7 +3850,7 @@
   <!-- ==========================================================================
        INTERACTIVE CLIENT SCRIPTS
        ========================================================================== -->
-  <script src="./surf-game.js?v=20260826_vPillHUD"></script>
+  <script src="./surf-game.js?v=20260826_vPureOrig"></script>
   <script>
     // --------------------------------------------------------------------------
     // 1. Easter Egg Giocoso di Pietro
