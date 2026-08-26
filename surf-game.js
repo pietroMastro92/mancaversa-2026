@@ -2,111 +2,64 @@
  * ==============================================================================
  * EDGE SURF GAME - SALENTO EDITION (AUTHENTIC MICROSOFT EDGE SURF ENGINE)
  * ==============================================================================
- * Porting completo e fedele in JavaScript / HTML5 Canvas del gioco open-source:
+ * Porting 1:1 in JavaScript / HTML5 Canvas del videogioco open-source:
  * https://github.com/ShirasawaSama/edge-surf-game (Microsoft Edge "edge://surf")
- *
- * Caratteristiche originali:
- * - Scorrimento infinito top-down con oceano dinamico e texture originali
- * - 8 Surfer selezionabili con relative tavole e animazioni
- * - Ostacoli: Scogli (piccoli/grandi), Pontili (docks), Banchi di sabbia, Alghe rallentanti, Mulinelli
- * - Oggetti speciali: Trampolini / Rampe di salto con volo aereo e rotazioni, Fulmini Boost (⚡),
- *   Cuori vita extra (💖), Cane compagno salvataggio (🐕), Monete dorate (🪙)
- * - Il Mostro Marino (Kraken / Piovra Gigante) che insegue il giocatore con tentacoli animati!
- * - Controlli completi: Tastiera (Frecce / WASD / Spazio) e Touch per smartphone (Swipe / Drag / Tasti virtuali)
- * - Audio sintetizzato Web Audio per salti, boost, collisioni, kraken e fanfare record
  */
 
 (function (window) {
   'use strict';
 
-  // ----------------------------------------------------------------------------
-  // 1. CONFIGURAZIONE E COSTANTI ORIGINALI DI EDGE SURF
-  // ----------------------------------------------------------------------------
   const GAME_WIDTH = 480;
   const GAME_HEIGHT = 640;
   const SURFER_TOP_RATIO = 0.33;
+  const ANIMATION_TIMER_MAX_VALUE = 40;
 
-  const OBJECT_HITBOXES = {
-    0: [32, 32],   // SMALL_OBJECT
-    1: [64, 64],   // BIG_OBJECT
-    2: [64, 64],   // SLOWDOWN_OBJECT
-    3: [96, 96],   // RIPPLE_OBJECT
-    4: [64, 64],   // AMBIENT_OBJECT
-    5: [256, 128], // SAND_BAR_OBJECT
-    6: [1280, 512],// ISLAND_OBJECT
-    7: [64, 64],   // INTERACT_OBJECT
-    8: [128, 128], // EFFECT_OBJECT
-    9: [64, 64]    // DOCK_OBJECT
-  };
+  // Hitboxes esatte da objects.c:
+  // 0:SMALL, 1:BIG, 2:SLOWDOWN, 3:RIPPLE, 4:AMBIENT, 5:SANDBAR, 6:ISLAND, 7:INTERACT, 8:EFFECT, 9:DOCK
+  const OBJECT_HITBOXES = [
+    [32, 32],    // 0: SMALL_OBJECT (objects32.png)
+    [64, 64],    // 1: BIG_OBJECT (objects64.png)
+    [64, 64],    // 2: SLOWDOWN_OBJECT (slowdown64.png)
+    [96, 96],    // 3: RIPPLE_OBJECT (ripple96.png)
+    [64, 64],    // 4: AMBIENT_OBJECT (ambient64.png)
+    [256, 128],  // 5: SAND_BAR_OBJECT (sandbar256.png)
+    [1280, 512], // 6: ISLAND_OBJECT (island1280.png)
+    [64, 64],    // 7: INTERACT_OBJECT (interact64.png)
+    [128, 128],  // 8: EFFECT_OBJECT (effects128.png)
+    [64, 64]     // 9: DOCK_OBJECT (docks64.png)
+  ];
 
-  const ASSET_PATHS = {
-    water: './surf-assets/water256.png',
+  const ASSET_SRC = {
+    background: './surf-assets/water256.png',
+    surfer: './surf-assets/surfer64.png',
     player: './surf-assets/player64.png',
     board: './surf-assets/surfboard64.png',
+    interface: './surf-assets/interface24.png',
+    naughtySurfer: './surf-assets/surfer64.png',
+    enemy: './surf-assets/enemy128.png',
     objectsSmall: './surf-assets/objects32.png',
     objectsBig: './surf-assets/objects64.png',
-    interact: './surf-assets/interact64.png',
-    docks: './surf-assets/docks64.png',
-    sandbar: './surf-assets/sandbar256.png',
     slowdown: './surf-assets/slowdown64.png',
-    enemy: './surf-assets/enemy128.png',
-    effects: './surf-assets/effects128.png',
-    interface: './surf-assets/interface24.png',
     ripple: './surf-assets/ripple96.png',
-    ambient: './surf-assets/ambient64.png'
+    ambient: './surf-assets/ambient64.png',
+    sandbar: './surf-assets/sandbar256.png',
+    island: './surf-assets/island1280.png',
+    interact: './surf-assets/interact64.png',
+    effects: './surf-assets/effects128.png',
+    docks: './surf-assets/docks64.png'
   };
 
   // ----------------------------------------------------------------------------
-  // 2. GESTORE ASSET IMMAGINI
-  // ----------------------------------------------------------------------------
-  class AssetManager {
-    constructor() {
-      this.images = {};
-      this.loaded = false;
-      this.loadCount = 0;
-      this.total = Object.keys(ASSET_PATHS).length;
-    }
-
-    load(onComplete) {
-      if (this.loaded) {
-        if (onComplete) onComplete();
-        return;
-      }
-      for (const [key, src] of Object.entries(ASSET_PATHS)) {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-          this.loadCount++;
-          if (this.loadCount >= this.total) {
-            this.loaded = true;
-            if (onComplete) onComplete();
-          }
-        };
-        img.onerror = () => {
-          this.loadCount++;
-          if (this.loadCount >= this.total) {
-            this.loaded = true;
-            if (onComplete) onComplete();
-          }
-        };
-        this.images[key] = img;
-      }
-    }
-
-    get(key) {
-      return this.images[key];
-    }
-  }
-
-  // ----------------------------------------------------------------------------
-  // 3. EFFETTI SONORI SINTETIZZATI WEB AUDIO
+  // WEB AUDIO SOUND EFFECTS
   // ----------------------------------------------------------------------------
   class EdgeSurfAudio {
     constructor() {
       this.ctx = null;
       this.isMuted = false;
-      const saved = localStorage.getItem('salento_edge_surf_muted');
-      if (saved !== null) this.isMuted = saved === 'true';
+      try {
+        const s = localStorage.getItem('salento_edge_surf_muted');
+        if (s !== null) this.isMuted = s === 'true';
+      } catch (e) {}
     }
 
     init() {
@@ -123,7 +76,9 @@
 
     toggleMute() {
       this.isMuted = !this.isMuted;
-      localStorage.setItem('salento_edge_surf_muted', this.isMuted);
+      try { localStorage.setItem('salento_edge_surf_muted', this.isMuted); } catch (e) {}
+      const btn = document.getElementById('btnSurfMute');
+      if (btn) btn.textContent = this.isMuted ? '🔇 Muto' : '🔊 Audio';
       return this.isMuted;
     }
 
@@ -136,7 +91,7 @@
       osc.type = 'sine';
       osc.frequency.setValueAtTime(320, t);
       osc.frequency.exponentialRampToValueAtTime(740, t + 0.22);
-      g.gain.setValueAtTime(0.2, t);
+      g.gain.setValueAtTime(0.25, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
       osc.connect(g);
       g.connect(this.ctx.destination);
@@ -151,7 +106,7 @@
       const osc = this.ctx.createOscillator();
       const g = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.setValueAtTime(240, t);
       osc.frequency.exponentialRampToValueAtTime(880, t + 0.28);
       g.gain.setValueAtTime(0.22, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
@@ -170,7 +125,7 @@
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(587.33, t);
       osc.frequency.setValueAtTime(880, t + 0.08);
-      g.gain.setValueAtTime(0.18, t);
+      g.gain.setValueAtTime(0.2, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
       osc.connect(g);
       g.connect(this.ctx.destination);
@@ -187,7 +142,7 @@
       osc.type = 'square';
       osc.frequency.setValueAtTime(180, t);
       osc.frequency.linearRampToValueAtTime(40, t + 0.3);
-      g.gain.setValueAtTime(0.24, t);
+      g.gain.setValueAtTime(0.25, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
       osc.connect(g);
       g.connect(this.ctx.destination);
@@ -203,8 +158,8 @@
       const g = this.ctx.createGain();
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(90, t);
-      osc.frequency.linearRampToValueAtTime(60, t + 0.6);
-      g.gain.setValueAtTime(0.3, t);
+      osc.frequency.linearRampToValueAtTime(55, t + 0.6);
+      g.gain.setValueAtTime(0.35, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
       osc.connect(g);
       g.connect(this.ctx.destination);
@@ -214,22 +169,25 @@
   }
 
   // ----------------------------------------------------------------------------
-  // 4. MOTORE PRINCIPALE DI GIOCO (EDGE SURF EXACT PORT)
+  // EDGE SURF ENGINE
   // ----------------------------------------------------------------------------
   class EdgeSurfEngine {
     constructor() {
       this.canvas = null;
       this.ctx = null;
-      this.assets = new AssetManager();
+      this.width = GAME_WIDTH;
+      this.height = GAME_HEIGHT;
+
+      this.images = {};
+      this.imagesLoaded = false;
+      this.waterPattern = null;
       this.audio = new EdgeSurfAudio();
 
-      // Stato partita
+      // Stato gioco da game.c
       this.started = false;
       this.paused = true;
       this.finished = false;
-
-      this.surfer = 0; // indice surfer 0..7
-      this.surferAction = 0; // 0:fermo, 1:hard-left, 2:left, 3:straight, 4:right, 5:hard-right, 6:crash, 7:eaten
+      this.surfer = 0; // 0..7
       this.initialSpeed = 4;
       this.speed = 0;
       this.distance = 0;
@@ -240,35 +198,72 @@
       this.coinCount = 0;
       this.hasDog = false;
 
-      // Timer
-      this.fallTimer = 0;
+      this.surferAction = 0;
       this.invincibleTimer = 0;
-      this.flyingTimer = 0;
-      this.rushTimer = 0;
+      this.fallTimer = 0;
       this.boardTimer = 0;
+      this.flyingTimer = 0;
+      this.changeDirectionTimer = 0;
+      this.rushTimer = 0;
       this.enemyTimer = 0;
       this.enemyStoped = false;
       this.enemyX = 0;
       this.enemyY = 0;
+      this.boardBrokenTimer = 0;
+      this.animationTimer = 0;
 
       this.objects = [];
       this.highScore = 0;
       this.bestDistance = 0;
 
-      this.lastTimestamp = 0;
+      this.lastTime = 0;
       this.animId = null;
 
-      // Touch controls
-      this.touchStartX = 0;
-      this.touchStartY = 0;
-      this.isTouchActive = false;
+      // Touch drag
+      this.isDragging = false;
+      this.dragStartX = 0;
+      this.lastTouchX = 0;
 
-      this.loadSavedScore();
+      this.loadHighScore();
+      this.preloadImages();
     }
 
-    loadSavedScore() {
+    preloadImages() {
+      let loaded = 0;
+      const keys = Object.keys(ASSET_SRC);
+      const total = keys.length;
+
+      keys.forEach((key) => {
+        const img = new Image();
+        img.src = ASSET_SRC[key];
+        img.onload = () => {
+          loaded++;
+          if (loaded >= total) {
+            this.imagesLoaded = true;
+            this.createWaterPattern();
+            this.updateCardUI();
+          }
+        };
+        img.onerror = () => {
+          loaded++;
+          if (loaded >= total) {
+            this.imagesLoaded = true;
+            this.updateCardUI();
+          }
+        };
+        this.images[key] = img;
+      });
+    }
+
+    createWaterPattern() {
+      if (this.ctx && this.images.background && this.images.background.complete) {
+        this.waterPattern = this.ctx.createPattern(this.images.background, 'repeat');
+      }
+    }
+
+    loadHighScore() {
       try {
-        const saved = localStorage.getItem('salento_edge_surf_highscore_v1');
+        const saved = localStorage.getItem('salento_edge_surf_highscore_v2');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
@@ -278,14 +273,14 @@
       } catch (e) {}
     }
 
-    saveScore() {
+    saveHighScore() {
       try {
-        const currentScore = this.getScore();
-        if (currentScore > this.highScore) this.highScore = currentScore;
-        const currentDist = Math.floor(this.distance / 10.0);
-        if (currentDist > this.bestDistance) this.bestDistance = currentDist;
+        const curScore = this.getScore();
+        if (curScore > this.highScore) this.highScore = curScore;
+        const curDist = Math.floor(this.distance / 10.0);
+        if (curDist > this.bestDistance) this.bestDistance = curDist;
 
-        localStorage.setItem('salento_edge_surf_highscore_v1', JSON.stringify({
+        localStorage.setItem('salento_edge_surf_highscore_v2', JSON.stringify({
           highScore: this.highScore,
           bestDistance: this.bestDistance,
           surfer: this.surfer
@@ -301,21 +296,18 @@
       this.canvas = document.getElementById(canvasId);
       if (!this.canvas) return;
 
-      this.canvas.width = GAME_WIDTH;
-      this.canvas.height = GAME_HEIGHT;
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.imageSmoothingEnabled = false;
 
-      this.assets.load(() => {
-        this.updateCardUI();
-      });
-
-      this.bindControls();
+      this.createWaterPattern();
+      this.bindInputs();
       this.resetGame();
 
-      this.lastTimestamp = performance.now();
+      this.lastTime = performance.now();
       if (this.animId) cancelAnimationFrame(this.animId);
-      this.loop(this.lastTimestamp);
+      this.loop(this.lastTime);
     }
 
     resetGame() {
@@ -336,11 +328,14 @@
       this.invincibleTimer = 0;
       this.fallTimer = 0;
       this.flyingTimer = 0;
+      this.changeDirectionTimer = 0;
       this.rushTimer = 0;
       this.enemyTimer = 0;
       this.enemyStoped = false;
       this.enemyX = 0;
       this.enemyY = 0;
+      this.boardBrokenTimer = 0;
+      this.animationTimer = 1;
 
       this.updateHUD();
       this.updateCardUI();
@@ -357,172 +352,789 @@
       this.started = true;
       this.paused = false;
       this.speed = this.initialSpeed;
-      this.surferAction = 3; // Down
+      this.surferAction = 3; // dritto
       this.makeStarterObjects();
+    }
+
+    setSurferCharacter(idx) {
+      this.surfer = (idx + 8) % 8;
+      this.saveHighScore();
+      this.updateCardUI();
     }
 
     triggerBoost() {
       this.audio.init();
       this.audio.resume();
 
-      if (this.paused) {
+      if (this.paused || !this.started) {
         this.startSurfing();
         return;
       }
-      if (this.power > 0 || this.rushTimer > 0) {
-        if (!this.rushTimer) {
-          this.power = Math.max(0, this.power - 1);
-          this.audio.playBoost();
-        }
+      if (!this.rushTimer && this.power > 0) {
         this.rushTimer = 1;
+        this.power--;
         this.speed = this.initialSpeed * 2.2;
-        if (this.surferAction === 0) this.surferAction = 3;
+        if (!this.surferAction) this.surferAction = 3;
+        this.audio.playBoost();
       }
     }
 
-    setSurferCharacter(idx) {
-      this.surfer = Math.max(0, Math.min(7, idx));
-      this.saveScore();
-      this.updateCardUI();
+    steerLeft() {
+      if (this.paused && this.started && !this.finished) {
+        this.paused = false;
+        this.speed = this.initialSpeed;
+      }
+      this.surferAction = this.surferAction === 2 ? 1 : 2;
+    }
+
+    steerRight() {
+      if (this.paused && this.started && !this.finished) {
+        this.paused = false;
+        this.speed = this.initialSpeed;
+      }
+      this.surferAction = this.surferAction === 4 ? 5 : 4;
+    }
+
+    stopPlayer() {
+      if (this.rushTimer) return;
+      this.paused = true;
+      this.speed = 0;
+      this.surferAction = 0;
+      this.rushTimer = 0;
     }
 
     // --------------------------------------------------------------------------
-    // GENERAZIONE DEGLI OGGETTI (ROCKS, DOCKS, SANDBARS, BOOSTS, HEARTS, KRAKEN)
+    // CREAZIONE OSTACOLI (objects.c exact logic)
     // --------------------------------------------------------------------------
+    randomX() { return Math.random() * this.width + this.offset; }
+    randomY() { return this.distance + this.height * (1 + Math.random()); }
+
+    makeSmallObject(x, y, idx) {
+      return { type: 0, index: idx !== undefined ? idx : Math.floor(Math.random() * 8), x, y, stage: 0, maxStage: 0, once: false };
+    }
+    makeBigObject(x, y, idx) {
+      const index = idx !== undefined ? idx : Math.floor(Math.random() * 25);
+      return { type: 1, index, x, y, stage: 0, maxStage: 0, once: false };
+    }
+    makeSlowdownObject(x, y) {
+      return { type: 2, index: Math.floor(Math.random() * 9), x, y, stage: 0, maxStage: 2, once: false };
+    }
+    makeRippleObject(x, y) {
+      return { type: 3, index: 0, x, y, stage: 0, maxStage: 2, once: false };
+    }
+    makeAmbientObject(x, y) {
+      return { type: 4, index: Math.floor(Math.random() * 4), x, y, stage: 0, maxStage: 5, once: true };
+    }
+    makeSandBarObject(x, y) {
+      return { type: 5, index: Math.floor(Math.random() * 4), x, y, stage: 0, maxStage: 0, once: false };
+    }
+    makeIslandObject(x, y) {
+      return { type: 6, index: 0, x, y, stage: 0, maxStage: 0, once: false };
+    }
+    makeInteractObject(x, y, idx) {
+      const index = idx !== undefined ? idx : Math.floor(Math.random() * 6);
+      return { type: 7, index: index === 5 ? 6 : index, x, y, stage: 0, maxStage: 3, once: false };
+    }
+    makeEffectObject(x, y, idx) {
+      return { type: 8, index: idx, x, y, stage: 0, maxStage: 2, once: false };
+    }
+    makeDockObject(x, y, idx) {
+      this.objects.push({ type: 9, index: idx, x, y, stage: 0, maxStage: 0, once: false });
+      if (idx < 7 && Math.random() > 0.5) {
+        this.objects.push(this.makeSmallObject(x + 13 + Math.random() * 6, y + Math.random() * 10, 8 + Math.floor(Math.random() * 12)));
+      }
+    }
+    makeDockOnTop(x, y, hasTop) {
+      if (hasTop || Math.random() > 0.8) this.makeDockObject(x, y - 64, 4);
+    }
+    makeDocksObject(x, y, hasTop) {
+      y += 64;
+      if (Math.random() > 0.7) {
+        const it = Math.random();
+        this.makeDockObject(x, y, it > 0.5 ? 3 : 7);
+        if (hasTop || it > 0.5) this.makeDockOnTop(x, y, hasTop);
+      } else {
+        let left = x;
+        this.makeDockObject(left, y, 0);
+        this.makeDockOnTop(left, y, hasTop);
+        const count = Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+          left += 64;
+          const it = Math.random();
+          this.makeDockObject(left, y, it > 0.75 ? 1 : it > 0.5 ? 7 : it > 0.25 ? 8 : 9);
+          if (!hasTop && it > 0.75) this.makeDockOnTop(left, y, false);
+        }
+        left += 64;
+        this.makeDockObject(left, y, 2);
+        if (!hasTop) this.makeDockOnTop(left, y, false);
+      }
+    }
+
     makeStarterObjects() {
-      const centerX = GAME_WIDTH / 2.0;
-      const centerY = GAME_HEIGHT / 2.0 + 64;
+      const centerX = this.width / 2.0;
+      const centerY = this.height / 2.0 + 64;
 
-      // Cuore iniziale e boost
-      this.objects.push({ type: 7, index: 3, x: centerX - 84, y: centerY, stage: 0, maxStage: 3, once: false }); // Heart
-      this.objects.push({ type: 7, index: 2, x: centerX + 20, y: centerY, stage: 0, maxStage: 3, once: false }); // Boost
+      this.objects.push(this.makeInteractObject(centerX - 64 - 20, centerY, 3)); // Heart
+      this.objects.push(this.makeInteractObject(centerX, centerY, 2));            // Boost
 
-      // Pontili e scogli iniziali
-      this.makeDocks(centerX - 64 * 3.5, centerY + 128);
-      this.makeDocks(centerX + 64 * 1.5, centerY + 128);
-    }
+      let x = centerX - 64 * 6;
+      let y = centerY + 128;
 
-    makeDocks(x, y) {
-      this.objects.push({ type: 9, index: 0, x: x, y: y, stage: 0, maxStage: 0, once: false });
-      this.objects.push({ type: 9, index: 1, x: x + 64, y: y, stage: 0, maxStage: 0, once: false });
-      this.objects.push({ type: 9, index: 8, x: x + 128, y: y, stage: 0, maxStage: 0, once: false });
-      this.objects.push({ type: 9, index: 2, x: x + 192, y: y, stage: 0, maxStage: 0, once: false });
-    }
+      for (let i = 0; i < 10; i++) this.objects.push(this.makeSlowdownObject(x + Math.random() * 450 - 250, y + Math.random() * 300 - 200));
+      for (let i = 0; i < 5; i++) this.objects.push(this.makeBigObject(x + Math.random() * 450 - 250, y + Math.random() * 300 - 200));
+      for (let i = 0; i < 3; i++) this.objects.push(this.makeSmallObject(x + Math.random() * 450 - 250, y + Math.random() * 300 - 200));
 
-    randomX() {
-      return Math.random() * GAME_WIDTH + this.offset;
-    }
+      this.makeDockOnTop(x, y, true);
+      this.makeDockObject(x, y, 0);
+      x += 64; this.makeDockObject(x, y, 1);
+      x += 64; this.makeDockObject(x, y, 8);
+      x += 64; this.makeDockObject(x, y, 2);
 
-    randomY() {
-      return this.distance + GAME_HEIGHT * (1 + Math.random());
+      x = centerX + 96;
+      for (let i = 0; i < 10; i++) this.objects.push(this.makeSlowdownObject(x + Math.random() * 450, y + Math.random() * 300 - 200));
+      for (let i = 0; i < 5; i++) this.objects.push(this.makeBigObject(x + Math.random() * 450, y + Math.random() * 300 - 200));
+      for (let i = 0; i < 3; i++) this.objects.push(this.makeSmallObject(x + Math.random() * 450, y + Math.random() * 300 - 200));
+
+      this.makeDockObject(x, y, 0);
+      x += 64; this.makeDockObject(x, y, 9);
+      x += 64; this.makeDockObject(x, y, 1);
+      x += 64; this.makeDockObject(x, y, 2);
+      this.makeDockOnTop(x, y, true);
     }
 
     generateObjects() {
-      if (this.paused || this.finished) return;
+      if (this.paused) return;
       const dis = Math.floor(this.distance);
+      const isFar = dis > 10000;
+      let chanceModify = Math.floor(this.distance / 10000) * 0.03;
+      if (chanceModify > 0.16) chanceModify = 0.16;
 
-      // Scogli piccoli
-      if (dis % 73 <= this.speed && Math.random() > 0.45) {
-        this.objects.push({ type: 0, index: Math.floor(Math.random() * 8), x: this.randomX(), y: this.randomY(), stage: 0, maxStage: 0, once: false });
-      }
-      // Alghe rallentanti
-      if (dis % 44 <= this.speed && Math.random() > 0.65) {
-        this.objects.push({ type: 2, index: Math.floor(Math.random() * 9), x: this.randomX(), y: this.randomY(), stage: 0, maxStage: 2, once: false });
-      }
-      // Scogli grandi / coralli
-      if (dis % 77 <= this.speed && Math.random() > 0.38) {
-        this.objects.push({ type: 3, index: 0, x: this.randomX() - 16, y: this.randomY() - 18, stage: 0, maxStage: 2, once: false }); // Ripple
-        this.objects.push({ type: 1, index: Math.floor(Math.random() * 25), x: this.randomX(), y: this.randomY(), stage: 0, maxStage: 0, once: false });
-      }
-      // Oggetti interagibili (Boost, Cuore, Rampa salto, Moneta, Cane)
-      if (dis % 175 <= this.speed && Math.random() > 0.6) {
-        const randIdx = Math.floor(Math.random() * 7);
-        const objIdx = randIdx === 5 ? 6 : randIdx; // 0:rampa, 2:boost, 3:cuore, 4:moneta, 6:cane
-        this.objects.push({ type: 7, index: objIdx, x: this.randomX(), y: this.randomY(), stage: 0, maxStage: 3, once: false });
-      }
-      // Banchi di sabbia
-      if (dis % 433 <= this.speed && Math.random() > 0.68) {
-        this.objects.push({ type: 5, index: Math.floor(Math.random() * 4), x: this.randomX(), y: this.randomY(), stage: 0, maxStage: 0, once: false });
-      }
-      // Pontili
-      if (dis % 633 <= this.speed && Math.random() > 0.55) {
-        this.makeDocks(this.randomX(), this.randomY());
+      if (dis % 73 <= this.speed && Math.random() > (0.45 - chanceModify)) this.objects.push(this.makeSmallObject(this.randomX(), this.randomY()));
+      if (dis % 44 <= this.speed && Math.random() > (0.65 - chanceModify)) this.objects.push(this.makeSlowdownObject(this.randomX(), this.randomY()));
+      if (dis % 133 <= this.speed && Math.random() > (0.93 - chanceModify)) this.objects.push(this.makeAmbientObject(this.randomX(), this.randomY()));
+      if (dis % 633 <= this.speed && Math.random() > (0.5 - chanceModify)) this.makeDocksObject(this.randomX(), this.randomY(), false);
+
+      if (isFar && dis % (this.height * 3) <= this.speed && Math.random() > 0.9) {
+        const x = this.randomX();
+        const y = this.randomY();
+        this.objects.push(this.makeIslandObject(x, y));
+        this.objects.push(this.makeInteractObject(x + 620, y + 94, 0));
+        this.objects.push(this.makeEffectObject(x + 800, y + 140, 5));
       }
 
-      // KRAKEN SPAWN: dopo 500m (5000px) il mostro marino comincia ad emergere!
-      if (dis > 3500 && this.enemyTimer === 0 && Math.random() < 0.003) {
+      if (dis % 175 <= this.speed && Math.random() > 0.7) {
+        const x = this.randomX();
+        const y = this.randomY();
+        this.objects.push(this.makeRippleObject(x - 16, y - 18));
+        this.objects.push(this.makeInteractObject(x, y));
+      }
+
+      if (dis % 77 <= this.speed && Math.random() > (0.36 - chanceModify)) {
+        const x = this.randomX();
+        const y = this.randomY();
+        this.objects.push(this.makeRippleObject(x - 16, y - 18));
+        this.objects.push(this.makeBigObject(x, y));
+      }
+
+      if (dis % 433 <= this.speed && Math.random() > (0.7 - chanceModify)) {
+        const x = this.randomX();
+        const y = this.randomY();
+        this.objects.push(this.makeSandBarObject(x, y));
+        if (Math.random() > 0.7) this.makeDocksObject(x + Math.random() * 198, y + 128, true);
+      }
+
+      // KRAKEN SPAWN: dopo 300 metri (3000px) o evento casuale
+      if (dis > 3000 && this.enemyTimer === 0 && Math.random() < 0.002) {
         this.enemyTimer = 1;
-        this.enemyX = this.offset + (GAME_WIDTH / 2.0) - 64;
-        this.enemyY = this.distance - 120;
+        this.enemyX = this.offset + (this.width / 2.0) - 64;
+        this.enemyY = this.distance - 100;
         this.audio.playKraken();
       }
     }
 
     // --------------------------------------------------------------------------
-    // GESTIONE CONTROLLI TOUCH & TASTIERA
+    // COLLISIONI E FISICA
     // --------------------------------------------------------------------------
-    bindControls() {
+    isInvincible() {
+      return this.fallTimer > 0 || this.invincibleTimer > 0;
+    }
+
+    kickDog() {
+      if (!this.hasDog) return;
+      this.hasDog = false;
+      const px = this.width / 2.0;
+      const py = this.height * SURFER_TOP_RATIO;
+      const x = px + this.offset - 32;
+      const y = py + this.distance - 32;
+      this.objects.push(this.makeRippleObject(x - 16, y - 25));
+      this.objects.push(this.makeInteractObject(x, y, 7));
+    }
+
+    hitPlayer() {
+      if (this.isInvincible()) return;
+      if (this.hasDog) {
+        this.kickDog();
+        this.invincibleTimer = 170;
+        this.audio.playHit();
+        return;
+      }
+
+      this.speed = 0;
+      this.paused = true;
+      if (--this.heart < 0) this.heart = 0;
+      this.surferAction = 6;
+      this.audio.playHit();
+
+      if (this.heart < 1) {
+        this.finished = true;
+        this.animationTimer = 1;
+        this.saveHighScore();
+        this.showGameOverCard();
+      } else {
+        this.fallTimer = 1;
+      }
+    }
+
+    showGameOverCard() {
+      const modal = document.getElementById('surfGameOverModal');
+      const finalScore = document.getElementById('surfFinalScore');
+      const finalDist = document.getElementById('surfFinalDist');
+      const finalBarrel = document.getElementById('surfFinalBarrel');
+      const recordBadge = document.getElementById('surfNewRecordBadge');
+
+      const isNew = this.getScore() >= this.highScore;
+
+      if (finalScore) finalScore.textContent = this.getScore().toLocaleString();
+      if (finalDist) finalDist.textContent = `${Math.floor(this.distance / 10.0)}m`;
+      if (finalBarrel) finalBarrel.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
+      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
+
+      if (modal) modal.classList.add('active');
+    }
+
+    calcOffset() {
+      if (this.paused) return;
+      this.distance += this.speed;
+
+      let ratio = 0;
+      switch (this.surferAction) {
+        case 1: ratio = -0.6; break;
+        case 2: ratio = -0.2; break;
+        case 4: ratio = 0.2; break;
+        case 5: ratio = 0.6; break;
+      }
+      this.offset += ratio * this.speed;
+
+      if (this.rushTimer) {
+        if (this.rushTimer >= 600) {
+          this.rushTimer = 0;
+          this.speed = this.initialSpeed;
+        } else {
+          this.rushTimer++;
+        }
+      }
+      if (this.speed < this.initialSpeed) {
+        this.speed *= 1.01;
+      }
+    }
+
+    update() {
+      if (this.animationTimer && this.animationTimer < ANIMATION_TIMER_MAX_VALUE) {
+        this.animationTimer++;
+      }
+      this.boardTimer = (this.boardTimer + 1) % 120;
+
+      if (this.started) {
+        if (this.changeDirectionTimer > 0) this.changeDirectionTimer--;
+        if (!this.finished) {
+          this.calcOffset();
+
+          if (this.fallTimer) {
+            this.fallTimer++;
+            if (this.fallTimer > 180) {
+              this.fallTimer = 0;
+              this.surferAction = 3;
+              this.paused = false;
+              this.speed = this.initialSpeed;
+              this.invincibleTimer = 1;
+            }
+          }
+
+          if (this.invincibleTimer && this.surferAction !== 0) {
+            this.invincibleTimer++;
+            if (this.invincibleTimer > 250) this.invincibleTimer = 0;
+          }
+
+          if (this.flyingTimer > 0) this.flyingTimer--;
+        }
+      }
+
+      if (this.started && !this.finished) {
+        this.generateObjects();
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // RENDER GRAFICA ORIGINALE DI EDGE SURF
+    // --------------------------------------------------------------------------
+    draw() {
+      const ctx = this.ctx;
+      if (!ctx) return;
+
+      const w = this.width;
+      const h = this.height;
+
+      // 1. PULIZIA TOTALE DELLO SFONDO: cancella completamente per evitare qualsiasi scia!
+      ctx.fillStyle = '#38C2EE';
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. Disegna l'oceano piastrellato
+      const bgImg = this.images.background;
+      if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+        const startX = -((Math.floor(this.offset) % 256 + 256) % 256);
+        const startY = -((Math.floor(this.distance) % 256 + 256) % 256);
+        for (let x = startX - 256; x < w + 256; x += 256) {
+          for (let y = startY - 256; y < h + 256; y += 256) {
+            ctx.drawImage(bgImg, x, y);
+          }
+        }
+      }
+
+      if (this.started) {
+        this.drawObjects(ctx);
+        if (this.enemyTimer) this.drawEnemy(ctx);
+        this.drawSurfer(ctx);
+        if (this.finished) this.drawFinishViewer(ctx);
+      } else {
+        this.drawStarterViewer(ctx);
+      }
+
+      this.drawStatusBar(ctx);
+    }
+
+    getTextureForType(type) {
+      switch (type) {
+        case 0: return this.images.objectsSmall;
+        case 1: return this.images.objectsBig;
+        case 2: return this.images.slowdown;
+        case 3: return this.images.ripple;
+        case 4: return this.images.ambient;
+        case 5: return this.images.sandbar;
+        case 6: return this.images.island;
+        case 7: return this.images.interact;
+        case 8: return this.images.effects;
+        case 9: return this.images.docks;
+        default: return this.images.objectsBig;
+      }
+    }
+
+    drawObjects(ctx) {
+      const playerX = this.width / 2.0;
+      const playerY = this.height * SURFER_TOP_RATIO + 32;
+
+      for (let i = this.objects.length - 1; i >= 0; i--) {
+        const obj = this.objects[i];
+        const type = obj.type;
+        const boxX = OBJECT_HITBOXES[type][0];
+        const boxY = OBJECT_HITBOXES[type][1];
+
+        // Se l'oggetto è superato oltre lo schermo in alto
+        if (obj.y + boxY < this.distance - 100) {
+          this.objects.splice(i, 1);
+          continue;
+        }
+
+        const maxX = boxX / 2;
+        const maxY = boxY / 2;
+        const tx = obj.x - this.offset;
+        const ty = obj.y - this.distance;
+
+        let x = maxX - 4;
+        let y = maxY * 0.7;
+        const cx = tx + maxX;
+        const cy = ty + maxY;
+
+        switch (type) {
+          case 5: y = 20; break;
+          case 7: if (obj.index === 1) { x = 70; y = 70; } break;
+          case 9: x = 38; y = 38; break;
+          case 6: y = 125; break;
+        }
+
+        // Render dello sprite
+        const texture = this.getTextureForType(type);
+        if (texture && texture.complete && texture.naturalWidth > 0) {
+          if (!obj.once || obj.stage > 80) {
+            const sx = boxX * obj.index;
+            const sy = boxY * Math.floor((obj.stage - (obj.once ? 80 : 0)) / 14);
+            ctx.drawImage(texture, sx, sy, boxX, boxY, Math.round(tx), Math.round(ty), boxX, boxY);
+          }
+        }
+
+        // Avanzamento stage animazione
+        if (obj.maxStage) {
+          if (obj.once) {
+            if (obj.stage <= obj.maxStage * 14 + 80) obj.stage++;
+          } else if (++obj.stage > obj.maxStage * 14) {
+            obj.stage = 0;
+          }
+        }
+
+        if (this.finished) continue;
+
+        // Collision Check con il player
+        if (!this.flyingTimer && playerX > cx - x && playerX < cx + x && playerY > cy - y && playerY < cy + y) {
+          switch (type) {
+            case 7: // INTERACT_OBJECT
+              switch (obj.index) {
+                case 0: // Rampa di salto!
+                  this.flyingTimer = 180;
+                  if (this.enemyTimer) this.enemyStoped = true;
+                  this.audio.playJump();
+                  break;
+                case 1: // Kraken spawn
+                  if (!this.isInvincible()) {
+                    this.enemyTimer = 1;
+                    this.enemyX = obj.x;
+                    this.enemyY = obj.y;
+                    this.audio.playKraken();
+                  }
+                  break;
+                case 2: // Fulmine Boost
+                  if (this.power < 3) this.power++;
+                  this.audio.playCollect();
+                  break;
+                case 3: // Cuore vita extra
+                  if (this.heart < 3) this.heart++;
+                  this.audio.playCollect();
+                  break;
+                case 4: // Moneta
+                  this.coinCount++;
+                  this.audio.playCollect();
+                  break;
+                case 6: // Cane compagno
+                  this.hasDog = true;
+                  this.audio.playCollect();
+                  break;
+              }
+              this.objects.splice(i, 1);
+              continue;
+
+            case 0: // SMALL_OBJECT (piccolo scoglio): fa sbandare
+              if (!this.isInvincible() && !this.changeDirectionTimer) {
+                this.surferAction = 1 + Math.floor(Math.random() * 5);
+                this.changeDirectionTimer = 40;
+              }
+              break;
+
+            case 2: // SLOWDOWN_OBJECT (alghe)
+              if (!this.isInvincible()) {
+                this.speed = 1.5;
+                this.rushTimer = 0;
+              }
+              break;
+
+            case 3: // RIPPLE
+            case 4: // AMBIENT
+              break;
+
+            default: // Scoglio grande, pontile, isola
+              this.hitPlayer();
+              break;
+          }
+        }
+      }
+    }
+
+    drawEnemy(ctx) {
+      if (this.boardBrokenTimer) {
+        if (this.boardBrokenTimer < 59) this.boardBrokenTimer++;
+      }
+      if (++this.enemyTimer === 160) this.enemyTimer = 100;
+      if (this.enemyTimer < 100) return;
+
+      if (this.enemyY + 200 < this.distance) {
+        this.enemyX = this.enemyY = this.enemyTimer = 0;
+        this.enemyStoped = false;
+        return;
+      }
+
+      const enemyImg = this.images.enemy;
+      const playerX = (this.width - 64) / 2.0 + 32;
+      const playerY = this.height * SURFER_TOP_RATIO + 32;
+
+      if (this.enemyStoped) {
+        if (enemyImg && enemyImg.complete) {
+          const sy = Math.floor(this.boardBrokenTimer / 10) * 128;
+          ctx.drawImage(enemyImg, 128, sy, 128, 128, Math.round(this.enemyX - this.offset), Math.round(this.enemyY - this.distance), 128, 128);
+        }
+      } else {
+        const tx = this.offset + playerX - 64;
+        const ty = this.distance + playerY - 64;
+        if (ty - this.enemyY > 6) this.enemyY += 4.3;
+        this.enemyX += 2.0 * (this.enemyX > tx ? -1 : this.enemyX === tx ? 0 : 1);
+        if (Math.abs(this.enemyX - tx) < 2.5) this.enemyX = tx;
+
+        // Collisione Kraken con il Surfer
+        const nx = this.enemyX - this.offset + 64;
+        const ny = this.enemyY - this.distance + 64;
+        if (!this.isInvincible() && !this.flyingTimer && playerX > nx - 64 && playerX < nx + 64 && playerY > ny - 64 && playerY < ny + 64) {
+          this.kickDog();
+          this.paused = this.finished = this.enemyStoped = true;
+          this.animationTimer = 1;
+          this.heart = this.speed = 0;
+          this.surferAction = 7;
+          this.boardBrokenTimer = 1;
+          this.audio.playKraken();
+          this.saveHighScore();
+          this.showGameOverCard();
+          return;
+        }
+      }
+
+      if (enemyImg && enemyImg.complete) {
+        const sy = Math.floor((this.enemyTimer - 100) / 10) * 128;
+        ctx.drawImage(enemyImg, 0, sy, 128, 128, Math.round(this.enemyX - this.offset), Math.round(this.enemyY - this.distance + 70), 128, 128);
+      }
+    }
+
+    drawSurferOrigin(ctx, type, action, alpha, x, y) {
+      const boardImg = this.images.board;
+      const playerImg = this.images.player;
+
+      const sx = action * 64.0;
+      const boardSy = Math.floor((this.boardTimer % 30) / 10) * 64;
+      const playerSy = type * 64.0;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      if (boardImg && boardImg.complete) {
+        ctx.drawImage(boardImg, sx, boardSy, 64, 64, x, y, 64, 64);
+      }
+      if (playerImg && playerImg.complete) {
+        ctx.drawImage(playerImg, sx, playerSy, 64, 64, x, y, 64, 64);
+      }
+      ctx.restore();
+    }
+
+    drawSurfer(ctx) {
+      const left = (this.width - 64) / 2.0;
+      const top = this.height * SURFER_TOP_RATIO;
+
+      const alpha = (this.invincibleTimer && !this.surferAction) || Math.floor(this.invincibleTimer / 15) % 2 === 0 ? 1.0 : 0.45;
+      const action = this.flyingTimer ? 9 + Math.floor((this.flyingTimer / 8) % 4) : this.surferAction;
+
+      this.drawSurferOrigin(ctx, this.surfer, action, alpha, left, top);
+
+      if (this.hasDog && this.images.player && this.images.player.complete) {
+        ctx.drawImage(this.images.player, action * 64.0, 512, 64, 64, left, top, 64, 64);
+      }
+
+      // Ombra durante il salto
+      if (this.flyingTimer) {
+        ctx.save();
+        ctx.fillStyle = `rgba(0, 0, 0, ${this.flyingTimer > 50 ? 0.35 : this.flyingTimer / 150})`;
+        ctx.beginPath();
+        ctx.ellipse(left + 32, top + (this.flyingTimer > 50 ? 80.0 : 70.0 + this.flyingTimer / 5.0), 16, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    drawStarterViewer(ctx) {
+      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
+      const center = this.width / 2.0;
+      const oLeft = (this.width - 64) / 2.0;
+      const top = this.height * SURFER_TOP_RATIO;
+
+      let left = oLeft - this.surfer * 84;
+      for (let i = 0; i < 8; i++, left += 84) {
+        const act = this.surfer === i ? 1 + (this.boardTimer >= 60 ? 4 - Math.floor((this.boardTimer - 60) / 12.0) : Math.floor(this.boardTimer / 12.0)) : 3;
+        this.drawSurferOrigin(ctx, i, act, alpha, left, top);
+      }
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.85})`;
+      ctx.font = 'bold 42px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("LET'S SURF!", center, top - 80);
+
+      ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("◄ TOCCA A SINISTRA / DESTRA PER SCEGLIERE ►", center, top + 95);
+
+      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#D97706';
+      ctx.fillText("🎮 TOCCA PER GIOCARE!", center, top + 135);
+
+      ctx.restore();
+    }
+
+    drawFinishViewer(ctx) {
+      const alpha = this.animationTimer / ANIMATION_TIMER_MAX_VALUE;
+      const center = this.width / 2.0;
+      const centerY = this.height / 2.0 - 50;
+
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
+      ctx.fillRect(0, 0, this.width, this.height);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.95})`;
+      ctx.font = 'bold 44px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("GAME OVER!", center, centerY - 40);
+
+      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("Tocca o premi Spazio per ricominciare", center, centerY + 10);
+
+      ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#EA580C';
+      ctx.fillText(`Punti: ${this.getScore().toLocaleString()}`, center, centerY + 55);
+
+      ctx.restore();
+    }
+
+    drawStatusBar(ctx) {
+      const iface = this.images.interface;
+      const center = this.width / 2.0;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillRect(0, 0, this.width, 50);
+
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, 50);
+      ctx.lineTo(this.width, 50);
+      ctx.stroke();
+
+      // Distanza centrale
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#0F172A';
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 32);
+
+      // Cuori (a sinistra)
+      let hLeft = center - 80;
+      for (let i = 0; i < 3; i++) {
+        const isFull = i < this.heart;
+        if (iface && iface.complete) {
+          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, hLeft, 13, 24, 24);
+        } else {
+          ctx.font = '16px sans-serif';
+          ctx.fillText(isFull ? '💖' : '🖤', hLeft + 10, 30);
+        }
+        hLeft -= 26;
+      }
+
+      // Fulmini Boost (a destra)
+      let pLeft = center + 56;
+      for (let i = 0; i < 3; i++) {
+        const isFull = i < this.power;
+        if (iface && iface.complete) {
+          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, 24, pLeft, 13, 24, 24);
+        } else {
+          ctx.font = '16px sans-serif';
+          ctx.fillText(isFull ? '⚡' : '⚪', pLeft + 10, 30);
+        }
+        pLeft += 26;
+      }
+
+      // Cane e Monete
+      let lLeft = 10;
+      if (this.hasDog && iface && iface.complete) {
+        ctx.drawImage(iface, 24, 48, 24, 24, lLeft, 14, 24, 24);
+        lLeft += 28;
+      }
+      if (this.coinCount > 0) {
+        if (iface && iface.complete) {
+          ctx.drawImage(iface, 24, 72, 24, 24, lLeft, 15, 24, 24);
+        }
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#0F172A';
+        ctx.fillText(`x${this.coinCount}`, lLeft + 26, 31);
+      }
+
+      ctx.restore();
+    }
+
+    // --------------------------------------------------------------------------
+    // INPUT LISTENERS
+    // --------------------------------------------------------------------------
+    bindInputs() {
       if (!this.canvas) return;
 
-      const handlePointerDown = (e) => {
+      const handleStart = (e) => {
         e.preventDefault();
         this.audio.init();
         this.audio.resume();
 
         const touch = e.touches ? e.touches[0] : e;
         const rect = this.canvas.getBoundingClientRect();
-        this.touchStartX = ((touch.clientX - rect.left) / rect.width) * GAME_WIDTH;
-        this.touchStartY = ((touch.clientY - rect.top) / rect.height) * GAME_HEIGHT;
-        this.isTouchActive = true;
+        const curX = ((touch.clientX - rect.left) / rect.width) * this.width;
 
         if (!this.started || this.finished) {
+          if (!this.started) {
+            // Se clicca a sinistra/destra sulla schermata iniziale cambia personaggio
+            if (curX < this.width * 0.35) {
+              this.setSurferCharacter(this.surfer - 1);
+              return;
+            } else if (curX > this.width * 0.65) {
+              this.setSurferCharacter(this.surfer + 1);
+              return;
+            }
+          }
           this.startSurfing();
           return;
         }
 
-        // Tap a sinistra/destra del surfer per virare
-        const playerScreenX = GAME_WIDTH / 2.0;
-        if (this.touchStartX < playerScreenX - 40) {
+        this.isDragging = true;
+        this.dragStartX = curX;
+        this.lastTouchX = curX;
+
+        // Vira a sinistra o destra se tap diretto
+        const center = this.width / 2.0;
+        if (curX < center - 30) {
           this.steerLeft();
-        } else if (this.touchStartX > playerScreenX + 40) {
+        } else if (curX > center + 30) {
           this.steerRight();
         } else {
-          this.surferAction = 3; // dritto
+          this.surferAction = 3;
         }
       };
 
-      const handlePointerMove = (e) => {
-        if (!this.isTouchActive || !this.started || this.finished) return;
+      const handleMove = (e) => {
+        if (!this.isDragging || !this.started || this.finished) return;
         e.preventDefault();
         const touch = e.touches ? e.touches[0] : e;
         const rect = this.canvas.getBoundingClientRect();
-        const curX = ((touch.clientX - rect.left) / rect.width) * GAME_WIDTH;
-        const dx = curX - this.touchStartX;
+        const curX = ((touch.clientX - rect.left) / rect.width) * this.width;
+        const dx = curX - this.lastTouchX;
 
-        if (dx < -30) {
+        if (dx < -15) {
           this.surferAction = 1; // Hard left
-        } else if (dx < -8) {
+        } else if (dx < -4) {
           this.surferAction = 2; // Gentle left
-        } else if (dx > 30) {
+        } else if (dx > 15) {
           this.surferAction = 5; // Hard right
-        } else if (dx > 8) {
+        } else if (dx > 4) {
           this.surferAction = 4; // Gentle right
-        } else {
-          this.surferAction = 3; // Straight down
         }
+        this.lastTouchX = curX;
       };
 
-      const handlePointerUp = (e) => {
-        e.preventDefault();
-        this.isTouchActive = false;
+      const handleEnd = (e) => {
+        this.isDragging = false;
       };
 
-      this.canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
-      this.canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-      this.canvas.addEventListener('touchend', handlePointerUp, { passive: false });
-      this.canvas.addEventListener('mousedown', handlePointerDown);
-      window.addEventListener('mousemove', handlePointerMove);
-      window.addEventListener('mouseup', handlePointerUp);
+      this.canvas.addEventListener('touchstart', handleStart, { passive: false });
+      this.canvas.addEventListener('touchmove', handleMove, { passive: false });
+      this.canvas.addEventListener('touchend', handleEnd, { passive: false });
+      this.canvas.addEventListener('mousedown', handleStart);
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
 
       // Tastiera
       window.addEventListener('keydown', (e) => {
@@ -550,13 +1162,10 @@
           } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
             this.steerRight();
           } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-            this.surferAction = 3;
             if (this.paused) { this.paused = false; this.speed = this.initialSpeed; }
+            this.surferAction = 3;
           } else if (e.code === 'ArrowUp' || e.code === 'KeyW') {
-            // Frena / Ferma
-            this.paused = true;
-            this.speed = 0;
-            this.surferAction = 0;
+            this.stopPlayer();
           } else if (e.code === 'Space' || e.code === 'KeyF') {
             this.triggerBoost();
           }
@@ -564,482 +1173,8 @@
       });
     }
 
-    steerLeft() {
-      if (this.paused) { this.paused = false; this.speed = this.initialSpeed; }
-      this.surferAction = this.surferAction === 2 ? 1 : 2;
-    }
-
-    steerRight() {
-      if (this.paused) { this.paused = false; this.speed = this.initialSpeed; }
-      this.surferAction = this.surferAction === 4 ? 5 : 4;
-    }
-
-    // --------------------------------------------------------------------------
-    // UPDATE FISICA E GIOCO
-    // --------------------------------------------------------------------------
-    hitPlayer() {
-      if (this.fallTimer > 0 || this.invincibleTimer > 0 || this.flyingTimer > 0) return;
-
-      if (this.hasDog) {
-        // Il cane salva il surfer e salta via
-        this.hasDog = false;
-        this.invincibleTimer = 180;
-        this.audio.playHit();
-        return;
-      }
-
-      this.speed = 0;
-      this.paused = true;
-      this.heart = Math.max(0, this.heart - 1);
-      this.surferAction = 6; // Crash pose
-      this.audio.playHit();
-
-      if (this.heart <= 0) {
-        this.finished = true;
-        this.saveScore();
-        this.showGameOverModal();
-      } else {
-        this.fallTimer = 1;
-      }
-    }
-
-    showGameOverModal() {
-      const modal = document.getElementById('surfGameOverModal');
-      const finalScoreEl = document.getElementById('surfFinalScore');
-      const finalDistEl = document.getElementById('surfFinalDist');
-      const finalBarrelEl = document.getElementById('surfFinalBarrel');
-      const recordBadge = document.getElementById('surfNewRecordBadge');
-
-      const isNew = this.getScore() >= this.highScore;
-
-      if (finalScoreEl) finalScoreEl.textContent = this.getScore().toLocaleString();
-      if (finalDistEl) finalDistEl.textContent = `${Math.floor(this.distance / 10.0)}m`;
-      if (finalBarrelEl) finalBarrelEl.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
-      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
-
-      if (modal) modal.classList.add('active');
-    }
-
-    update(dt) {
-      this.boardTimer = (this.boardTimer + 1) % 120;
-
-      if (!this.started || this.finished) return;
-
-      // Recupero dopo caduta
-      if (this.fallTimer > 0) {
-        this.fallTimer++;
-        if (this.fallTimer > 120) {
-          this.fallTimer = 0;
-          this.invincibleTimer = 160;
-          this.surferAction = 3;
-          this.speed = this.initialSpeed;
-          this.paused = false;
-        }
-        return;
-      }
-
-      if (this.invincibleTimer > 0) this.invincibleTimer--;
-      if (this.flyingTimer > 0) this.flyingTimer--;
-
-      // Movimento e scrolling
-      if (!this.paused) {
-        this.distance += this.speed;
-
-        let steerRatio = 0;
-        switch (this.surferAction) {
-          case 1: steerRatio = -0.7; break; // Hard Left
-          case 2: steerRatio = -0.25; break; // Gentle Left
-          case 4: steerRatio = 0.25; break; // Gentle Right
-          case 5: steerRatio = 0.7; break; // Hard Right
-        }
-        this.offset += steerRatio * this.speed;
-
-        // Boost rush timer
-        if (this.rushTimer > 0) {
-          this.rushTimer++;
-          if (this.rushTimer > 280) {
-            this.rushTimer = 0;
-            this.speed = this.initialSpeed;
-          }
-        }
-        if (this.speed < this.initialSpeed) {
-          this.speed = Math.min(this.initialSpeed, this.speed * 1.02);
-        }
-      }
-
-      // Generazione e collisioni oggetti
-      this.generateObjects();
-      this.updateObjectsAndCollisions();
-
-      // Aggiorna Kraken Enemy
-      this.updateKraken();
-    }
-
-    updateObjectsAndCollisions() {
-      const playerX = GAME_WIDTH / 2.0;
-      const playerY = GAME_HEIGHT * SURFER_TOP_RATIO;
-      const pWorldX = playerX + this.offset;
-      const pWorldY = playerY + this.distance;
-
-      for (let i = this.objects.length - 1; i >= 0; i--) {
-        const obj = this.objects[i];
-        const box = OBJECT_HITBOXES[obj.type] || [64, 64];
-
-        // Rimuovi oggetti usciti in alto
-        if (obj.y + box[1] < this.distance - 100) {
-          this.objects.splice(i, 1);
-          continue;
-        }
-
-        // Animazione ciclica
-        if (obj.maxStage > 0) {
-          obj.stage = (obj.stage + 0.15) % (obj.maxStage + 1);
-        }
-
-        // Collision Check con il Surfer
-        const halfW = box[0] * 0.4;
-        const halfH = box[1] * 0.35;
-        const dx = Math.abs(pWorldX - (obj.x + box[0] * 0.5));
-        const dy = Math.abs(pWorldY - (obj.y + box[1] * 0.5));
-
-        if (!this.flyingTimer && dx < halfW && dy < halfH) {
-          switch (obj.type) {
-            case 7: // INTERACT_OBJECT (Boost, Cuore, Rampa, Cane, Moneta)
-              if (obj.index === 0) {
-                // RAMPA DI SALTO!
-                this.flyingTimer = 110;
-                this.audio.playJump();
-              } else if (obj.index === 2) {
-                // Fulmine Boost
-                if (this.power < 3) this.power++;
-                this.audio.playCollect();
-              } else if (obj.index === 3) {
-                // Cuore extra
-                if (this.heart < 3) this.heart++;
-                this.audio.playCollect();
-              } else if (obj.index === 4) {
-                // Moneta
-                this.coinCount++;
-                this.audio.playCollect();
-              } else if (obj.index === 6) {
-                // Cane salvato!
-                this.hasDog = true;
-                this.audio.playCollect();
-              }
-              this.objects.splice(i, 1);
-              break;
-
-            case 2: // SLOWDOWN (Alghe)
-              this.speed = Math.max(1.8, this.speed * 0.92);
-              break;
-
-            case 3: // RIPPLE
-              break;
-
-            default: // Scogli, pontili, isole
-              this.hitPlayer();
-              break;
-          }
-        }
-      }
-    }
-
-    updateKraken() {
-      if (this.enemyTimer <= 0) return;
-      this.enemyTimer++;
-
-      const playerTargetX = this.offset + (GAME_WIDTH / 2.0) - 64;
-      const playerTargetY = this.distance + (GAME_HEIGHT * SURFER_TOP_RATIO) - 64;
-
-      // Inseguimento
-      if (!this.enemyStoped) {
-        this.enemyY += 3.8;
-        if (this.enemyX < playerTargetX) this.enemyX += 1.8;
-        else if (this.enemyX > playerTargetX) this.enemyX -= 1.8;
-
-        // Collisione Kraken con il Surfer
-        const dx = Math.abs(this.enemyX - playerTargetX);
-        const dy = Math.abs(this.enemyY - playerTargetY);
-        if (!this.flyingTimer && dx < 40 && dy < 40) {
-          this.enemyStoped = true;
-          this.heart = 0;
-          this.finished = true;
-          this.surferAction = 7; // Eaten
-          this.audio.playKraken();
-          this.saveScore();
-          this.showGameOverModal();
-        }
-      }
-
-      // Se il kraken rimane troppo indietro, scompare
-      if (this.enemyY + 300 < this.distance) {
-        this.enemyTimer = 0;
-        this.enemyStoped = false;
-      }
-    }
-
-    // --------------------------------------------------------------------------
-    // RENDER GRAFICA
-    // --------------------------------------------------------------------------
-    draw() {
-      const ctx = this.ctx;
-      if (!ctx) return;
-
-      const w = GAME_WIDTH;
-      const h = GAME_HEIGHT;
-
-      // 1. Sfondo Oceano con onde animate
-      const waterImg = this.assets.get('water');
-      if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
-        const bgOffsetX = Math.floor(this.offset) % 256;
-        const bgOffsetY = Math.floor(this.distance) % 256;
-        for (let x = -bgOffsetX - 256; x < w + 256; x += 256) {
-          for (let y = -bgOffsetY - 256; y < h + 256; y += 256) {
-            ctx.drawImage(waterImg, x, y, 256, 256);
-          }
-        }
-      } else {
-        // Fallback gradiente marino
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, '#38BDF8');
-        grad.addColorStop(1, '#0284C7');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
-      }
-
-      // 2. Oggetti in acqua
-      this.drawObjects(ctx);
-
-      // 3. Mostro Marino (Kraken)
-      this.drawKraken(ctx);
-
-      // 4. Surfer
-      if (this.started) {
-        this.drawSurfer(ctx);
-      } else {
-        this.drawStartScreen(ctx);
-      }
-
-      // 5. HUD Superiore
-      this.drawHUD(ctx);
-    }
-
-    drawObjects(ctx) {
-      for (let i = 0; i < this.objects.length; i++) {
-        const obj = this.objects[i];
-        const screenX = obj.x - this.offset;
-        const screenY = obj.y - this.distance;
-        const box = OBJECT_HITBOXES[obj.type] || [64, 64];
-
-        let imgKey = 'objectsBig';
-        let frameW = box[0];
-        let frameH = box[1];
-        let sx = obj.index * frameW;
-        let sy = Math.floor(obj.stage) * frameH;
-
-        switch (obj.type) {
-          case 0: imgKey = 'objectsSmall'; break;
-          case 1: imgKey = 'objectsBig'; break;
-          case 2: imgKey = 'slowdown'; break;
-          case 3: imgKey = 'ripple'; break;
-          case 4: imgKey = 'ambient'; break;
-          case 5: imgKey = 'sandbar'; break;
-          case 7: imgKey = 'interact'; break;
-          case 9: imgKey = 'docks'; break;
-        }
-
-        const img = this.assets.get(imgKey);
-        if (img && img.complete && img.naturalWidth > 0) {
-          ctx.drawImage(img, sx, sy, frameW, frameH, Math.round(screenX), Math.round(screenY), frameW, frameH);
-        } else {
-          // Fallback pixel art
-          ctx.fillStyle = obj.type === 7 ? '#FBBF24' : '#64748B';
-          ctx.fillRect(Math.round(screenX), Math.round(screenY), frameW * 0.7, frameH * 0.7);
-        }
-      }
-    }
-
-    drawKraken(ctx) {
-      if (this.enemyTimer <= 0) return;
-      const screenX = this.enemyX - this.offset;
-      const screenY = this.enemyY - this.distance + 40;
-      const enemyImg = this.assets.get('enemy');
-
-      const frameIdx = Math.floor((this.enemyTimer / 8) % 4);
-      if (enemyImg && enemyImg.complete && enemyImg.naturalWidth > 0) {
-        ctx.drawImage(enemyImg, 0, frameIdx * 128, 128, 128, Math.round(screenX), Math.round(screenY), 128, 128);
-      } else {
-        ctx.fillStyle = '#DC2626';
-        ctx.fillRect(Math.round(screenX + 32), Math.round(screenY + 32), 64, 64);
-      }
-    }
-
-    drawSurfer(ctx) {
-      const left = (GAME_WIDTH - 64) / 2.0;
-      const top = GAME_HEIGHT * SURFER_TOP_RATIO;
-
-      // Ombra di volo sul salto
-      if (this.flyingTimer > 0) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        ctx.beginPath();
-        ctx.ellipse(left + 32, top + 64, 18, 7, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Azione / Animazione
-      let actionIdx = this.surferAction;
-      if (this.flyingTimer > 0) {
-        actionIdx = 9 + Math.floor((this.flyingTimer / 8) % 4);
-      }
-
-      // Trasparenza su invincibilità
-      const alpha = (this.invincibleTimer > 0 && Math.floor(this.invincibleTimer / 6) % 2 === 0) ? 0.45 : 1.0;
-      ctx.globalAlpha = alpha;
-
-      const boardImg = this.assets.get('board');
-      const playerImg = this.assets.get('player');
-
-      const sx = actionIdx * 64;
-      const boardSy = Math.floor((this.boardTimer % 30) / 10) * 64;
-      const playerSy = this.surfer * 64;
-
-      const drawY = this.flyingTimer > 0 ? top - (Math.sin(this.flyingTimer / 110 * Math.PI) * 28) : top;
-
-      // 1. Tavola
-      if (boardImg && boardImg.complete && boardImg.naturalWidth > 0) {
-        ctx.drawImage(boardImg, sx, boardSy, 64, 64, left, drawY, 64, 64);
-      }
-      // 2. Surfer
-      if (playerImg && playerImg.complete && playerImg.naturalWidth > 0) {
-        ctx.drawImage(playerImg, sx, playerSy, 64, 64, left, drawY, 64, 64);
-      } else {
-        ctx.fillStyle = '#FF385C';
-        ctx.fillRect(left + 16, drawY + 12, 32, 40);
-      }
-
-      // 3. Cane compagno a bordo
-      if (this.hasDog && playerImg && playerImg.complete) {
-        ctx.drawImage(playerImg, sx, 512, 64, 64, left, drawY, 64, 64);
-      }
-
-      ctx.globalAlpha = 1.0;
-    }
-
-    drawStartScreen(ctx) {
-      const center = GAME_WIDTH / 2.0;
-      const top = GAME_HEIGHT * SURFER_TOP_RATIO;
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-      ctx.shadowColor = 'rgba(0,0,0,0.85)';
-      ctx.shadowBlur = 8;
-      ctx.fillText("LET'S SURF!", center, top - 80);
-
-      // Mostra i surfer selezionabili in riga
-      const playerImg = this.assets.get('player');
-      const boardImg = this.assets.get('board');
-
-      const oLeft = (GAME_WIDTH - 64) / 2.0;
-      let left = oLeft - this.surfer * 80;
-
-      for (let i = 0; i < 8; i++, left += 80) {
-        const isSelected = i === this.surfer;
-        ctx.globalAlpha = isSelected ? 1.0 : 0.45;
-
-        if (boardImg && boardImg.complete) {
-          ctx.drawImage(boardImg, 3 * 64, 0, 64, 64, left, top, 64, 64);
-        }
-        if (playerImg && playerImg.complete) {
-          ctx.drawImage(playerImg, 3 * 64, i * 64, 64, 64, left, top, 64, 64);
-        }
-
-        if (isSelected) {
-          ctx.strokeStyle = '#FDE047';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(left + 4, top + 4, 56, 56);
-        }
-      }
-      ctx.globalAlpha = 1.0;
-
-      ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText('◄ TOCCA O FRECCE PER SCEGLIERE IL SURFER ►', center, top + 90);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('🎮 TOCCA LO SCHERMO PER GIOCARE!', center, top + 130);
-    }
-
-    drawHUD(ctx) {
-      // Barra superiore HUD
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-      ctx.fillRect(0, 0, GAME_WIDTH, 48);
-
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(0, 0, GAME_WIDTH, 48);
-
-      const center = GAME_WIDTH / 2.0;
-
-      // Distanza percorsa
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 17px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = '#0F172A';
-      ctx.shadowBlur = 0;
-      const meters = Math.floor(this.distance / 10.0);
-      ctx.fillText(`${meters} M`, center, 31);
-
-      // Icone Cuori (a sinistra)
-      const iface = this.assets.get('interface');
-      let heartLeft = center - 85;
-      for (let i = 0; i < 3; i++) {
-        const isFull = i < this.heart;
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, heartLeft, 12, 22, 22);
-        } else {
-          ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '💖' : '🖤', heartLeft + 10, 28);
-        }
-        heartLeft -= 24;
-      }
-
-      // Icone Fulmini Boost (a destra)
-      let boostLeft = center + 55;
-      for (let i = 0; i < 3; i++) {
-        const isFull = i < this.power;
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, 24, boostLeft, 12, 22, 22);
-        } else {
-          ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '⚡' : '⚪', boostLeft + 10, 28);
-        }
-        boostLeft += 24;
-      }
-
-      // Cane e Monete a sinistra
-      let extraLeft = 14;
-      if (this.hasDog) {
-        if (iface && iface.complete) {
-          ctx.drawImage(iface, 24, 48, 24, 24, extraLeft, 12, 22, 22);
-        } else {
-          ctx.fillText('🐕', extraLeft + 8, 28);
-        }
-        extraLeft += 26;
-      }
-      if (this.coinCount > 0) {
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
-        ctx.fillStyle = '#B45309';
-        ctx.fillText(`🪙x${this.coinCount}`, extraLeft, 30);
-      }
-    }
-
     loop(timestamp) {
-      const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.08);
-      this.lastTimestamp = timestamp;
-
-      this.update(dt);
+      this.update();
       this.draw();
       this.updateHUD();
 
@@ -1047,13 +1182,11 @@
     }
 
     updateHUD() {
-      const scoreEl = document.getElementById('surfLiveScore');
       const distEl = document.getElementById('surfLiveDist');
       const shellsEl = document.getElementById('surfLiveShells');
 
-      if (scoreEl) scoreEl.textContent = this.getScore().toLocaleString();
       if (distEl) distEl.textContent = `${Math.floor(this.distance / 10.0)}m`;
-      if (shellsEl) shellsEl.textContent = `⚡ x${this.power}`;
+      if (shellsEl) shellsEl.textContent = `x${this.power}`;
     }
 
     updateCardUI() {
@@ -1067,7 +1200,7 @@
     }
   }
 
-  // Istanza globale
+  // Singleton
   window.SalentoSurf = new EdgeSurfEngine();
 
 })(window);
