@@ -1,15 +1,13 @@
 /**
  * ==============================================================================
- * MICROSOFT EDGE SURF (edge://surf) - EXACT 1:1 REIMPLEMENTATION
+ * SALENTO SURF - FULLSCREEN MOBILE FIRST & RETRO 8-BIT ENGINE
  * ==============================================================================
- * Porting fedele e ottimizzato in JavaScript / HTML5 Canvas del repository:
- * https://github.com/ShirasawaSama/edge-surf-game
- *
- * Controlli Mobile First:
- * - Touch e drag continuo sullo schermo per sterzare con precisione assoluta
- * - Pulsanti a schermo dedicati (Sinistra, Boost, Destra, Frena)
- * - Selezione del surfer con frecce touch e tocco diretto sui personaggi (senza tasti A/D su mobile)
- * - BGM originale e SFX Web Audio sincronizzati
+ * Fedele reimplementazione in JavaScript / HTML5 Canvas del celebre gioco
+ * di surf infinito:
+ * - Adattamento 100% Fullscreen su Smartphone senza bande nere
+ * - Controlli Pop Glassmorphism a schermo & Touch Analogico sul mare
+ * - Colonna sonora BGM, suoni sintetizzati ed effetti particellari
+ * - Selezione 8 surfer 100% in-game nella schermata iniziale
  */
 
 (function (window) {
@@ -57,13 +55,13 @@
   // ----------------------------------------------------------------------------
   // AUDIO ENGINE (BGM & SFX)
   // ----------------------------------------------------------------------------
-  class EdgeSurfAudio {
+  class SalentoSurfAudio {
     constructor() {
       this.ctx = null;
       this.bgm = null;
       this.isMuted = false;
       try {
-        const saved = localStorage.getItem('salento_edge_surf_muted');
+        const saved = localStorage.getItem('salento_surf_muted_v1');
         if (saved !== null) this.isMuted = saved === 'true';
       } catch (e) {}
     }
@@ -98,13 +96,13 @@
 
     toggleMute() {
       this.isMuted = !this.isMuted;
-      try { localStorage.setItem('salento_edge_surf_muted', this.isMuted); } catch (e) {}
+      try { localStorage.setItem('salento_surf_muted_v1', this.isMuted); } catch (e) {}
       if (this.bgm) {
         if (this.isMuted) this.bgm.pause();
         else this.bgm.play().catch(() => {});
       }
       const btn = document.getElementById('btnSurfMute');
-      if (btn) btn.textContent = this.isMuted ? '🔇 Muto' : '🔊 Audio';
+      if (btn) btn.innerHTML = `<span>${this.isMuted ? '🔇 Muto' : '🔊 Audio'}</span>`;
       return this.isMuted;
     }
 
@@ -195,20 +193,21 @@
   }
 
   // ----------------------------------------------------------------------------
-  // EDGE SURF ENGINE CLASS
+  // SALENTO SURF ENGINE CLASS
   // ----------------------------------------------------------------------------
-  class EdgeSurfEngine {
+  class SalentoSurfEngine {
     constructor() {
       this.canvas = null;
       this.ctx = null;
+      this.activeCanvasId = null;
       this.width = GAME_WIDTH;
       this.height = GAME_HEIGHT;
 
       this.images = {};
       this.imagesLoaded = false;
-      this.audio = new EdgeSurfAudio();
+      this.audio = new SalentoSurfAudio();
 
-      // Stato gioco da game.c
+      // Stato gioco originale
       this.paused = true;
       this.started = false;
       this.finished = false;
@@ -254,7 +253,7 @@
 
     loadSavedScores() {
       try {
-        const saved = localStorage.getItem('salento_edge_surf_score_v4');
+        const saved = localStorage.getItem('salento_surf_best_score_v5');
         if (saved) {
           const d = JSON.parse(saved);
           this.highScore = d.highScore || 0;
@@ -271,7 +270,7 @@
         const curDist = Math.floor(this.distance / 10.0);
         if (curDist > this.bestDistance) this.bestDistance = curDist;
 
-        localStorage.setItem('salento_edge_surf_score_v4', JSON.stringify({
+        localStorage.setItem('salento_surf_best_score_v5', JSON.stringify({
           highScore: this.highScore,
           bestDistance: this.bestDistance,
           surfer: this.surfer
@@ -317,14 +316,46 @@
       return this.naughtySurfer.visible && this.naughtySurfer.action !== 2;
     }
 
+    updateDimensions() {
+      if (!this.canvas) return;
+      if (this.activeCanvasId === 'surfGameCanvas') {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+
+        this.width = winW;
+        this.height = winH;
+
+        this.canvas.width = Math.round(winW * dpr);
+        this.canvas.height = Math.round(winH * dpr);
+        this.canvas.style.width = `${winW}px`;
+        this.canvas.style.height = `${winH}px`;
+
+        if (this.ctx) {
+          this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          this.ctx.imageSmoothingEnabled = false;
+        }
+      } else {
+        this.width = GAME_WIDTH;
+        this.height = GAME_HEIGHT;
+        this.canvas.width = GAME_WIDTH;
+        this.canvas.height = GAME_HEIGHT;
+        this.canvas.style.width = '';
+        this.canvas.style.height = '';
+        if (this.ctx) {
+          this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+          this.ctx.imageSmoothingEnabled = false;
+        }
+      }
+    }
+
     init(canvasId) {
       this.canvas = document.getElementById(canvasId);
       if (!this.canvas) return;
 
-      this.canvas.width = this.width;
-      this.canvas.height = this.height;
+      this.activeCanvasId = canvasId;
       this.ctx = this.canvas.getContext('2d');
-      this.ctx.imageSmoothingEnabled = false;
+      this.updateDimensions();
 
       this.bindInputs();
       this.resetGame();
@@ -428,7 +459,7 @@
     }
 
     // --------------------------------------------------------------------------
-    // CREAZIONE OSTACOLI (objects.c)
+    // CREAZIONE OSTACOLI
     // --------------------------------------------------------------------------
     randomX() { return Math.random() * this.width + this.offset; }
     randomY() { return this.distance + this.height * (1 + Math.random()); }
@@ -627,6 +658,8 @@
       if (finalScore) finalScore.textContent = this.getScore().toLocaleString();
       if (finalDist) finalDist.textContent = `${Math.floor(this.distance / 10.0)}m`;
       if (finalBarrel) finalBarrel.textContent = `🪙 x${this.coinCount} · ⚡ x${this.power}`;
+      if (recordBadge) recordBadge.style.display = isNew ? 'inline-block' : 'none';
+
       if (modal) modal.classList.add('active');
 
       // Salva automaticamente il punteggio nella Classifica Top 10 sotto il gioco
@@ -724,7 +757,7 @@
       const w = this.width;
       const h = this.height;
 
-      // 1. Sfondo mare
+      // 1. Sfondo mare a tutto schermo
       const center = w / 2.0;
       const grad = ctx.createLinearGradient(center, 0, center, h);
       grad.addColorStop(0, '#38C2EE');
@@ -732,7 +765,7 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Onde animate piastrellate
+      // 2. Onde animate piastrellate a modulo continuo
       const bgImg = this.images.background;
       if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
         const offX = ((Math.floor(this.offset) % 256) + 256) % 256;
@@ -744,7 +777,7 @@
         }
       }
 
-      // 3. Entità
+      // 3. Entità di gioco
       if (this.started) {
         this.drawObjects(ctx);
         if (this.enemyTimer) this.drawEnemy(ctx);
@@ -755,7 +788,7 @@
         this.drawStarterViewer(ctx);
       }
 
-      // 4. Status Bar
+      // 4. Status Bar in alto
       this.drawStatusBar(ctx);
     }
 
@@ -1040,35 +1073,35 @@
       ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.9})`;
-      ctx.font = 'bold 44px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.font = 'bold 40px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("LET'S SURF!", center, top - 80);
 
-      // Frecce touch per smartphone
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      // Frecce touch eleganti per smartphone
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.lineWidth = 2;
 
       // Freccia Sinistra
       if (this.surfer > 0) {
         ctx.beginPath();
-        ctx.arc(oLeft - 22, top + 32, 22, 0, Math.PI * 2);
+        ctx.arc(oLeft - 24, top + 32, 24, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#0F172A';
         ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('◄', oLeft - 22, top + 40);
+        ctx.fillText('◄', oLeft - 24, top + 40);
       }
 
       // Freccia Destra
       if (this.surfer < 7) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         ctx.beginPath();
-        ctx.arc(oLeft + 86, top + 32, 22, 0, Math.PI * 2);
+        ctx.arc(oLeft + 88, top + 32, 24, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = '#0F172A';
         ctx.font = 'bold 22px sans-serif';
-        ctx.fillText('►', oLeft + 86, top + 40);
+        ctx.fillText('►', oLeft + 88, top + 40);
       }
 
       // Istruzioni touch-friendly
@@ -1076,20 +1109,27 @@
       ctx.font = 'bold 15px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("◄ TOCCA FRECCE PER SCEGLIERE ►", center, top + 95);
 
-      // Bottone Play Centrale
-      const btnW = 260;
-      const btnH = 46;
+      // Bottone Play Centrale Pop
+      const btnW = Math.min(280, this.width - 40);
+      const btnH = 50;
       const btnX = center - btnW / 2;
       const btnY = top + 125;
 
-      ctx.fillStyle = '#F59E0B';
+      // Shadow del bottone
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
       ctx.beginPath();
-      ctx.roundRect(btnX, btnY, btnW, btnH, 23);
+      ctx.roundRect(btnX, btnY + 4, btnW, btnH, 25);
+      ctx.fill();
+
+      // Corpo bottone
+      ctx.fillStyle = '#FF9500';
+      ctx.beginPath();
+      ctx.roundRect(btnX, btnY, btnW, btnH, 25);
       ctx.fill();
 
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 16px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
-      ctx.fillText("▶ TOCCA PER PARTIRE!", center, btnY + 29);
+      ctx.font = 'bold 17px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.fillText("▶ TOCCA PER PARTIRE!", center, btnY + 31);
 
       ctx.restore();
     }
@@ -1105,7 +1145,7 @@
 
       ctx.textAlign = 'center';
       ctx.fillStyle = `rgba(0, 0, 0, ${alpha * 0.95})`;
-      ctx.font = 'bold 44px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
+      ctx.font = 'bold 42px "FiraCode", "Plus Jakarta Sans", monospace, sans-serif';
       ctx.fillText("GAME OVER!", center, centerY - 40);
 
       ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
@@ -1121,33 +1161,34 @@
     drawStatusBar(ctx) {
       const iface = this.images.interface;
       const center = this.width / 2.0;
+      const barHeight = 54;
 
       ctx.save();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
-      ctx.fillRect(0, 0, this.width, 50);
+      ctx.fillRect(0, 0, this.width, barHeight);
 
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(0, 50);
-      ctx.lineTo(this.width, 50);
+      ctx.moveTo(0, barHeight);
+      ctx.lineTo(this.width, barHeight);
       ctx.stroke();
 
-      // Distanza
+      // Distanza centrale in metri
       ctx.textAlign = 'center';
       ctx.font = 'bold 18px "FiraCode", monospace, sans-serif';
       ctx.fillStyle = '#0F172A';
-      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 33);
+      ctx.fillText(`${Math.floor(this.distance / 10.0)} M`, center, 35);
 
       // Cuori
       let hLeft = center - 80;
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.heart;
         if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, hLeft, 13, 24, 24);
+          ctx.drawImage(iface, isFull ? 24 : 0, 0, 24, 24, hLeft, 15, 24, 24);
         } else {
           ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '💖' : '🖤', hLeft + 10, 30);
+          ctx.fillText(isFull ? '💖' : '🖤', hLeft + 10, 32);
         }
         hLeft -= 26;
       }
@@ -1157,28 +1198,28 @@
       for (let i = 0; i < 3; i++) {
         const isFull = i < this.power;
         if (iface && iface.complete) {
-          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, 24, pLeft, 13, 24, 24);
+          ctx.drawImage(iface, isFull ? 24 : 0, 24, 24, pLeft, 15, 24, 24);
         } else {
           ctx.font = '16px sans-serif';
-          ctx.fillText(isFull ? '⚡' : '⚪', pLeft + 10, 30);
+          ctx.fillText(isFull ? '⚡' : '⚪', pLeft + 10, 32);
         }
         pLeft += 26;
       }
 
       // Cane e Monete
-      let lLeft = 12;
+      let lLeft = 14;
       if (this.hasDog && iface && iface.complete) {
-        ctx.drawImage(iface, 24, 48, 24, 24, lLeft, 14, 24, 24);
+        ctx.drawImage(iface, 24, 48, 24, 24, lLeft, 15, 24, 24);
         lLeft += 28;
       }
       if (this.coinCount > 0) {
         if (iface && iface.complete) {
-          ctx.drawImage(iface, 24, 72, 24, 24, lLeft, 15, 24, 24);
+          ctx.drawImage(iface, 24, 72, 24, 24, lLeft, 16, 24, 24);
         }
         ctx.textAlign = 'left';
         ctx.font = 'bold 14px "FiraCode", monospace, sans-serif';
         ctx.fillStyle = '#B45309';
-        ctx.fillText(`x${this.coinCount}`, lLeft + 26, 31);
+        ctx.fillText(`x${this.coinCount}`, lLeft + 26, 33);
       }
 
       ctx.restore();
@@ -1266,6 +1307,12 @@
       window.addEventListener('mousemove', handlePointerMove);
       window.addEventListener('mouseup', handlePointerUp);
 
+      window.addEventListener('resize', () => {
+        if (this.activeCanvasId === 'surfGameCanvas') {
+          this.updateDimensions();
+        }
+      });
+
       // Tastiera Desktop
       window.addEventListener('keydown', (e) => {
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyF'].includes(e.code)) {
@@ -1329,6 +1376,6 @@
     }
   }
 
-  window.SalentoSurf = new EdgeSurfEngine();
+  window.SalentoSurf = new SalentoSurfEngine();
 
 })(window);

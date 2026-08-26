@@ -2547,122 +2547,90 @@
     /* ==========================================================================
        SURF GAME FULLSCREEN MODAL OVERLAY
        ========================================================================== */
+    /* ==========================================================================
+       SALENTO SURF GAME FULLSCREEN MODAL OVERLAY (EDGE-TO-EDGE)
+       ========================================================================== */
     .surf-game-modal-overlay {
       position: fixed;
       inset: 0;
+      width: 100vw;
+      height: 100dvh;
       z-index: 10000;
-      background: #000000;
+      background: #38C2EE;
       display: none;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
+      overflow: hidden;
     }
     .surf-game-modal-overlay.active {
       display: flex;
     }
-    .surf-modal-hud {
+
+    /* Top Floating Controls Bar (Minimal Pop Glass) */
+    .surf-top-pill-bar {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: calc(12px + env(safe-area-inset-top)) 16px 10px;
+      top: calc(12px + env(safe-area-inset-top));
+      right: 14px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      z-index: 10;
-      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
-      color: #FFFFFF;
+      gap: 8px;
+      z-index: 40;
       pointer-events: auto;
     }
-    .surf-hud-score-box {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-    .surf-hud-score-val {
-      font-family: 'Plus Jakarta Sans', monospace, sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      color: #FDE047;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      letter-spacing: 0.5px;
-    }
-    .surf-hud-combo-badge {
-      background: var(--rausch);
-      color: #FFFFFF;
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-      font-size: 11px;
-      font-weight: 800;
-      box-shadow: 0 2px 8px rgba(255, 56, 92, 0.5);
-      animation: pulseCombo 0.8s infinite alternate;
-    }
-    @keyframes pulseCombo {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
-    }
-    .surf-hud-stats-mini {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .surf-pop-hud-btn {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      color: #0F172A;
       font-size: 12.5px;
-      font-weight: 700;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-    }
-    .surf-hud-buttons {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-surf-hud-icon {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 12px;
+      font-weight: 800;
+      padding: 7px 14px;
       border-radius: var(--radius-pill);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .btn-surf-hud-icon:active {
-      transform: scale(0.94);
-      background: rgba(255, 255, 255, 0.35);
-    }
-    .btn-surf-close-x {
-      width: 32px;
-      height: 32px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+      touch-action: manipulation;
+    }
+    .surf-pop-hud-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.65);
+    }
+    .surf-pop-close-btn {
+      width: 36px;
+      height: 36px;
       padding: 0;
+      border-radius: 50%;
+      font-size: 15px;
     }
 
-    /* Modal Canvas Container */
+    /* Modal Canvas Container - 100% Edge to Edge */
     .surf-modal-canvas-container {
+      position: absolute;
+      inset: 0;
       width: 100vw;
-      height: 100vh;
-      max-height: 100%;
+      height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
+      overflow: hidden;
+      background: #38C2EE;
     }
     .surf-active-canvas {
-      width: 100%;
-      height: 100%;
-      max-width: 480px;
-      max-height: 92vh;
-      aspect-ratio: 3 / 4;
-      object-fit: contain;
+      width: 100vw;
+      height: 100dvh;
+      display: block;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
+      touch-action: none;
     }
 
     /* Floating Touch Hint */
@@ -2853,45 +2821,98 @@
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     }
 
-    /* In-Game Action Bar on Canvas */
+    /* Minimal & Pop Floating In-Game Action Controls */
     .surf-in-game-actions {
       position: absolute;
-      bottom: calc(14px + env(safe-area-inset-bottom));
-      left: 12px;
-      right: 12px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      left: 0;
+      right: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      z-index: 15;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 14px;
+      z-index: 30;
       pointer-events: auto;
     }
-    .btn-mobile-game-action {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1.5px solid rgba(255, 255, 255, 0.35);
-      color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 10px 14px;
-      border-radius: var(--radius-pill);
+    .btn-surf-pop-steer {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      color: #0F172A;
+      font-size: 22px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
       cursor: pointer;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, box-shadow 0.15s ease;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .btn-surf-pop-steer:active {
+      transform: scale(0.88);
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .btn-surf-pop-brake {
+      height: 60px;
+      padding: 0 18px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.34);
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      color: #0F172A;
+      font-size: 13.5px;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-      transition: var(--transition);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.15), inset 0 1.5px 2px rgba(255, 255, 255, 0.95);
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease, color 0.15s ease;
       touch-action: manipulation;
     }
-    .btn-mobile-game-action:active {
-      transform: scale(0.94);
-      background: rgba(2, 132, 199, 0.85);
+    .btn-surf-pop-brake:active {
+      transform: scale(0.9);
+      background: rgba(239, 68, 68, 0.85);
+      border-color: #EF4444;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
     }
-    .btn-mobile-popup-action {
-      background: #10B981;
-      border-color: #34D399;
-      font-size: 13px;
-      padding: 11px 18px;
+    .btn-surf-pop-boost {
+      height: 60px;
+      padding: 0 22px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #FF6B00 0%, #FFA800 100%);
+      border: 2px solid #FFFFFF;
+      color: #FFFFFF;
+      font-size: 14.5px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48), 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+      touch-action: manipulation;
+      animation: popPulse 2.2s infinite ease-in-out;
+    }
+    @keyframes popPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 10px 28px rgba(255, 107, 0, 0.48); }
+      50% { transform: scale(1.03); box-shadow: 0 12px 34px rgba(255, 107, 0, 0.68); }
+    }
+    .btn-surf-pop-boost:active {
+      transform: scale(0.92);
+      box-shadow: 0 4px 14px rgba(255, 107, 0, 0.6);
     }
   </style>
 </head>
@@ -3779,44 +3800,37 @@
   </div>
 
   <!-- ==========================================================================
-       SALENTO SURF SANDBOX - FULLSCREEN MODAL
+       SALENTO SURF - FULLSCREEN 100% EDGE-TO-EDGE MODAL
        ========================================================================== -->
   <div class="surf-game-modal-overlay" id="surfGameModalOverlay">
     
-    <!-- Top Floating HUD Bar -->
-    <!-- Top Floating Modal Controls -->
-    <div class="surf-modal-hud" style="justify-content: space-between; background: transparent;">
-      <div style="font-weight: 800; font-size: 14px; color: #FFFFFF; text-shadow: 0 2px 6px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px;">
-        <span>🏄‍♂️ Salento Surf</span>
-      </div>
-
-      <div class="surf-hud-buttons">
-        <button type="button" class="btn-surf-hud-icon" id="btnSurfMute" onclick="window.SalentoSurf.audio.toggleMute()">
-          🔊 Audio
-        </button>
-        <button type="button" class="btn-surf-hud-icon btn-surf-close-x" onclick="closeSurfGameModal()" title="Chiudi Gioco">
-          ✕
-        </button>
-      </div>
+    <!-- Top Right Floating Pop HUD Controls -->
+    <div class="surf-top-pill-bar">
+      <button type="button" class="surf-pop-hud-btn" id="btnSurfMute" onclick="window.SalentoSurf.audio.toggleMute()">
+        <span>🔊 Audio</span>
+      </button>
+      <button type="button" class="surf-pop-hud-btn surf-pop-close-btn" onclick="closeSurfGameModal()" title="Chiudi Gioco">
+        <span>✕</span>
+      </button>
     </div>
 
     <!-- Canvas Wrapper -->
     <div class="surf-modal-canvas-container" id="surfModalCanvasContainer">
-      <canvas id="surfGameCanvas" class="surf-active-canvas" width="480" height="640"></canvas>
+      <canvas id="surfGameCanvas" class="surf-active-canvas"></canvas>
 
-      <!-- Floating In-Game Action Bar for Mobile Touch -->
-      <div class="surf-in-game-actions" style="justify-content: center; gap: 8px;">
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra" style="padding: 12px 16px; font-size: 13.5px;">
-          <span>◄ Sinistra</span>
+      <!-- Minimal Pop In-Game Floating Action Controls -->
+      <div class="surf-in-game-actions">
+        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerLeft(event)" title="Vira a Sinistra">
+          <span>◄</span>
         </button>
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileBrake(event)" title="Frena / Ferma" style="padding: 12px 14px; font-size: 13.5px;">
+        <button type="button" class="btn-surf-pop-brake" onclick="handleMobileBrake(event)" title="Frena / Ferma">
           <span>🛑 Frena</span>
         </button>
-        <button type="button" class="btn-mobile-game-action btn-mobile-popup-action" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine" style="background: #F59E0B; border-color: #FBBF24; padding: 12px 20px; font-size: 13.5px;">
+        <button type="button" class="btn-surf-pop-boost" id="btnMobileBoost" onclick="handleMobileBoost(event)" title="Super Boost Fulmine">
           <span>⚡ BOOST</span>
         </button>
-        <button type="button" class="btn-mobile-game-action" onclick="handleMobileSteerRight(event)" title="Vira a Destra" style="padding: 12px 16px; font-size: 13.5px;">
-          <span>Destra ►</span>
+        <button type="button" class="btn-surf-pop-steer" onclick="handleMobileSteerRight(event)" title="Vira a Destra">
+          <span>►</span>
         </button>
       </div>
 
